@@ -108,6 +108,7 @@
                     <span id="player-name">Dragon</span>
                     <span id="player-tribe" class="tribe-badge">Tribe</span>
                     <span id="player-level">Level 1</span>
+                    <span id="player-status-effects"></span>
                 </div>
                 <div class="stat-bars">
                     <div class="stat-bar">
@@ -129,6 +130,7 @@
                     <span>⚔️ <span id="attack-stat">10</span></span>
                     <span>🛡️ <span id="defense-stat">10</span></span>
                     <span>💰 <span id="gold-stat">0</span></span>
+                    <span>🎒 <span id="inventory-count">0</span></span>
                 </div>
             </div>
 
@@ -138,6 +140,9 @@
                 <div id="location-panel">
                     <h2 id="location-name">The Mud Kingdom</h2>
                     <p id="location-description">You find yourself in a vast swampy land...</p>
+                    <div id="boss-indicator" class="hidden">
+                        <span class="boss-warning">👑 BOSS AVAILABLE</span>
+                    </div>
                 </div>
 
                 <!-- Game Log -->
@@ -148,7 +153,9 @@
                 <!-- Action Buttons -->
                 <div id="action-panel">
                     <button class="btn action-btn" data-action="explore">🔍 Explore</button>
+                    <button class="btn action-btn" data-action="boss">👑 Boss</button>
                     <button class="btn action-btn" data-action="quest">📜 Quests</button>
+                    <button class="btn action-btn" data-action="inventory">🎒 Items</button>
                     <button class="btn action-btn" data-action="travel">🗺️ Travel</button>
                     <button class="btn action-btn" data-action="rest">💤 Rest</button>
                 </div>
@@ -157,10 +164,19 @@
 
         <!-- Battle Screen -->
         <div id="battle-screen" class="screen">
+            <div id="battle-header">
+                <div id="combo-display" class="hidden">
+                    <span id="combo-count">0</span>
+                    <span>COMBO!</span>
+                </div>
+                <div id="boss-title" class="hidden">👑 BOSS BATTLE 👑</div>
+            </div>
+
             <div id="battle-arena">
                 <div id="enemy-panel" class="combatant-panel">
                     <h3 id="enemy-name">Enemy Dragon</h3>
-                    <div class="tribe-icon enemy-icon">🐉</div>
+                    <div class="tribe-icon enemy-icon" id="enemy-icon">🐉</div>
+                    <div id="enemy-status-effects"></div>
                     <div class="stat-bar">
                         <div class="bar-container large">
                             <div id="enemy-hp-bar" class="bar hp"></div>
@@ -175,6 +191,7 @@
 
                 <div id="player-battle-panel" class="combatant-panel">
                     <h3 id="battle-player-name">Your Dragon</h3>
+                    <div id="player-battle-status"></div>
                     <div class="stat-bar">
                         <div class="bar-container large">
                             <div id="battle-hp-bar" class="bar hp"></div>
@@ -186,8 +203,10 @@
 
             <div id="battle-actions">
                 <button class="btn battle-btn" data-battle="attack">⚔️ Attack</button>
+                <button class="btn battle-btn" data-battle="heavy">💥 Heavy</button>
                 <button class="btn battle-btn" data-battle="special">✨ Special</button>
                 <button class="btn battle-btn" data-battle="defend">🛡️ Defend</button>
+                <button class="btn battle-btn" data-battle="item">🧪 Item</button>
                 <button class="btn battle-btn" data-battle="flee">🏃 Flee</button>
             </div>
         </div>
@@ -204,6 +223,51 @@
             <h2>🗺️ Travel to...</h2>
             <div id="location-list" class="location-grid"></div>
             <button id="close-travel-btn" class="btn">Back</button>
+        </div>
+
+        <!-- Inventory Screen -->
+        <div id="inventory-screen" class="screen">
+            <h2>🎒 Inventory</h2>
+            <div id="equipment-section">
+                <h3>Equipment</h3>
+                <div id="equipment-slots">
+                    <div class="equipment-slot" data-slot="weapon">
+                        <span class="slot-label">Weapon</span>
+                        <span id="equipped-weapon">None</span>
+                    </div>
+                    <div class="equipment-slot" data-slot="armor">
+                        <span class="slot-label">Armor</span>
+                        <span id="equipped-armor">None</span>
+                    </div>
+                    <div class="equipment-slot" data-slot="accessory">
+                        <span class="slot-label">Accessory</span>
+                        <span id="equipped-accessory">None</span>
+                    </div>
+                </div>
+            </div>
+            <div id="items-section">
+                <h3>Items</h3>
+                <div id="inventory-list"></div>
+            </div>
+            <button id="close-inventory-btn" class="btn">Back</button>
+        </div>
+
+        <!-- Battle Item Selection -->
+        <div id="battle-item-screen" class="screen">
+            <h2>🧪 Use Item</h2>
+            <div id="battle-item-list"></div>
+            <button id="close-battle-items-btn" class="btn">Cancel</button>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen">
+            <h2 id="victory-title">Victory!</h2>
+            <div id="victory-content">
+                <p id="victory-message"></p>
+                <div id="victory-rewards"></div>
+                <div id="loot-drops"></div>
+            </div>
+            <button id="victory-continue-btn" class="btn btn-primary">Continue</button>
         </div>
 
         <!-- Game Over Screen -->
