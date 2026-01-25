@@ -1,5 +1,177 @@
 // Wings of Fire - Dragon Adventure Game
-// Enhanced Edition with Bosses, Items, Status Effects, and Combos
+// Enhanced Edition with Bosses, Items, Status Effects, Combos, Flight & Map
+
+// ============================================
+// DRAGON SVG GENERATOR
+// ============================================
+
+const DragonSVG = {
+    // Generate animated SVG dragon for each tribe
+    generate(tribe, size = 120, isFlying = false) {
+        const colors = {
+            MudWing: { primary: '#8B4513', secondary: '#654321', accent: '#D2691E' },
+            SandWing: { primary: '#DEB887', secondary: '#D2B48C', accent: '#FFD700' },
+            SkyWing: { primary: '#DC143C', secondary: '#B22222', accent: '#FF4500' },
+            SeaWing: { primary: '#20B2AA', secondary: '#008B8B', accent: '#00CED1' },
+            RainWing: { primary: '#9932CC', secondary: '#8B008B', accent: '#FF00FF' },
+            IceWing: { primary: '#87CEEB', secondary: '#B0E0E6', accent: '#E0FFFF' },
+            NightWing: { primary: '#4B0082', secondary: '#2E0854', accent: '#9400D3' }
+        };
+
+        const c = colors[tribe] || colors.MudWing;
+        const flyAnim = isFlying ? 'flying' : 'idle';
+
+        return `
+        <svg width="${size}" height="${size}" viewBox="0 0 120 120" class="dragon-svg ${flyAnim}">
+            <defs>
+                <linearGradient id="bodyGrad-${tribe}" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:${c.primary}"/>
+                    <stop offset="100%" style="stop-color:${c.secondary}"/>
+                </linearGradient>
+                <filter id="glow-${tribe}">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <!-- Wing (back) -->
+            <g class="wing-back">
+                <path d="M 45 50 Q 20 25 10 45 Q 15 55 25 60 Q 35 55 45 55 Z"
+                      fill="${c.secondary}" opacity="0.8"/>
+            </g>
+
+            <!-- Body -->
+            <ellipse cx="60" cy="60" rx="25" ry="18" fill="url(#bodyGrad-${tribe})" class="body"/>
+
+            <!-- Neck -->
+            <path d="M 75 55 Q 85 45 90 35" stroke="${c.primary}" stroke-width="12"
+                  stroke-linecap="round" fill="none"/>
+
+            <!-- Head -->
+            <ellipse cx="95" cy="30" rx="12" ry="10" fill="${c.primary}" class="head"/>
+
+            <!-- Snout -->
+            <ellipse cx="105" cy="32" rx="8" ry="5" fill="${c.secondary}"/>
+
+            <!-- Eye -->
+            <circle cx="97" cy="27" r="3" fill="${c.accent}" filter="url(#glow-${tribe})"/>
+            <circle cx="97" cy="27" r="1.5" fill="#000"/>
+
+            <!-- Horns -->
+            <path d="M 88 22 Q 85 15 82 18" stroke="${c.secondary}" stroke-width="2" fill="none"/>
+            <path d="M 92 20 Q 90 12 88 15" stroke="${c.secondary}" stroke-width="2" fill="none"/>
+
+            <!-- Wing (front) -->
+            <g class="wing-front">
+                <path d="M 50 45 Q 30 15 15 30 Q 25 40 35 50 Q 40 50 50 50 Z"
+                      fill="${c.primary}" stroke="${c.accent}" stroke-width="1"/>
+                <path d="M 50 45 L 25 25" stroke="${c.accent}" stroke-width="1" opacity="0.5"/>
+                <path d="M 50 45 L 30 30" stroke="${c.accent}" stroke-width="1" opacity="0.5"/>
+                <path d="M 50 45 L 35 38" stroke="${c.accent}" stroke-width="1" opacity="0.5"/>
+            </g>
+
+            <!-- Legs -->
+            <g class="legs">
+                <path d="M 45 70 Q 40 85 35 90" stroke="${c.primary}" stroke-width="6"
+                      stroke-linecap="round" fill="none"/>
+                <path d="M 70 70 Q 75 85 80 90" stroke="${c.primary}" stroke-width="6"
+                      stroke-linecap="round" fill="none"/>
+                <!-- Claws -->
+                <path d="M 32 90 L 28 95 M 35 90 L 35 96 M 38 90 L 42 95"
+                      stroke="${c.secondary}" stroke-width="2"/>
+                <path d="M 77 90 L 73 95 M 80 90 L 80 96 M 83 90 L 87 95"
+                      stroke="${c.secondary}" stroke-width="2"/>
+            </g>
+
+            <!-- Tail -->
+            <path d="M 35 60 Q 15 70 5 85 Q 10 82 15 85"
+                  stroke="${c.primary}" stroke-width="8" stroke-linecap="round" fill="none" class="tail"/>
+            <path d="M 15 85 L 5 80 L 8 90 L 15 85" fill="${c.accent}"/>
+
+            <!-- Belly scales -->
+            <ellipse cx="60" cy="65" rx="15" ry="8" fill="${c.accent}" opacity="0.3"/>
+
+            <!-- Fire/breath effect for certain tribes -->
+            ${tribe === 'SkyWing' || tribe === 'NightWing' ? `
+            <g class="breath-effect">
+                <ellipse cx="115" cy="35" rx="5" ry="3" fill="#FF6600" opacity="0.8">
+                    <animate attributeName="rx" values="5;8;5" dur="0.5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;0.4;0.8" dur="0.5s" repeatCount="indefinite"/>
+                </ellipse>
+            </g>
+            ` : ''}
+
+            <!-- Glow effect for SeaWing -->
+            ${tribe === 'SeaWing' ? `
+            <g class="glow-spots">
+                <circle cx="55" cy="55" r="2" fill="${c.accent}" opacity="0.8">
+                    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="65" cy="58" r="2" fill="${c.accent}" opacity="0.8">
+                    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="60" cy="62" r="2" fill="${c.accent}" opacity="0.8">
+                    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="1.2s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+            ` : ''}
+
+            <!-- Color shimmer for RainWing -->
+            ${tribe === 'RainWing' ? `
+            <g class="color-shimmer">
+                <ellipse cx="60" cy="60" rx="25" ry="18" fill="none" stroke="${c.accent}" stroke-width="2">
+                    <animate attributeName="stroke"
+                             values="#FF00FF;#00FF00;#FF6600;#00FFFF;#FF00FF"
+                             dur="3s" repeatCount="indefinite"/>
+                </ellipse>
+            </g>
+            ` : ''}
+        </svg>`;
+    },
+
+    // Generate enemy dragon or creature
+    generateEnemy(name, isBoss = false) {
+        const size = isBoss ? 150 : 100;
+        const color = isBoss ? '#8B0000' : '#666666';
+
+        return `
+        <svg width="${size}" height="${size}" viewBox="0 0 120 120" class="enemy-svg ${isBoss ? 'boss' : ''}">
+            <defs>
+                <filter id="enemy-glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <!-- Body -->
+            <ellipse cx="60" cy="60" rx="${isBoss ? 30 : 25}" ry="20" fill="${color}" class="body">
+                ${isBoss ? '<animate attributeName="ry" values="20;22;20" dur="2s" repeatCount="indefinite"/>' : ''}
+            </ellipse>
+
+            <!-- Head -->
+            <circle cx="90" cy="45" r="${isBoss ? 18 : 15}" fill="${color}"/>
+
+            <!-- Eyes -->
+            <circle cx="95" cy="42" r="4" fill="#FF0000" filter="url(#enemy-glow)"/>
+            <circle cx="95" cy="42" r="2" fill="#FFFF00"/>
+            ${isBoss ? '<circle cx="85" cy="42" r="4" fill="#FF0000" filter="url(#enemy-glow)"/><circle cx="85" cy="42" r="2" fill="#FFFF00"/>' : ''}
+
+            <!-- Horns/spikes -->
+            <path d="M 80 30 L 75 15 L 85 25" fill="${color}"/>
+            <path d="M 90 28 L 90 10 L 100 22" fill="${color}"/>
+            ${isBoss ? '<path d="M 100 30 L 105 12 L 110 25" fill="${color}"/>' : ''}
+
+            <!-- Tail -->
+            <path d="M 30 60 Q 10 50 5 70 L 15 65" stroke="${color}" stroke-width="10" fill="${color}"/>
+        </svg>`;
+    }
+};
 
 // ============================================
 // GAME DATA
@@ -12,7 +184,9 @@ const TRIBES = {
         baseStats: { hp: 120, attack: 12, defense: 15 },
         special: 'Mud Shield',
         specialDesc: 'Greatly increase defense for 3 turns',
-        color: '#8B4513'
+        color: '#8B4513',
+        flightBonus: { stamina: 80, speed: 0.8 }, // Lower stamina, slower flyers
+        icon: '🟤'
     },
     SandWing: {
         name: 'SandWing',
@@ -20,7 +194,9 @@ const TRIBES = {
         baseStats: { hp: 100, attack: 18, defense: 10 },
         special: 'Venom Strike',
         specialDesc: 'Poison the enemy for 3 turns',
-        color: '#DEB887'
+        color: '#DEB887',
+        flightBonus: { stamina: 100, speed: 1.0 }, // Average flyers
+        icon: '🟡'
     },
     SkyWing: {
         name: 'SkyWing',
@@ -28,7 +204,9 @@ const TRIBES = {
         baseStats: { hp: 100, attack: 20, defense: 8 },
         special: 'Inferno',
         specialDesc: 'Devastating fire attack that burns enemy',
-        color: '#DC143C'
+        color: '#DC143C',
+        flightBonus: { stamina: 150, speed: 1.5 }, // Best flyers!
+        icon: '🔴'
     },
     SeaWing: {
         name: 'SeaWing',
@@ -36,7 +214,9 @@ const TRIBES = {
         baseStats: { hp: 110, attack: 14, defense: 12 },
         special: 'Tidal Crush',
         specialDesc: 'Water attack that may stun for 1 turn',
-        color: '#20B2AA'
+        color: '#20B2AA',
+        flightBonus: { stamina: 90, speed: 0.9 }, // Prefer swimming
+        icon: '🔵'
     },
     RainWing: {
         name: 'RainWing',
@@ -44,7 +224,9 @@ const TRIBES = {
         baseStats: { hp: 85, attack: 22, defense: 8 },
         special: 'Death Spit',
         specialDesc: 'Deadly venom that melts armor',
-        color: '#9932CC'
+        color: '#9932CC',
+        flightBonus: { stamina: 110, speed: 1.1 }, // Good gliders
+        icon: '🟣'
     },
     IceWing: {
         name: 'IceWing',
@@ -52,7 +234,9 @@ const TRIBES = {
         baseStats: { hp: 105, attack: 14, defense: 14 },
         special: 'Absolute Zero',
         specialDesc: 'Freeze enemy, reducing their speed',
-        color: '#87CEEB'
+        color: '#87CEEB',
+        flightBonus: { stamina: 120, speed: 1.2 }, // Strong cold air flyers
+        icon: '🩵'
     },
     NightWing: {
         name: 'NightWing',
@@ -60,7 +244,9 @@ const TRIBES = {
         baseStats: { hp: 100, attack: 16, defense: 12 },
         special: 'Nightmare',
         specialDesc: 'Psychic attack that confuses enemy',
-        color: '#4B0082'
+        color: '#4B0082',
+        flightBonus: { stamina: 100, speed: 1.0 }, // Night flyers
+        icon: '⚫'
     }
 };
 
@@ -279,7 +465,10 @@ const LOCATIONS = {
         description: 'A vast swampy land where the MudWings make their home.',
         enemies: ['MudWing Scout', 'Swamp Crocodile', 'Marsh Snake'],
         enemyLevel: [1, 3],
-        bossMinLevel: 4
+        bossMinLevel: 4,
+        mapCoords: { x: 280, y: 180 }, // Map position
+        travelCost: 10, // Stamina cost to travel by flight
+        color: '#8B4513'
     },
     sandKingdom: {
         id: 'sandKingdom',
@@ -287,7 +476,10 @@ const LOCATIONS = {
         description: 'Endless dunes stretch across the horizon.',
         enemies: ['SandWing Patrol', 'Desert Scorpion', 'Sand Viper'],
         enemyLevel: [2, 4],
-        bossMinLevel: 5
+        bossMinLevel: 5,
+        mapCoords: { x: 150, y: 280 },
+        travelCost: 15,
+        color: '#DEB887'
     },
     skyKingdom: {
         id: 'skyKingdom',
@@ -295,7 +487,10 @@ const LOCATIONS = {
         description: 'Mountain peaks pierce the clouds.',
         enemies: ['SkyWing Guard', 'Mountain Eagle', 'Rock Serpent'],
         enemyLevel: [3, 5],
-        bossMinLevel: 6
+        bossMinLevel: 6,
+        mapCoords: { x: 380, y: 80 },
+        travelCost: 20,
+        color: '#DC143C'
     },
     seaKingdom: {
         id: 'seaKingdom',
@@ -303,7 +498,10 @@ const LOCATIONS = {
         description: 'Crystal blue waters hide magnificent secrets.',
         enemies: ['SeaWing Warrior', 'Giant Octopus', 'Shark'],
         enemyLevel: [2, 4],
-        bossMinLevel: 5
+        bossMinLevel: 5,
+        mapCoords: { x: 80, y: 150 },
+        travelCost: 12,
+        color: '#20B2AA'
     },
     rainforest: {
         id: 'rainforest',
@@ -311,7 +509,10 @@ const LOCATIONS = {
         description: 'Lush jungle canopy hides colorful dangers.',
         enemies: ['RainWing Sentry', 'Jungle Panther', 'Poison Dart Frog'],
         enemyLevel: [3, 5],
-        bossMinLevel: 7
+        bossMinLevel: 7,
+        mapCoords: { x: 200, y: 350 },
+        travelCost: 18,
+        color: '#9932CC'
     },
     iceKingdom: {
         id: 'iceKingdom',
@@ -319,7 +520,10 @@ const LOCATIONS = {
         description: 'Frozen tundra and glacial fortresses.',
         enemies: ['IceWing Soldier', 'Polar Bear', 'Frost Wolf'],
         enemyLevel: [4, 6],
-        bossMinLevel: 8
+        bossMinLevel: 8,
+        mapCoords: { x: 420, y: 250 },
+        travelCost: 25,
+        color: '#87CEEB'
     },
     nightKingdom: {
         id: 'nightKingdom',
@@ -327,7 +531,10 @@ const LOCATIONS = {
         description: 'Volcanic islands shrouded in mystery.',
         enemies: ['NightWing Shadow', 'Lava Serpent', 'Ash Phoenix'],
         enemyLevel: [5, 7],
-        bossMinLevel: 10
+        bossMinLevel: 10,
+        mapCoords: { x: 50, y: 380 },
+        travelCost: 30,
+        color: '#4B0082'
     }
 };
 
@@ -418,7 +625,9 @@ let gameState = {
     battleState: null,
     visitedLocations: [],
     defeatedBosses: [],
-    pendingVictory: null
+    pendingVictory: null,
+    isFlying: false,
+    selectedMapLocation: null
 };
 
 // ============================================
@@ -458,9 +667,28 @@ class Player {
         this.comboCount = 0;
         this.critChance = 0.1;
 
+        // Flight mechanics
+        this.maxStamina = tribeData.flightBonus.stamina;
+        this.stamina = this.maxStamina;
+        this.flightSpeed = tribeData.flightBonus.speed;
+
         // Starting items
         this.addItem('healing_potion');
         this.addItem('healing_potion');
+    }
+
+    // Flight methods
+    useStamina(amount) {
+        this.stamina = Math.max(0, this.stamina - amount);
+        return this.stamina > 0;
+    }
+
+    recoverStamina(amount) {
+        this.stamina = Math.min(this.maxStamina, this.stamina + amount);
+    }
+
+    canFly() {
+        return this.stamina >= 10;
     }
 
     addItem(itemId) {
@@ -688,8 +916,10 @@ class Enemy {
 
 const screens = {
     title: document.getElementById('title-screen'),
+    guide: document.getElementById('guide-screen'),
     character: document.getElementById('character-screen'),
     game: document.getElementById('game-screen'),
+    map: document.getElementById('map-screen'),
     battle: document.getElementById('battle-screen'),
     quest: document.getElementById('quest-screen'),
     travel: document.getElementById('travel-screen'),
@@ -735,6 +965,47 @@ function updatePlayerUI() {
     document.getElementById('gold-stat').textContent = player.gold;
     document.getElementById('inventory-count').textContent = player.inventory.length;
 
+    // Flight status
+    const flightBadge = document.getElementById('flight-status');
+    if (flightBadge) {
+        if (gameState.isFlying) {
+            flightBadge.textContent = '✈️ Flying';
+            flightBadge.className = 'flight-badge flying';
+        } else {
+            flightBadge.textContent = '🦶 Grounded';
+            flightBadge.className = 'flight-badge grounded';
+        }
+    }
+
+    // Stamina bar
+    const staminaPercent = (player.stamina / player.maxStamina) * 100;
+    const staminaBar = document.getElementById('stamina-bar');
+    if (staminaBar) {
+        staminaBar.style.width = `${staminaPercent}%`;
+        if (staminaPercent < 25) {
+            staminaBar.classList.add('low');
+        } else {
+            staminaBar.classList.remove('low');
+        }
+    }
+    const staminaText = document.getElementById('stamina-text');
+    if (staminaText) {
+        staminaText.textContent = `${Math.floor(player.stamina)}/${player.maxStamina}`;
+    }
+
+    // Update fly button state
+    const flyBtn = document.querySelector('[data-action="fly"]');
+    if (flyBtn) {
+        if (gameState.isFlying) {
+            flyBtn.textContent = '🦶 Land';
+            flyBtn.classList.add('flying');
+        } else {
+            flyBtn.textContent = '✈️ Fly';
+            flyBtn.classList.remove('flying');
+        }
+        flyBtn.disabled = !player.canFly() && !gameState.isFlying;
+    }
+
     // Status effects
     updateStatusEffectsDisplay('player-status-effects', player.statusEffects);
 
@@ -748,6 +1019,19 @@ function updatePlayerUI() {
         bossIndicator.classList.remove('hidden');
     } else {
         bossIndicator.classList.add('hidden');
+    }
+
+    // Update dragon display
+    updateDragonDisplay();
+}
+
+function updateDragonDisplay() {
+    const player = gameState.player;
+    if (!player) return;
+
+    const dragonContainer = document.getElementById('player-dragon-display');
+    if (dragonContainer) {
+        dragonContainer.innerHTML = DragonSVG.generate(player.tribe, 80, gameState.isFlying);
     }
 }
 
@@ -816,6 +1100,12 @@ function updateBattleUI() {
         document.getElementById('battle-hp-text').textContent = `${player.hp}/${player.maxHp}`;
         document.getElementById('battle-player-name').textContent = player.name;
         updateStatusEffectsDisplay('player-battle-status', player.statusEffects);
+
+        // Update player dragon display in battle
+        const playerIcon = document.getElementById('player-battle-icon');
+        if (playerIcon) {
+            playerIcon.innerHTML = DragonSVG.generate(player.tribe, 100, gameState.battleState?.isAerial);
+        }
     }
 
     if (enemy) {
@@ -857,6 +1147,16 @@ function updateBattleUI() {
         bossTitle.classList.remove('hidden');
     } else {
         bossTitle.classList.add('hidden');
+    }
+
+    // Aerial combat indicator
+    const aerialIndicator = document.getElementById('aerial-combat-indicator');
+    if (aerialIndicator) {
+        if (gameState.battleState?.isAerial) {
+            aerialIndicator.classList.remove('hidden');
+        } else {
+            aerialIndicator.classList.add('hidden');
+        }
     }
 }
 
@@ -1202,12 +1502,16 @@ function startBattle(isBoss = false) {
         enemy = new Enemy(enemyName, enemyLevel);
     }
 
+    // Aerial combat if player was flying
+    const isAerial = gameState.isFlying;
+
     gameState.battleState = {
         enemy: enemy,
         playerDefending: false,
         turn: 'player',
         combo: 0,
-        isBoss: isBoss
+        isBoss: isBoss,
+        isAerial: isAerial // Track if battle is in the air
     };
 
     gameState.player.specialCooldown = 0;
@@ -1218,6 +1522,10 @@ function startBattle(isBoss = false) {
         addBattleMessage(`"${enemy.title}"`, 'system');
     } else {
         addBattleMessage(`A wild ${enemy.name} (Level ${enemy.level}) appears!`, 'system');
+    }
+
+    if (isAerial) {
+        addBattleMessage(`✈️ AERIAL COMBAT! +20% damage bonus!`, 'combo');
     }
 
     updateBattleUI();
@@ -1232,6 +1540,11 @@ function calculateDamage(attacker, isHeavy = false, isCritical = false) {
     // Combo bonus
     if (gameState.battleState.combo > 1) {
         baseDamage *= (1 + gameState.battleState.combo * 0.1);
+    }
+
+    // Aerial combat bonus (20% extra damage)
+    if (gameState.battleState.isAerial) {
+        baseDamage *= 1.2;
     }
 
     return Math.floor(baseDamage);
@@ -1711,9 +2024,231 @@ function rest() {
     const player = gameState.player;
     const healAmount = Math.floor(player.maxHp * 0.4);
     const healed = player.heal(healAmount);
+    const staminaRecovered = Math.floor(player.maxStamina * 0.5);
+    player.recoverStamina(staminaRecovered);
     player.statusEffects = [];
-    addLogEntry(`You rest and recover ${healed} HP. Status effects cleared.`);
+    gameState.isFlying = false;
+    addLogEntry(`You rest and recover ${healed} HP and ${staminaRecovered} stamina. Status effects cleared.`);
     updatePlayerUI();
+}
+
+// ============================================
+// FLIGHT FUNCTIONS
+// ============================================
+
+function toggleFlight() {
+    const player = gameState.player;
+
+    if (gameState.isFlying) {
+        // Land
+        gameState.isFlying = false;
+        addLogEntry('You land gracefully on the ground.');
+    } else {
+        // Take off
+        if (!player.canFly()) {
+            addLogEntry('Not enough stamina to fly! Rest to recover.');
+            return;
+        }
+        gameState.isFlying = true;
+        player.useStamina(10); // Initial takeoff cost
+        addLogEntry(`You take to the skies! (Speed: ${player.flightSpeed}x)`);
+    }
+
+    updatePlayerUI();
+}
+
+function updateFlightStamina() {
+    if (gameState.isFlying && gameState.player) {
+        gameState.player.useStamina(2); // Passive stamina drain while flying
+        if (gameState.player.stamina <= 0) {
+            gameState.isFlying = false;
+            addLogEntry('You ran out of stamina and had to land!');
+        }
+        updatePlayerUI();
+    }
+}
+
+// ============================================
+// MAP FUNCTIONS
+// ============================================
+
+function renderMap() {
+    const mapSvg = document.getElementById('pyrrhia-map');
+    const player = gameState.player;
+
+    // Clear existing location markers
+    const existingMarkers = mapSvg.querySelectorAll('.map-marker');
+    existingMarkers.forEach(m => m.remove());
+
+    // Add location markers
+    Object.entries(LOCATIONS).forEach(([id, location]) => {
+        const isCurrent = gameState.currentLocation === id;
+        const bossDefeated = gameState.defeatedBosses.includes(id);
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.classList.add('map-marker', 'map-location');
+        if (isCurrent) group.classList.add('current');
+        group.dataset.location = id;
+
+        // Location circle
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', location.mapCoords.x);
+        circle.setAttribute('cy', location.mapCoords.y);
+        circle.setAttribute('r', isCurrent ? 18 : 15);
+        circle.setAttribute('fill', location.color);
+        circle.setAttribute('stroke', isCurrent ? '#FFD700' : '#333');
+        circle.setAttribute('stroke-width', isCurrent ? 3 : 2);
+
+        // Location name text
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', location.mapCoords.x);
+        text.setAttribute('y', location.mapCoords.y + 35);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#fff');
+        text.setAttribute('font-size', '12');
+        text.textContent = location.name.replace('The ', '');
+
+        // Boss defeated crown
+        if (bossDefeated) {
+            const crown = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            crown.setAttribute('x', location.mapCoords.x);
+            crown.setAttribute('y', location.mapCoords.y + 5);
+            crown.setAttribute('text-anchor', 'middle');
+            crown.setAttribute('font-size', '16');
+            crown.textContent = '👑';
+            group.appendChild(crown);
+        }
+
+        group.appendChild(circle);
+        group.appendChild(text);
+
+        // Click handler
+        group.addEventListener('click', () => selectMapLocation(id));
+
+        mapSvg.appendChild(group);
+    });
+
+    // Draw travel lines from current location
+    const currentLoc = LOCATIONS[gameState.currentLocation];
+    Object.entries(LOCATIONS).forEach(([id, location]) => {
+        if (id !== gameState.currentLocation) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', currentLoc.mapCoords.x);
+            line.setAttribute('y1', currentLoc.mapCoords.y);
+            line.setAttribute('x2', location.mapCoords.x);
+            line.setAttribute('y2', location.mapCoords.y);
+            line.setAttribute('stroke', '#444');
+            line.setAttribute('stroke-width', 1);
+            line.setAttribute('stroke-dasharray', '5,5');
+            line.classList.add('map-marker');
+            mapSvg.insertBefore(line, mapSvg.firstChild);
+        }
+    });
+
+    // Reset selection
+    gameState.selectedMapLocation = null;
+    updateMapInfo();
+}
+
+function selectMapLocation(locationId) {
+    gameState.selectedMapLocation = locationId;
+    updateMapInfo();
+
+    // Visual feedback
+    document.querySelectorAll('.map-location').forEach(el => {
+        el.classList.remove('selected');
+        if (el.dataset.location === locationId) {
+            el.classList.add('selected');
+        }
+    });
+}
+
+function updateMapInfo() {
+    const infoPanel = document.getElementById('map-location-info');
+    const travelBtn = document.getElementById('map-travel-btn');
+    const player = gameState.player;
+
+    if (!gameState.selectedMapLocation) {
+        infoPanel.innerHTML = `
+            <h3>Select a Location</h3>
+            <p>Click on a location on the map to see details and travel options.</p>
+        `;
+        if (travelBtn) travelBtn.classList.add('hidden');
+        return;
+    }
+
+    const location = LOCATIONS[gameState.selectedMapLocation];
+    const boss = BOSSES[gameState.selectedMapLocation];
+    const bossDefeated = gameState.defeatedBosses.includes(gameState.selectedMapLocation);
+    const isCurrent = gameState.currentLocation === gameState.selectedMapLocation;
+
+    // Calculate flight bonus
+    const flightCost = Math.floor(location.travelCost / player.flightSpeed);
+    const canFlyThere = gameState.isFlying && player.stamina >= flightCost;
+
+    infoPanel.innerHTML = `
+        <h3>${location.name}</h3>
+        <p>${location.description}</p>
+        <p><strong>Enemy Level:</strong> ${location.enemyLevel[0]}-${location.enemyLevel[1]}</p>
+        <p><strong>Boss:</strong> ${boss.name} (Lv.${boss.level}) ${bossDefeated ? '👑 Defeated' : ''}</p>
+        ${!isCurrent ? `
+            <p class="flight-bonus">
+                ${gameState.isFlying ? `✈️ Flight cost: ${flightCost} stamina (${player.flightSpeed}x speed bonus)` : '🦶 Walking (no stamina cost)'}
+            </p>
+        ` : '<p><em>You are here</em></p>'}
+    `;
+
+    if (travelBtn) {
+        if (isCurrent) {
+            travelBtn.classList.add('hidden');
+        } else {
+            travelBtn.classList.remove('hidden');
+            travelBtn.textContent = gameState.isFlying ? `Fly Here (${flightCost} stamina)` : 'Travel Here';
+            travelBtn.disabled = gameState.isFlying && !canFlyThere;
+        }
+    }
+}
+
+function travelFromMap() {
+    if (!gameState.selectedMapLocation) return;
+
+    const player = gameState.player;
+    const location = LOCATIONS[gameState.selectedMapLocation];
+
+    if (gameState.isFlying) {
+        const flightCost = Math.floor(location.travelCost / player.flightSpeed);
+        if (player.stamina < flightCost) {
+            addLogEntry('Not enough stamina to fly there!');
+            return;
+        }
+        player.useStamina(flightCost);
+        addLogEntry(`You fly swiftly to ${location.name}! (-${flightCost} stamina)`);
+    }
+
+    travelTo(gameState.selectedMapLocation);
+    showScreen('game');
+}
+
+// ============================================
+// GUIDE FUNCTIONS
+// ============================================
+
+function initGuide() {
+    // Set up guide tab switching
+    document.querySelectorAll('.guide-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.dataset.tab;
+
+            // Update active tab
+            document.querySelectorAll('.guide-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Update active content
+            document.querySelectorAll('.guide-content').forEach(c => c.classList.remove('active'));
+            const content = document.getElementById(`guide-${tabId}`);
+            if (content) content.classList.add('active');
+        });
+    });
 }
 
 // ============================================
@@ -1724,6 +2259,14 @@ function rest() {
 document.getElementById('start-btn').addEventListener('click', () => {
     showScreen('character');
 });
+
+// Title screen guide button
+const titleGuideBtn = document.getElementById('guide-btn');
+if (titleGuideBtn) {
+    titleGuideBtn.addEventListener('click', () => {
+        showScreen('guide');
+    });
+}
 
 // Character creation
 let selectedTribe = null;
@@ -1770,6 +2313,11 @@ document.querySelectorAll('.action-btn').forEach(btn => {
         switch (action) {
             case 'explore':
                 explore();
+                // Drain stamina while exploring if flying
+                if (gameState.isFlying) {
+                    gameState.player.useStamina(5);
+                    updatePlayerUI();
+                }
                 break;
             case 'boss':
                 const location = LOCATIONS[gameState.currentLocation];
@@ -1795,6 +2343,16 @@ document.querySelectorAll('.action-btn').forEach(btn => {
                 break;
             case 'rest':
                 rest();
+                break;
+            case 'fly':
+                toggleFlight();
+                break;
+            case 'map':
+                renderMap();
+                showScreen('map');
+                break;
+            case 'guide':
+                showScreen('guide');
                 break;
         }
     });
@@ -1835,6 +2393,23 @@ document.getElementById('close-inventory-btn').addEventListener('click', () => s
 document.getElementById('close-battle-items-btn').addEventListener('click', () => showScreen('battle'));
 document.getElementById('victory-continue-btn').addEventListener('click', claimVictory);
 
+// Map screen buttons
+const closeMapBtn = document.getElementById('close-map-btn');
+if (closeMapBtn) {
+    closeMapBtn.addEventListener('click', () => showScreen('game'));
+}
+
+const mapTravelBtn = document.getElementById('map-travel-btn');
+if (mapTravelBtn) {
+    mapTravelBtn.addEventListener('click', travelFromMap);
+}
+
+// Guide screen buttons
+const closeGuideBtn = document.getElementById('close-guide-btn');
+if (closeGuideBtn) {
+    closeGuideBtn.addEventListener('click', () => showScreen('game'));
+}
+
 // Game over
 document.getElementById('restart-btn').addEventListener('click', () => {
     gameState = {
@@ -1855,5 +2430,22 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     showScreen('title');
 });
 
+// Initialize guide tabs
+initGuide();
+
+// Add dragon SVGs to tribe selection cards
+document.querySelectorAll('.tribe-card').forEach(card => {
+    const tribe = card.dataset.tribe;
+    if (tribe && TRIBES[tribe]) {
+        const iconDiv = card.querySelector('.tribe-icon');
+        if (iconDiv) {
+            iconDiv.innerHTML = DragonSVG.generate(tribe, 60, false);
+        }
+    }
+});
+
 // Initialize
 showScreen('title');
+
+// Flight stamina drain interval (every 3 seconds while flying)
+setInterval(updateFlightStamina, 3000);

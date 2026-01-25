@@ -1010,3 +1010,590 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ===== GUIDE SCREEN ===== */
+#guide-screen {
+    background: var(--bg-dark);
+    overflow-y: auto;
+}
+
+#guide-screen h2 {
+    text-align: center;
+    color: var(--accent-fire);
+    margin-bottom: 20px;
+}
+
+.guide-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.guide-tab {
+    padding: 10px 20px;
+    background: var(--bg-medium);
+    border: 2px solid var(--bg-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.guide-tab:hover {
+    border-color: var(--accent-fire);
+    transform: translateY(-2px);
+}
+
+.guide-tab.active {
+    background: linear-gradient(135deg, var(--accent-fire), var(--accent-gold));
+    border-color: var(--accent-fire);
+    font-weight: bold;
+}
+
+.guide-content {
+    display: none;
+    padding: 20px;
+    background: var(--bg-medium);
+    border-radius: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.guide-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.guide-content h3 {
+    color: var(--accent-fire);
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--bg-light);
+    padding-bottom: 8px;
+}
+
+.guide-content h4 {
+    color: var(--gold-color);
+    margin: 15px 0 10px 0;
+}
+
+.guide-content p {
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.guide-content ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.guide-content li {
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.guide-content li::before {
+    content: '🐉';
+    position: absolute;
+    left: 0;
+    font-size: 0.8rem;
+}
+
+.guide-section {
+    margin-bottom: 20px;
+}
+
+.tribe-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tribe-guide-card {
+    background: var(--bg-dark);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-fire);
+}
+
+.tribe-guide-card h5 {
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+
+.tribe-guide-card p {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+/* Tribe-specific guide card colors */
+.tribe-guide-card.mudwing { border-left-color: var(--mudwing); }
+.tribe-guide-card.sandwing { border-left-color: var(--sandwing); }
+.tribe-guide-card.skywing { border-left-color: var(--skywing); }
+.tribe-guide-card.seawing { border-left-color: var(--seawing); }
+.tribe-guide-card.rainwing { border-left-color: var(--rainwing); }
+.tribe-guide-card.icewing { border-left-color: var(--icewing); }
+.tribe-guide-card.nightwing { border-left-color: var(--nightwing); }
+
+.boss-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.boss-guide-card {
+    background: var(--bg-dark);
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #8e44ad;
+}
+
+.boss-guide-card h5 {
+    color: var(--gold-color);
+    margin-bottom: 5px;
+}
+
+.boss-guide-card p {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+/* ===== MAP SCREEN ===== */
+#map-screen {
+    background: var(--bg-dark);
+    padding: 20px;
+}
+
+#map-screen h2 {
+    text-align: center;
+    color: var(--accent-fire);
+    margin-bottom: 15px;
+}
+
+.map-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    background: linear-gradient(135deg, #1a3a2a 0%, #0d2818 50%, #1a3a2a 100%);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+#pyrrhia-map {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.map-location {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.map-location:hover {
+    filter: brightness(1.3);
+    transform: scale(1.1);
+}
+
+.map-location.current {
+    filter: drop-shadow(0 0 10px var(--gold-color));
+    animation: currentLocationPulse 1.5s infinite;
+}
+
+@keyframes currentLocationPulse {
+    0%, 100% { filter: drop-shadow(0 0 10px var(--gold-color)); }
+    50% { filter: drop-shadow(0 0 20px var(--gold-color)); }
+}
+
+.map-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.legend-color.current { background: var(--gold-color); }
+.legend-color.available { background: var(--seawing); }
+.legend-color.boss { background: #8e44ad; }
+
+#map-location-info {
+    background: var(--bg-medium);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#map-location-info h3 {
+    color: var(--accent-fire);
+    margin-bottom: 8px;
+}
+
+#map-location-info p {
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+#map-travel-btn {
+    margin-top: 10px;
+}
+
+#map-screen .btn {
+    margin: 5px;
+}
+
+/* SVG Map location markers */
+.map-marker circle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.map-marker:hover circle {
+    stroke-width: 4;
+    filter: brightness(1.2);
+}
+
+.map-marker.selected circle {
+    stroke: var(--gold-color);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 8px var(--gold-color));
+}
+
+.map-marker text {
+    pointer-events: none;
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* ===== FLIGHT MECHANICS ===== */
+.flight-badge {
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, var(--seawing), var(--icewing));
+    color: var(--text-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.flight-badge.grounded {
+    background: var(--bg-light);
+    color: var(--text-muted);
+}
+
+.flight-badge.flying {
+    background: linear-gradient(135deg, var(--seawing), var(--skywing));
+    animation: flyingPulse 1s infinite;
+}
+
+@keyframes flyingPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(32, 178, 170, 0.5); }
+    50% { box-shadow: 0 0 15px rgba(32, 178, 170, 0.8); }
+}
+
+.stamina-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.stamina-bar-container label {
+    font-size: 0.85rem;
+    color: var(--seawing);
+    min-width: 60px;
+}
+
+.bar.stamina {
+    background: linear-gradient(90deg, var(--seawing), var(--icewing));
+}
+
+.bar.stamina.low {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    animation: lowStaminaPulse 0.5s infinite;
+}
+
+@keyframes lowStaminaPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Aerial Combat Indicator */
+.aerial-combat-badge {
+    background: linear-gradient(135deg, var(--skywing), var(--accent-fire));
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    animation: aerialFloat 2s ease-in-out infinite;
+}
+
+@keyframes aerialFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Flight Action Button */
+.action-btn[data-action="fly"] {
+    background: linear-gradient(135deg, var(--seawing), var(--icewing));
+}
+
+.action-btn[data-action="fly"].flying {
+    background: linear-gradient(135deg, var(--skywing), var(--accent-fire));
+}
+
+.action-btn[data-action="map"] {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.action-btn[data-action="guide"] {
+    background: linear-gradient(135deg, var(--xp-color), #8e44ad);
+}
+
+/* Battle aerial attacks */
+.battle-btn[data-battle="dive"] {
+    background: linear-gradient(135deg, var(--skywing), var(--accent-fire));
+}
+
+.battle-btn[data-battle="aerial"] {
+    background: linear-gradient(135deg, var(--seawing), var(--icewing));
+}
+
+/* Flight status effects */
+.status-effect.grounded {
+    background: var(--mudwing);
+}
+
+.status-effect.airborne {
+    background: linear-gradient(135deg, var(--seawing), var(--icewing));
+}
+
+/* Map travel with flight bonus indicator */
+.location-card .flight-bonus {
+    font-size: 0.75rem;
+    color: var(--seawing);
+    margin-top: 5px;
+}
+
+/* Responsive adjustments for new features */
+@media (max-width: 768px) {
+    .guide-tabs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .guide-tab {
+        text-align: center;
+    }
+
+    .tribe-guide-grid,
+    .boss-guide-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .map-legend {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stamina-bar-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .map-container {
+        padding: 10px;
+    }
+
+    .guide-content {
+        padding: 15px;
+        max-height: 250px;
+    }
+}
+
+/* ===== ANIMATED DRAGON SVG STYLES ===== */
+.dragon-svg {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Idle animation - subtle breathing */
+.dragon-svg.idle .body {
+    animation: dragonBreathe 3s ease-in-out infinite;
+}
+
+.dragon-svg.idle .wing-front {
+    animation: wingIdleFlap 4s ease-in-out infinite;
+    transform-origin: 50px 50px;
+}
+
+.dragon-svg.idle .wing-back {
+    animation: wingIdleFlap 4s ease-in-out infinite 0.2s;
+    transform-origin: 45px 55px;
+}
+
+.dragon-svg.idle .tail {
+    animation: tailSway 5s ease-in-out infinite;
+    transform-origin: 35px 60px;
+}
+
+/* Flying animation - active wing flapping */
+.dragon-svg.flying {
+    animation: dragonFloat 2s ease-in-out infinite;
+}
+
+.dragon-svg.flying .wing-front {
+    animation: wingFlap 0.3s ease-in-out infinite;
+    transform-origin: 50px 50px;
+}
+
+.dragon-svg.flying .wing-back {
+    animation: wingFlap 0.3s ease-in-out infinite 0.05s;
+    transform-origin: 45px 55px;
+}
+
+.dragon-svg.flying .legs {
+    animation: legsRetract 0.5s ease-out forwards;
+    transform-origin: 60px 70px;
+}
+
+.dragon-svg.flying .tail {
+    animation: tailStream 1s ease-in-out infinite;
+    transform-origin: 35px 60px;
+}
+
+/* Keyframe animations */
+@keyframes dragonBreathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes wingIdleFlap {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-5deg); }
+}
+
+@keyframes wingFlap {
+    0%, 100% { transform: rotate(15deg); }
+    50% { transform: rotate(-25deg); }
+}
+
+@keyframes dragonFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes tailSway {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    75% { transform: rotate(-3deg); }
+}
+
+@keyframes tailStream {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+@keyframes legsRetract {
+    0% { transform: scaleY(1); }
+    100% { transform: scaleY(0.6) translateY(-5px); }
+}
+
+/* Enemy SVG styles */
+.enemy-svg {
+    display: block;
+    margin: 0 auto;
+}
+
+.enemy-svg.boss {
+    filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.5));
+}
+
+.enemy-svg.boss .body {
+    animation: bossBreath 2s ease-in-out infinite;
+}
+
+@keyframes bossBreath {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Tribe card dragon display */
+.tribe-card .tribe-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70px;
+}
+
+.tribe-card .dragon-svg {
+    transition: transform 0.3s ease;
+}
+
+.tribe-card:hover .dragon-svg {
+    transform: scale(1.1);
+}
+
+.tribe-card.selected .dragon-svg {
+    animation: selectedDragon 1s ease-in-out infinite;
+}
+
+@keyframes selectedDragon {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.05); filter: brightness(1.2); }
+}
+
+/* Player dragon display in game screen */
+#player-dragon-display {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+/* Battle dragon displays */
+#player-battle-icon {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.combatant-panel .dragon-svg {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+/* Damage flash effect */
+.combatant-panel.damaged .dragon-svg {
+    animation: damageFlash 0.3s ease-out;
+}
+
+@keyframes damageFlash {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(2) hue-rotate(180deg); }
+}
