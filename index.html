@@ -12,200 +12,12 @@
         <div id="title-screen" class="screen active">
             <h1 class="game-title">Wings of Fire</h1>
             <p class="subtitle">Dragon Adventure</p>
-            <button id="start-btn" class="btn btn-primary">Begin Your Journey</button>
-            <button id="guide-btn" class="btn">How to Play</button>
-        </div>
-
-        <!-- Guide Screen -->
-        <div id="guide-screen" class="screen">
-            <h2>📖 Dragon Guide</h2>
-            <div class="guide-tabs">
-                <button class="guide-tab active" data-tab="basics">Basics</button>
-                <button class="guide-tab" data-tab="combat">Combat</button>
-                <button class="guide-tab" data-tab="flight">Flight</button>
-                <button class="guide-tab" data-tab="tribes">Tribes</button>
-                <button class="guide-tab" data-tab="bosses">Bosses</button>
+            <p class="controls-hint">Press ENTER to Start</p>
+            <div class="title-controls">
+                <p>Controls: WASD or Arrow Keys to move</p>
+                <p>SPACE - Attack | E - Special | Q - Defend | F - Fly</p>
+                <p>I - Inventory | M - Map | H - Help</p>
             </div>
-            <div id="guide-content">
-                <div id="guide-basics" class="guide-content active">
-                    <h3>🎮 Game Basics</h3>
-                    <div class="guide-item">
-                        <h4>🔍 Exploring</h4>
-                        <p>Click "Explore" to search your current location. You may find gold, items, healing herbs, or encounter enemies.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🗺️ Traveling</h4>
-                        <p>Use the Map or Travel button to move between kingdoms. Each location has different enemy levels and a unique boss.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>💤 Resting</h4>
-                        <p>Rest to recover 40% of your HP and clear status effects. Use this between battles to stay healthy.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>📜 Quests</h4>
-                        <p>Complete quests to earn XP, gold, and special items. Check your quest log regularly!</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🎒 Inventory</h4>
-                        <p>Manage your items and equipment. Click items to use or equip them. Equipment boosts your stats!</p>
-                    </div>
-                </div>
-                <div id="guide-combat" class="guide-content">
-                    <h3>⚔️ Combat Guide</h3>
-                    <div class="guide-item">
-                        <h4>⚔️ Attack</h4>
-                        <p>Basic attack. Builds combo for bonus damage.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>💥 Heavy Attack</h4>
-                        <p>Deals 1.5x damage but leaves you briefly vulnerable.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>✨ Special Ability</h4>
-                        <p>Your tribe's unique power. Has a 4-turn cooldown. Each tribe has different effects!</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🛡️ Defend</h4>
-                        <p>Reduces incoming damage by 50%. Resets your combo.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🔥 Combo System</h4>
-                        <p>Chain attacks without defending or fleeing to build combo. Each combo level adds 10% bonus damage!</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>💥 Critical Hits</h4>
-                        <p>10% base chance to deal double damage. Increases with level (up to 30%).</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🦠 Status Effects</h4>
-                        <p><span class="status-icon poison">🤢 Poison</span> - Damage over time (5% HP/turn)<br>
-                        <span class="status-icon burn">🔥 Burn</span> - Higher damage over time (8% HP/turn)<br>
-                        <span class="status-icon freeze">❄️ Freeze</span> - Reduces attack power<br>
-                        <span class="status-icon stun">💫 Stun</span> - Skip a turn</p>
-                    </div>
-                </div>
-                <div id="guide-flight" class="guide-content">
-                    <h3>🦅 Flight System</h3>
-                    <div class="guide-item">
-                        <h4>✈️ Taking Flight</h4>
-                        <p>Click "Fly" to take to the skies! Flying lets you travel faster and access aerial encounters.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>⚡ Flight Stamina</h4>
-                        <p>Flying consumes stamina. Your stamina bar shows how long you can stay airborne. Stamina regenerates while grounded.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🌤️ Aerial Exploration</h4>
-                        <p>While flying, you can spot locations from above, find sky treasures, and encounter flying enemies.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>⚔️ Aerial Combat</h4>
-                        <p>Some enemies can only be found in the sky. Aerial battles give bonus XP! SkyWings have advantages in air combat.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>🏃 Quick Travel</h4>
-                        <p>Flying to a new location is faster and may avoid ground encounters, but costs stamina.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h4>💨 Tribe Flight Bonuses</h4>
-                        <p><b>SkyWing:</b> +50% stamina, faster regen<br>
-                        <b>RainWing:</b> Camouflage while flying<br>
-                        <b>SeaWing:</b> Can dive underwater<br>
-                        <b>NightWing:</b> Better at night flights</p>
-                    </div>
-                </div>
-                <div id="guide-tribes" class="guide-content">
-                    <h3>🐉 Dragon Tribes</h3>
-                    <div class="guide-item tribe-guide mudwing">
-                        <h4>MudWing</h4>
-                        <p><b>Stats:</b> High HP, High Defense, Medium Attack<br>
-                        <b>Special:</b> Mud Shield - Greatly increases defense<br>
-                        <b>Best for:</b> Beginners, tank playstyle</p>
-                    </div>
-                    <div class="guide-item tribe-guide sandwing">
-                        <h4>SandWing</h4>
-                        <p><b>Stats:</b> Medium HP, Medium Defense, High Attack<br>
-                        <b>Special:</b> Venom Strike - Poisons enemies<br>
-                        <b>Best for:</b> DoT (damage over time) builds</p>
-                    </div>
-                    <div class="guide-item tribe-guide skywing">
-                        <h4>SkyWing</h4>
-                        <p><b>Stats:</b> Medium HP, Low Defense, High Attack<br>
-                        <b>Special:</b> Inferno - Massive fire damage + burn<br>
-                        <b>Best for:</b> Glass cannon, aerial combat</p>
-                    </div>
-                    <div class="guide-item tribe-guide seawing">
-                        <h4>SeaWing</h4>
-                        <p><b>Stats:</b> Balanced all around<br>
-                        <b>Special:</b> Tidal Crush - Damage + chance to stun<br>
-                        <b>Best for:</b> Versatile playstyle</p>
-                    </div>
-                    <div class="guide-item tribe-guide rainwing">
-                        <h4>RainWing</h4>
-                        <p><b>Stats:</b> Low HP, Low Defense, Very High Attack<br>
-                        <b>Special:</b> Death Spit - Huge damage + armor melt<br>
-                        <b>Best for:</b> High risk/reward, speedruns</p>
-                    </div>
-                    <div class="guide-item tribe-guide icewing">
-                        <h4>IceWing</h4>
-                        <p><b>Stats:</b> Medium HP, High Defense, Medium Attack<br>
-                        <b>Special:</b> Absolute Zero - Damage + freeze<br>
-                        <b>Best for:</b> Control playstyle</p>
-                    </div>
-                    <div class="guide-item tribe-guide nightwing">
-                        <h4>NightWing</h4>
-                        <p><b>Stats:</b> Balanced all around<br>
-                        <b>Special:</b> Nightmare - Damage + chance to stun<br>
-                        <b>Best for:</b> Mystery and versatility</p>
-                    </div>
-                </div>
-                <div id="guide-bosses" class="guide-content">
-                    <h3>👑 Boss Guide</h3>
-                    <div class="guide-item boss-guide">
-                        <h4>🐊 Marsh King Crocodile (Mud Kingdom)</h4>
-                        <p><b>Level:</b> 5 | <b>Danger:</b> ★★☆☆☆<br>
-                        <b>Abilities:</b> Tail Swipe, Mud Trap, Regenerate<br>
-                        <b>Tips:</b> Bring antidotes. Burst damage to prevent healing.</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>🦂 Queen Scorpion (Sand Kingdom)</h4>
-                        <p><b>Level:</b> 7 | <b>Danger:</b> ★★★☆☆<br>
-                        <b>Abilities:</b> Poison Sting, Burrow, Swarm<br>
-                        <b>Tips:</b> Stock up on antidotes. Watch for unavoidable swarm damage.</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>⚡ Thunderwing (Sky Kingdom)</h4>
-                        <p><b>Level:</b> 9 | <b>Danger:</b> ★★★★☆<br>
-                        <b>Abilities:</b> Lightning Strike, Wind Blast, Dive Bomb<br>
-                        <b>Tips:</b> Defend against Dive Bomb! Can stun you.</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>🐙 Leviathan (Sea Kingdom)</h4>
-                        <p><b>Level:</b> 8 | <b>Danger:</b> ★★★☆☆<br>
-                        <b>Abilities:</b> Tentacle Grab, Ink Cloud, Whirlpool<br>
-                        <b>Tips:</b> High defense boss. Use armor-piercing attacks.</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>🐍 Jungle Hydra (Rainforest)</h4>
-                        <p><b>Level:</b> 10 | <b>Danger:</b> ★★★★☆<br>
-                        <b>Abilities:</b> Multi-Bite, Poison Breath, Regenerate<br>
-                        <b>Tips:</b> Heavy poison. Bring mega potions and antidotes.</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>❄️ Frost Wyrm (Ice Kingdom)</h4>
-                        <p><b>Level:</b> 11 | <b>Danger:</b> ★★★★☆<br>
-                        <b>Abilities:</b> Ice Breath, Frozen Tomb, Blizzard<br>
-                        <b>Tips:</b> Bring thaw potions. Can freeze-lock you!</p>
-                    </div>
-                    <div class="guide-item boss-guide">
-                        <h4>👁️ Darkstalker (Night Kingdom)</h4>
-                        <p><b>Level:</b> 15 | <b>Danger:</b> ★★★★★<br>
-                        <b>Abilities:</b> Shadow Blast, Mind Break, Dark Resurrection<br>
-                        <b>Tips:</b> Final boss! Can heal at low HP. Max level and gear recommended.</p>
-                    </div>
-                </div>
-            </div>
-            <button id="close-guide-btn" class="btn">Back</button>
         </div>
 
         <!-- Character Creation Screen -->
@@ -213,329 +25,283 @@
             <h2>Create Your Dragon</h2>
             <div class="form-group">
                 <label for="dragon-name">Dragon Name:</label>
-                <input type="text" id="dragon-name" placeholder="Enter your dragon's name" maxlength="20">
+                <input type="text" id="dragon-name" placeholder="Enter your dragon's name" maxlength="20" autofocus>
             </div>
+            <p class="controls-hint">Use LEFT/RIGHT arrows to select tribe, ENTER to confirm</p>
             <div class="form-group">
                 <label>Choose Your Tribe:</label>
                 <div id="tribe-selection" class="tribe-grid">
-                    <div class="tribe-card" data-tribe="MudWing">
-                        <div class="tribe-icon mudwing">🐉</div>
+                    <div class="tribe-card selected" data-tribe="MudWing">
+                        <div class="tribe-icon"></div>
                         <h3>MudWing</h3>
-                        <p>Strong and resilient. Fire-resistant when warm.</p>
+                        <p>Strong and resilient</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: High</span>
-                            <span>⚔️ ATK: Medium</span>
-                            <span>🛡️ DEF: High</span>
+                            <span>HP: High | ATK: Med | DEF: High</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="SandWing">
-                        <div class="tribe-icon sandwing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>SandWing</h3>
-                        <p>Desert warriors with venomous tail barbs.</p>
+                        <p>Venomous tail barbs</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Medium</span>
-                            <span>⚔️ ATK: High</span>
-                            <span>🛡️ DEF: Medium</span>
+                            <span>HP: Med | ATK: High | DEF: Med</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="SkyWing">
-                        <div class="tribe-icon skywing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>SkyWing</h3>
-                        <p>Fastest flyers with powerful fire breath.</p>
+                        <p>Fastest flyers</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Medium</span>
-                            <span>⚔️ ATK: High</span>
-                            <span>🛡️ DEF: Low</span>
+                            <span>HP: Med | ATK: High | DEF: Low</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="SeaWing">
-                        <div class="tribe-icon seawing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>SeaWing</h3>
-                        <p>Aquatic dragons who glow in the dark.</p>
+                        <p>Aquatic glow</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Medium</span>
-                            <span>⚔️ ATK: Medium</span>
-                            <span>🛡️ DEF: Medium</span>
+                            <span>HP: Med | ATK: Med | DEF: Med</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="RainWing">
-                        <div class="tribe-icon rainwing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>RainWing</h3>
-                        <p>Color-changing scales and deadly venom.</p>
+                        <p>Color-changing scales</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Low</span>
-                            <span>⚔️ ATK: Very High</span>
-                            <span>🛡️ DEF: Low</span>
+                            <span>HP: Low | ATK: VHigh | DEF: Low</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="IceWing">
-                        <div class="tribe-icon icewing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>IceWing</h3>
-                        <p>Frost breath and razor-sharp claws.</p>
+                        <p>Frost breath</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Medium</span>
-                            <span>⚔️ ATK: Medium</span>
-                            <span>🛡️ DEF: High</span>
+                            <span>HP: Med | ATK: Med | DEF: High</span>
                         </div>
                     </div>
                     <div class="tribe-card" data-tribe="NightWing">
-                        <div class="tribe-icon nightwing">🐉</div>
+                        <div class="tribe-icon"></div>
                         <h3>NightWing</h3>
-                        <p>Mysterious dragons of prophecy and secrets.</p>
+                        <p>Mysterious powers</p>
                         <div class="tribe-stats">
-                            <span>❤️ HP: Medium</span>
-                            <span>⚔️ ATK: Medium</span>
-                            <span>🛡️ DEF: Medium</span>
+                            <span>HP: Med | ATK: Med | DEF: Med</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <button id="create-dragon-btn" class="btn btn-primary" disabled>Create Dragon</button>
         </div>
 
         <!-- Main Game Screen -->
         <div id="game-screen" class="screen">
-            <!-- Player Stats Panel -->
-            <div id="player-panel">
-                <div class="player-info">
-                    <span id="player-name">Dragon</span>
-                    <span id="player-tribe" class="tribe-badge">Tribe</span>
-                    <span id="player-level">Level 1</span>
-                    <span id="flight-status" class="flight-badge hidden">🦅 Flying</span>
-                    <span id="player-status-effects"></span>
-                </div>
-                <div class="stat-bars">
-                    <div class="stat-bar">
-                        <label>HP</label>
-                        <div class="bar-container">
-                            <div id="hp-bar" class="bar hp"></div>
+            <!-- HUD -->
+            <div id="hud">
+                <div id="hud-left">
+                    <div id="player-info">
+                        <span id="player-name-display">Dragon</span>
+                        <span id="player-tribe-badge" class="tribe-badge">Tribe</span>
+                        <span id="player-level">Lv.1</span>
+                    </div>
+                    <div id="hp-display">
+                        <span>HP</span>
+                        <div class="hud-bar-container">
+                            <div id="hud-hp-bar" class="hud-bar hp"></div>
                         </div>
                         <span id="hp-text">100/100</span>
                     </div>
-                    <div class="stat-bar">
-                        <label>XP</label>
-                        <div class="bar-container">
-                            <div id="xp-bar" class="bar xp"></div>
-                        </div>
-                        <span id="xp-text">0/100</span>
-                    </div>
-                    <div class="stat-bar">
-                        <label>✈️</label>
-                        <div class="bar-container">
-                            <div id="stamina-bar" class="bar stamina"></div>
+                    <div id="stamina-display">
+                        <span>ST</span>
+                        <div class="hud-bar-container">
+                            <div id="hud-stamina-bar" class="hud-bar stamina"></div>
                         </div>
                         <span id="stamina-text">100/100</span>
                     </div>
-                </div>
-                <div class="player-stats-display">
-                    <span>⚔️ <span id="attack-stat">10</span></span>
-                    <span>🛡️ <span id="defense-stat">10</span></span>
-                    <span>💰 <span id="gold-stat">0</span></span>
-                    <span>🎒 <span id="inventory-count">0</span></span>
-                </div>
-            </div>
-
-            <!-- Main Content Area -->
-            <div id="main-content">
-                <!-- Location Display -->
-                <div id="location-panel">
-                    <h2 id="location-name">The Mud Kingdom</h2>
-                    <p id="location-description">You find yourself in a vast swampy land...</p>
-                    <div id="player-dragon-display"></div>
-                    <div id="boss-indicator" class="hidden">
-                        <span class="boss-warning">👑 BOSS AVAILABLE</span>
+                    <div id="xp-display">
+                        <span>XP</span>
+                        <div class="hud-bar-container">
+                            <div id="hud-xp-bar" class="hud-bar xp"></div>
+                        </div>
+                        <span id="xp-text">0/100</span>
                     </div>
                 </div>
-
-                <!-- Game Log -->
-                <div id="game-log">
-                    <div id="log-content"></div>
+                <div id="hud-center">
+                    <div id="location-display">The Mud Kingdom</div>
+                    <div id="flight-indicator" class="hidden">FLYING</div>
                 </div>
-
-                <!-- Action Buttons -->
-                <div id="action-panel">
-                    <button class="btn action-btn" data-action="explore">🔍 Explore</button>
-                    <button class="btn action-btn" data-action="fly">🦅 Fly</button>
-                    <button class="btn action-btn" data-action="boss">👑 Boss</button>
-                    <button class="btn action-btn" data-action="map">🗺️ Map</button>
-                    <button class="btn action-btn" data-action="quest">📜 Quests</button>
-                    <button class="btn action-btn" data-action="inventory">🎒 Items</button>
-                    <button class="btn action-btn" data-action="guide">📖 Guide</button>
-                    <button class="btn action-btn" data-action="rest">💤 Rest</button>
+                <div id="hud-right">
+                    <div id="stats-display">
+                        <span>ATK: <span id="atk-stat">10</span></span>
+                        <span>DEF: <span id="def-stat">10</span></span>
+                        <span>Gold: <span id="gold-stat">0</span></span>
+                    </div>
+                    <div id="controls-reminder">
+                        WASD: Move | SPACE: Attack | F: Fly | H: Help
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Map Screen -->
-        <div id="map-screen" class="screen">
-            <h2>🗺️ Map of Pyrrhia</h2>
-            <div class="map-container">
-                <svg id="pyrrhia-map" viewBox="0 0 500 450">
-                    <!-- Ocean background -->
-                    <rect width="500" height="450" fill="#1a3a4a"/>
-
-                    <!-- Main continent -->
-                    <path d="M50,200 Q100,50 200,80 Q280,60 350,100 Q420,80 470,150
-                             Q480,250 450,300 Q400,380 300,370 Q200,390 100,350
-                             Q30,300 50,200 Z"
-                          fill="#3d5c3d" stroke="#2d4a2d" stroke-width="3"/>
-
-                    <!-- Ice region (north) -->
-                    <path d="M350,60 Q400,40 450,100 Q420,140 380,120 Q350,100 350,60 Z"
-                          fill="#a8d5e8" stroke="#7bb8d4" stroke-width="2"/>
-
-                    <!-- Desert region (east) -->
-                    <path d="M100,200 Q50,280 100,350 Q200,320 150,260 Q100,220 100,200 Z"
-                          fill="#d4a84b" stroke="#b8923f" stroke-width="2"/>
-
-                    <!-- Rainforest region (south) -->
-                    <path d="M150,330 Q200,400 300,380 Q280,340 200,340 Q160,340 150,330 Z"
-                          fill="#228b22" stroke="#1a6b1a" stroke-width="2"/>
-
-                    <!-- Mud region (west) -->
-                    <path d="M230,140 Q280,120 330,160 Q300,200 260,190 Q230,170 230,140 Z"
-                          fill="#6b4423" stroke="#4a2f18" stroke-width="2"/>
-
-                    <!-- Night region (volcanic islands) -->
-                    <ellipse cx="60" cy="400" rx="40" ry="25" fill="#2a1a3a" stroke="#4B0082" stroke-width="2"/>
-                    <ellipse cx="45" cy="385" rx="15" ry="10" fill="#4B0082" opacity="0.5"/>
-
-                    <!-- Location markers will be added by JavaScript -->
-                </svg>
+            <!-- Game World -->
+            <div id="game-world">
+                <canvas id="game-canvas"></canvas>
+                <!-- Message overlay -->
+                <div id="message-overlay" class="hidden">
+                    <div id="message-content"></div>
+                </div>
             </div>
 
-            <!-- Map Legend -->
-            <div class="map-legend">
-                <div class="legend-item"><div class="legend-color current"></div> Current Location</div>
-                <div class="legend-item"><div class="legend-color available"></div> Available</div>
-                <div class="legend-item"><div class="legend-color boss"></div> Boss Defeated</div>
+            <!-- Game Log -->
+            <div id="game-log">
+                <div id="log-content"></div>
             </div>
-
-            <!-- Selected location info -->
-            <div id="map-location-info">
-                <h3>Select a Location</h3>
-                <p>Click on a location on the map to see details and travel options.</p>
-            </div>
-
-            <button id="map-travel-btn" class="btn btn-primary hidden">Travel Here</button>
-            <button id="close-map-btn" class="btn">Back</button>
         </div>
 
         <!-- Battle Screen -->
         <div id="battle-screen" class="screen">
             <div id="battle-header">
+                <div id="battle-title">Battle!</div>
                 <div id="combo-display" class="hidden">
-                    <span id="combo-count">0</span>
-                    <span>COMBO!</span>
+                    <span id="combo-count">0</span> COMBO!
                 </div>
-                <div id="aerial-combat-indicator" class="hidden">🦅 AERIAL COMBAT 🦅</div>
-                <div id="boss-title" class="hidden">👑 BOSS BATTLE 👑</div>
             </div>
 
             <div id="battle-arena">
-                <div id="enemy-panel" class="combatant-panel">
-                    <h3 id="enemy-name">Enemy Dragon</h3>
-                    <div class="tribe-icon enemy-icon" id="enemy-icon">🐉</div>
-                    <div id="enemy-status-effects"></div>
-                    <div class="stat-bar">
-                        <div class="bar-container large">
-                            <div id="enemy-hp-bar" class="bar hp"></div>
+                <div id="enemy-side">
+                    <div id="enemy-name">Enemy</div>
+                    <div id="enemy-display"></div>
+                    <div id="enemy-hp-container">
+                        <div class="battle-bar-container">
+                            <div id="enemy-hp-bar" class="battle-bar hp"></div>
                         </div>
                         <span id="enemy-hp-text">100/100</span>
                     </div>
+                    <div id="enemy-status"></div>
                 </div>
 
-                <div id="battle-log">
-                    <div id="battle-log-content"></div>
+                <div id="battle-center">
+                    <div id="battle-log">
+                        <div id="battle-log-content"></div>
+                    </div>
                 </div>
 
-                <div id="player-battle-panel" class="combatant-panel">
-                    <h3 id="battle-player-name">Your Dragon</h3>
-                    <div id="player-battle-icon"></div>
-                    <div id="player-battle-status"></div>
-                    <div class="stat-bar">
-                        <div class="bar-container large">
-                            <div id="battle-hp-bar" class="bar hp"></div>
+                <div id="player-side">
+                    <div id="battle-player-name">Your Dragon</div>
+                    <div id="player-battle-display"></div>
+                    <div id="player-hp-container">
+                        <div class="battle-bar-container">
+                            <div id="player-hp-bar" class="battle-bar hp"></div>
                         </div>
-                        <span id="battle-hp-text">100/100</span>
+                        <span id="player-hp-text">100/100</span>
                     </div>
+                    <div id="player-status"></div>
                 </div>
             </div>
 
-            <div id="battle-actions">
-                <button class="btn battle-btn" data-battle="attack">⚔️ Attack</button>
-                <button class="btn battle-btn" data-battle="heavy">💥 Heavy</button>
-                <button class="btn battle-btn" data-battle="special">✨ Special</button>
-                <button class="btn battle-btn" data-battle="defend">🛡️ Defend</button>
-                <button class="btn battle-btn" data-battle="item">🧪 Item</button>
-                <button class="btn battle-btn" data-battle="flee">🏃 Flee</button>
-            </div>
-        </div>
-
-        <!-- Quest Screen -->
-        <div id="quest-screen" class="screen">
-            <h2>📜 Quests</h2>
-            <div id="quest-list"></div>
-            <button id="close-quests-btn" class="btn">Back</button>
-        </div>
-
-        <!-- Travel Screen -->
-        <div id="travel-screen" class="screen">
-            <h2>🗺️ Travel to...</h2>
-            <div id="location-list" class="location-grid"></div>
-            <button id="close-travel-btn" class="btn">Back</button>
-        </div>
-
-        <!-- Inventory Screen -->
-        <div id="inventory-screen" class="screen">
-            <h2>🎒 Inventory</h2>
-            <div id="equipment-section">
-                <h3>Equipment</h3>
-                <div id="equipment-slots">
-                    <div class="equipment-slot" data-slot="weapon">
-                        <span class="slot-label">Weapon</span>
-                        <span id="equipped-weapon">None</span>
-                    </div>
-                    <div class="equipment-slot" data-slot="armor">
-                        <span class="slot-label">Armor</span>
-                        <span id="equipped-armor">None</span>
-                    </div>
-                    <div class="equipment-slot" data-slot="accessory">
-                        <span class="slot-label">Accessory</span>
-                        <span id="equipped-accessory">None</span>
-                    </div>
+            <div id="battle-controls">
+                <div class="battle-control" data-action="attack">
+                    <span class="key">SPACE</span>
+                    <span class="action">Attack</span>
+                </div>
+                <div class="battle-control" data-action="heavy">
+                    <span class="key">SHIFT+SPACE</span>
+                    <span class="action">Heavy</span>
+                </div>
+                <div class="battle-control" data-action="special">
+                    <span class="key">E</span>
+                    <span class="action">Special</span>
+                </div>
+                <div class="battle-control" data-action="defend">
+                    <span class="key">Q</span>
+                    <span class="action">Defend</span>
+                </div>
+                <div class="battle-control" data-action="item">
+                    <span class="key">I</span>
+                    <span class="action">Item</span>
+                </div>
+                <div class="battle-control" data-action="flee">
+                    <span class="key">ESC</span>
+                    <span class="action">Flee</span>
                 </div>
             </div>
-            <div id="items-section">
-                <h3>Items</h3>
-                <div id="inventory-list"></div>
-            </div>
-            <button id="close-inventory-btn" class="btn">Back</button>
         </div>
 
-        <!-- Battle Item Selection -->
-        <div id="battle-item-screen" class="screen">
-            <h2>🧪 Use Item</h2>
-            <div id="battle-item-list"></div>
-            <button id="close-battle-items-btn" class="btn">Cancel</button>
+        <!-- Inventory Screen (Overlay) -->
+        <div id="inventory-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Inventory</h2>
+                <div id="equipment-display">
+                    <h3>Equipment</h3>
+                    <div id="equipment-slots"></div>
+                </div>
+                <div id="items-display">
+                    <h3>Items</h3>
+                    <div id="items-list"></div>
+                </div>
+                <p class="overlay-hint">Press I or ESC to close</p>
+            </div>
+        </div>
+
+        <!-- Map Screen (Overlay) -->
+        <div id="map-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Map of Pyrrhia</h2>
+                <div id="map-display">
+                    <canvas id="map-canvas"></canvas>
+                </div>
+                <div id="map-info"></div>
+                <p class="overlay-hint">Arrow keys to select, ENTER to travel, M or ESC to close</p>
+            </div>
+        </div>
+
+        <!-- Help Screen (Overlay) -->
+        <div id="help-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>How to Play</h2>
+                <div class="help-section">
+                    <h3>Movement</h3>
+                    <p>WASD or Arrow Keys - Move your dragon</p>
+                    <p>F - Toggle flight (uses stamina)</p>
+                </div>
+                <div class="help-section">
+                    <h3>Exploration</h3>
+                    <p>Walk into objects to interact</p>
+                    <p>Find gold, items, and enemies while exploring</p>
+                </div>
+                <div class="help-section">
+                    <h3>Combat</h3>
+                    <p>SPACE - Attack (builds combo)</p>
+                    <p>SHIFT+SPACE - Heavy Attack (more damage)</p>
+                    <p>E - Special Ability (tribe-specific)</p>
+                    <p>Q - Defend (reduces damage)</p>
+                </div>
+                <div class="help-section">
+                    <h3>Other</h3>
+                    <p>I - Inventory | M - Map | H - Help</p>
+                    <p>R - Rest (recover HP and stamina)</p>
+                </div>
+                <p class="overlay-hint">Press H or ESC to close</p>
+            </div>
         </div>
 
         <!-- Victory Screen -->
         <div id="victory-screen" class="screen">
             <h2 id="victory-title">Victory!</h2>
-            <div id="victory-content">
-                <p id="victory-message"></p>
-                <div id="victory-rewards"></div>
-                <div id="loot-drops"></div>
-            </div>
-            <button id="victory-continue-btn" class="btn btn-primary">Continue</button>
+            <div id="victory-message"></div>
+            <div id="victory-rewards"></div>
+            <div id="loot-drops"></div>
+            <p class="controls-hint">Press ENTER to continue</p>
         </div>
 
         <!-- Game Over Screen -->
         <div id="gameover-screen" class="screen">
             <h2>You Have Fallen...</h2>
             <p id="gameover-message">Your dragon has been defeated.</p>
-            <button id="restart-btn" class="btn btn-primary">Try Again</button>
+            <p class="controls-hint">Press ENTER to try again</p>
+        </div>
+
+        <!-- Level Up Screen -->
+        <div id="levelup-screen" class="screen">
+            <h2>Level Up!</h2>
+            <div id="levelup-message"></div>
+            <p class="controls-hint">Press ENTER to continue</p>
         </div>
     </div>
 
