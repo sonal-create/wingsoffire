@@ -239,10 +239,10 @@ const TRIBES = {
 const LOCATIONS = {
     mudKingdom: {
         name: 'The Mud Kingdom',
-        skyColor: 0x4A3728,
+        skyColor: 0x6A5748,
         groundColor: 0x3D2817,
-        fogColor: 0x5A4030,
-        fogDensity: 0.012,
+        fogColor: 0x7A6050,
+        fogDensity: 0.004,
         features: 'swamp',
         enemies: ['Swamp Serpent', 'Mud Crawler', 'MudWing Scout', 'Cave Guard', 'Scavenger'],
         enemyLevel: [1, 3],
@@ -293,10 +293,10 @@ const LOCATIONS = {
     },
     seaKingdom: {
         name: 'The Kingdom of the Sea',
-        skyColor: 0x1A5A6A,
+        skyColor: 0x3A7A8A,
         groundColor: 0x2A7A8A,
-        fogColor: 0x20B2AA,
-        fogDensity: 0.015,
+        fogColor: 0x40C2CA,
+        fogDensity: 0.005,
         features: 'underwater',
         enemies: ['Giant Crab', 'Shark', 'SeaWing Warrior'],
         enemyLevel: [2, 4],
@@ -311,10 +311,10 @@ const LOCATIONS = {
     },
     rainforest: {
         name: 'The Rainforest Kingdom',
-        skyColor: 0x228B22,
+        skyColor: 0x4AAB42,
         groundColor: 0x2E8B57,
-        fogColor: 0x3CB371,
-        fogDensity: 0.018,
+        fogColor: 0x5CB381,
+        fogDensity: 0.005,
         features: 'jungle',
         enemies: ['Jungle Cat', 'Poison Frog', 'RainWing Guard'],
         enemyLevel: [3, 5],
@@ -347,10 +347,10 @@ const LOCATIONS = {
     },
     nightKingdom: {
         name: 'The Lost City of Night',
-        skyColor: 0x0A0A1A,
-        groundColor: 0x1A1A2A,
-        fogColor: 0x2A2A4A,
-        fogDensity: 0.025,
+        skyColor: 0x1A1A3A,
+        groundColor: 0x2A2A4A,
+        fogColor: 0x3A3A5A,
+        fogDensity: 0.006,
         features: 'volcanic',
         enemies: ['Shadow Bat', 'Lava Serpent', 'NightWing Assassin'],
         enemyLevel: [5, 7],
@@ -3356,9 +3356,13 @@ function updatePlayer(delta) {
 
     const p = game.player;
 
+    // Store old position for unstuck
+    const oldX = p.position.x;
+    const oldZ = p.position.z;
+
     // Simple movement speed
-    let speed = 0.3;
-    if (p.isFlying) speed = 0.4;
+    let speed = 0.35;
+    if (p.isFlying) speed = 0.5;
     if (game.keys['ShiftLeft'] || game.keys['ShiftRight']) {
         speed *= 1.5;
     }
@@ -3388,14 +3392,14 @@ function updatePlayer(delta) {
     // Flying - SPACE to go up, CTRL to go down
     if (p.isFlying) {
         if (game.keys['Space']) {
-            p.position.y += 0.2;
+            p.position.y += 0.25;
         }
         if (game.keys['ControlLeft'] || game.keys['ControlRight']) {
-            p.position.y -= 0.3;
+            p.position.y -= 0.35;
         }
 
         // Drain stamina while flying
-        p.stamina -= 0.1;
+        p.stamina -= 0.08;
         if (p.stamina <= 0) {
             p.stamina = 0;
             p.isFlying = false;
@@ -3403,26 +3407,35 @@ function updatePlayer(delta) {
         }
     } else {
         // On ground - regenerate stamina
-        p.stamina = Math.min(p.maxStamina, p.stamina + 0.05);
+        p.stamina = Math.min(p.maxStamina, p.stamina + 0.08);
 
         // Gravity if not grounded
-        if (p.position.y > 2) {
-            p.position.y -= 0.15;
+        if (p.position.y > 3) {
+            p.position.y -= 0.2;
         }
     }
 
+    // Ground level - NEVER go below this
+    const groundLevel = 3;
+
     // Keep on ground if not flying
-    if (!p.isFlying && p.position.y < 2) {
-        p.position.y = 2;
+    if (!p.isFlying && p.position.y < groundLevel) {
+        p.position.y = groundLevel;
         p.isGrounded = true;
-    } else if (p.position.y > 2) {
+    } else if (p.position.y > groundLevel) {
         p.isGrounded = false;
     }
 
-    // World boundaries
-    p.position.x = Math.max(-100, Math.min(100, p.position.x));
-    p.position.z = Math.max(-100, Math.min(100, p.position.z));
-    p.position.y = Math.max(2, Math.min(50, p.position.y));
+    // World boundaries - keep player in bounds
+    p.position.x = Math.max(-90, Math.min(90, p.position.x));
+    p.position.z = Math.max(-90, Math.min(90, p.position.z));
+    p.position.y = Math.max(groundLevel, Math.min(60, p.position.y));
+
+    // Check if player is somehow stuck (NaN or invalid position)
+    if (isNaN(p.position.x) || isNaN(p.position.y) || isNaN(p.position.z)) {
+        p.position.set(0, groundLevel, 0);
+        showMessage('Teleported to safety!', 'info');
+    }
 
     // Update mesh
     p.mesh.position.copy(p.position);
@@ -3442,15 +3455,20 @@ function updatePlayer(delta) {
         }
     }
 
-    // Camera follows player
-    const camDist = 20;
-    const camHeight = 12;
+    // Camera follows player - ALWAYS stay above ground
+    const camDist = 22;
+    const camHeight = 15;
     const camX = p.position.x - Math.sin(game.cameraAngleY) * camDist;
-    const camY = p.position.y + camHeight;
+    const camY = Math.max(groundLevel + 10, p.position.y + camHeight); // Camera never below ground+10
     const camZ = p.position.z - Math.cos(game.cameraAngleY) * camDist;
 
     game.camera.position.set(camX, camY, camZ);
     game.camera.lookAt(p.position.x, p.position.y + 2, p.position.z);
+
+    // Update camera near/far to prevent clipping
+    game.camera.near = 0.5;
+    game.camera.far = 1000;
+    game.camera.updateProjectionMatrix();
 }
 
 function checkCollisions() {
@@ -3737,6 +3755,14 @@ function handleGameInput(e) {
             game.player.stamina = Math.min(game.player.maxStamina, game.player.stamina + 25);
             showMessage(`Resting... +${hpRec} HP, +25 Stamina`, 'reward');
             updateHUD();
+            break;
+
+        // Unstuck - teleport to center
+        case 'KeyT':
+            game.player.position.set(0, 5, 0);
+            game.player.isFlying = false;
+            game.player.isGrounded = true;
+            showMessage('Teleported to safety!', 'info');
             break;
     }
 }
