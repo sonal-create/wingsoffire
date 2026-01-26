@@ -6,18 +6,19 @@
 // ============================================
 
 const CONFIG = {
-    MOVE_SPEED: 8,
-    FLY_SPEED: 12,
-    SPRINT_MULTIPLIER: 1.8,
-    ROTATION_SPEED: 0.003,
-    GRAVITY: 0.5,
-    JUMP_FORCE: 12,
-    FLY_LIFT: 0.4,
-    STAMINA_DRAIN: 0.3,
-    STAMINA_REGEN: 0.15,
+    MOVE_SPEED: 15,
+    FLY_SPEED: 20,
+    SPRINT_MULTIPLIER: 1.6,
+    TURN_SPEED: 3.0,
+    GRAVITY: 0.8,
+    JUMP_FORCE: 15,
+    FLY_LIFT: 0.5,
+    STAMINA_DRAIN: 0.2,
+    STAMINA_REGEN: 0.2,
     GROUND_LEVEL: 0,
-    CAMERA_DISTANCE: 15,
-    CAMERA_HEIGHT: 8
+    CAMERA_DISTANCE: 18,
+    CAMERA_HEIGHT: 10,
+    FRICTION: 0.88
 };
 
 // ============================================
@@ -1522,6 +1523,12 @@ class Enemy {
         this.hp = this.maxHp;
         this.isFlying = Math.random() > 0.5;
 
+        // Real-time combat properties
+        this.attackCooldown = 0;
+        this.aggroRange = isBoss ? 40 : 25;
+        this.moveSpeed = isBoss ? 4 : 6;
+        this.velocity = new THREE.Vector3(0, 0, 0);
+
         this.mesh = null;
         this.position = new THREE.Vector3(
             (Math.random() - 0.5) * 60,
@@ -1541,6 +1548,47 @@ class Enemy {
         const reduced = Math.max(1, amount - Math.floor(this.defense / 3));
         this.hp = Math.max(0, this.hp - reduced);
         return reduced;
+    }
+
+    // AI: Chase player if in range
+    updateAI(delta, playerPos) {
+        if (!this.mesh || this.hp <= 0) return;
+
+        // Update attack cooldown
+        if (this.attackCooldown > 0) {
+            this.attackCooldown -= delta;
+        }
+
+        const dist = this.mesh.position.distanceTo(playerPos);
+
+        // Chase player if in aggro range
+        if (dist < this.aggroRange && dist > 2) {
+            const direction = new THREE.Vector3()
+                .subVectors(playerPos, this.mesh.position)
+                .normalize();
+
+            // Move toward player
+            this.velocity.x = direction.x * this.moveSpeed * delta;
+            this.velocity.z = direction.z * this.moveSpeed * delta;
+
+            // Rotate to face player
+            this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+        } else {
+            // Slow down
+            this.velocity.x *= 0.9;
+            this.velocity.z *= 0.9;
+        }
+
+        // Apply velocity
+        this.mesh.position.x += this.velocity.x;
+        this.mesh.position.z += this.velocity.z;
+
+        // Keep in bounds
+        this.mesh.position.x = Math.max(-100, Math.min(100, this.mesh.position.x));
+        this.mesh.position.z = Math.max(-100, Math.min(100, this.mesh.position.z));
+
+        // Update position reference
+        this.position.copy(this.mesh.position);
     }
 }
 
@@ -1678,17 +1726,23 @@ class World {
     }
 
     update(delta) {
+        // Get player position for AI
+        const playerPos = game.player ? game.player.position : new THREE.Vector3(0, 0, 0);
+
+        // Rotate collectibles
         this.collectibles.forEach(c => {
             c.rotation.y += delta * 2;
             c.position.y = (c.userData.baseY || c.position.y) + Math.sin(Date.now() * 0.003) * 0.3;
             c.userData.baseY = c.userData.baseY || c.position.y;
         });
 
+        // Update enemies with AI
         this.enemies.forEach(enemy => {
-            if (enemy.mesh) {
-                enemy.mesh.position.x += Math.sin(Date.now() * 0.001 + enemy.position.x) * 0.03;
-                enemy.mesh.position.z += Math.cos(Date.now() * 0.001 + enemy.position.z) * 0.03;
+            if (enemy.mesh && enemy.hp > 0) {
+                // Call AI to chase player
+                enemy.updateAI(delta, playerPos);
 
+                // Wing animation
                 if (enemy.isFlying && enemy.mesh.userData) {
                     enemy.mesh.userData.wingAngle = Math.sin(Date.now() * 0.01) * 0.6;
                     if (enemy.mesh.userData.leftWing) {
@@ -1701,12 +1755,15 @@ class World {
             }
         });
 
+        // Rotate portals
         this.portals.forEach(p => {
             p.rotation.z += delta * 0.5;
         });
 
-        if (this.boss && this.boss.mesh) {
-            this.boss.mesh.position.y = 8 + Math.sin(Date.now() * 0.002) * 1;
+        // Boss AI and animation
+        if (this.boss && this.boss.mesh && this.boss.hp > 0) {
+            this.boss.updateAI(delta, playerPos);
+            this.boss.mesh.position.y = Math.max(4, this.boss.mesh.position.y);
         }
     }
 
@@ -2651,29 +2708,48 @@ function updatePlayer(delta) {
 
     const p = game.player;
 
+    // Clamp delta to avoid huge jumps if tab is unfocused
+    const dt = Math.min(delta, 0.1);
+
     // Movement speed
     let speed = CONFIG.MOVE_SPEED;
     if (p.isFlying) speed = CONFIG.FLY_SPEED;
-    if (p.isSprinting) speed *= CONFIG.SPRINT_MULTIPLIER;
+    if (game.keys['ShiftLeft'] || game.keys['ShiftRight']) {
+        speed *= CONFIG.SPRINT_MULTIPLIER;
+        p.isSprinting = true;
+    } else {
+        p.isSprinting = false;
+    }
 
     // Calculate movement direction based on player rotation
     const moveX = Math.sin(p.rotation);
     const moveZ = Math.cos(p.rotation);
 
-    // Handle input
+    // Handle movement input - direct velocity for responsiveness
+    let moving = false;
     if (game.keys['KeyW'] || game.keys['ArrowUp']) {
-        p.velocity.x += moveX * speed * delta;
-        p.velocity.z += moveZ * speed * delta;
+        p.velocity.x = moveX * speed * dt * 60;
+        p.velocity.z = moveZ * speed * dt * 60;
+        moving = true;
     }
     if (game.keys['KeyS'] || game.keys['ArrowDown']) {
-        p.velocity.x -= moveX * speed * delta;
-        p.velocity.z -= moveZ * speed * delta;
+        p.velocity.x = -moveX * speed * dt * 60 * 0.6; // Slower backward
+        p.velocity.z = -moveZ * speed * dt * 60 * 0.6;
+        moving = true;
     }
+
+    // Turn with A/D
     if (game.keys['KeyA'] || game.keys['ArrowLeft']) {
-        p.rotation += 2.5 * delta;
+        p.rotation += CONFIG.TURN_SPEED * dt;
     }
     if (game.keys['KeyD'] || game.keys['ArrowRight']) {
-        p.rotation -= 2.5 * delta;
+        p.rotation -= CONFIG.TURN_SPEED * dt;
+    }
+
+    // Apply friction when not actively moving
+    if (!moving) {
+        p.velocity.x *= CONFIG.FRICTION;
+        p.velocity.z *= CONFIG.FRICTION;
     }
 
     // Flying controls
@@ -2681,39 +2757,36 @@ function updatePlayer(delta) {
         if (game.keys['Space']) {
             p.velocity.y += CONFIG.FLY_LIFT;
         }
-        if (game.keys['ShiftLeft'] || game.keys['ShiftRight']) {
-            p.velocity.y -= CONFIG.FLY_LIFT;
+        if (game.keys['ControlLeft'] || game.keys['ControlRight']) {
+            p.velocity.y -= CONFIG.FLY_LIFT * 1.5; // Faster descent
         }
 
-        p.stamina -= CONFIG.STAMINA_DRAIN * delta * 60;
+        p.stamina -= CONFIG.STAMINA_DRAIN * dt * 60;
         if (p.stamina <= 0) {
             p.stamina = 0;
             p.isFlying = false;
-            showMessage('Out of stamina!', 'info');
+            showMessage('Out of stamina! Landing...', 'info');
         }
 
-        p.velocity.y *= 0.95;
+        p.velocity.y *= 0.92; // Air resistance
     } else {
-        // Gravity
+        // Gravity when not flying
         if (!p.isGrounded) {
-            p.velocity.y -= CONFIG.GRAVITY * delta * 60;
+            p.velocity.y -= CONFIG.GRAVITY * dt * 60;
         }
-        // Stamina regen
-        p.stamina = Math.min(p.maxStamina, p.stamina + CONFIG.STAMINA_REGEN * delta * 60);
+        // Stamina regen on ground
+        p.stamina = Math.min(p.maxStamina, p.stamina + CONFIG.STAMINA_REGEN * dt * 60);
     }
 
-    // Apply friction
-    p.velocity.x *= 0.92;
-    p.velocity.z *= 0.92;
-
-    // Apply velocity
-    p.position.x += p.velocity.x;
-    p.position.y += p.velocity.y;
-    p.position.z += p.velocity.z;
+    // Apply velocity to position
+    p.position.x += p.velocity.x * dt;
+    p.position.y += p.velocity.y * dt;
+    p.position.z += p.velocity.z * dt;
 
     // Ground collision
-    if (p.position.y <= CONFIG.GROUND_LEVEL + 2) {
-        p.position.y = CONFIG.GROUND_LEVEL + 2;
+    const groundY = CONFIG.GROUND_LEVEL + 2;
+    if (p.position.y <= groundY) {
+        p.position.y = groundY;
         p.velocity.y = 0;
         p.isGrounded = true;
         if (p.isFlying) {
@@ -2723,18 +2796,18 @@ function updatePlayer(delta) {
         p.isGrounded = false;
     }
 
-    // Boundaries
-    p.position.x = Math.max(-120, Math.min(120, p.position.x));
-    p.position.z = Math.max(-120, Math.min(120, p.position.z));
+    // World boundaries
+    p.position.x = Math.max(-115, Math.min(115, p.position.x));
+    p.position.z = Math.max(-115, Math.min(115, p.position.z));
 
-    // Update mesh
+    // Update mesh position and rotation
     p.mesh.position.copy(p.position);
     p.mesh.rotation.y = p.rotation;
 
     // Wing animation
     if (p.mesh.userData) {
-        const wingSpeed = p.isFlying ? 0.02 : 0.005;
-        const wingAmount = p.isFlying ? 0.7 : 0.15;
+        const wingSpeed = p.isFlying ? 0.015 : 0.003;
+        const wingAmount = p.isFlying ? 0.8 : 0.1;
         p.mesh.userData.wingAngle = Math.sin(Date.now() * wingSpeed) * wingAmount;
 
         if (p.mesh.userData.leftWing) {
@@ -2745,12 +2818,16 @@ function updatePlayer(delta) {
         }
     }
 
-    // Update camera - orbit around player
-    const camX = p.position.x - Math.sin(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
-    const camY = p.position.y + Math.sin(game.cameraAngleX) * game.cameraDist + CONFIG.CAMERA_HEIGHT;
-    const camZ = p.position.z - Math.cos(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
+    // Smooth camera follow - orbit around player
+    const targetCamX = p.position.x - Math.sin(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
+    const targetCamY = p.position.y + Math.sin(game.cameraAngleX) * game.cameraDist + CONFIG.CAMERA_HEIGHT;
+    const targetCamZ = p.position.z - Math.cos(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
 
-    game.camera.position.set(camX, camY, camZ);
+    // Smooth camera movement
+    game.camera.position.x += (targetCamX - game.camera.position.x) * 0.1;
+    game.camera.position.y += (targetCamY - game.camera.position.y) * 0.1;
+    game.camera.position.z += (targetCamZ - game.camera.position.z) * 0.1;
+
     game.camera.lookAt(p.position.x, p.position.y + 2, p.position.z);
 }
 
@@ -2759,6 +2836,7 @@ function checkCollisions() {
 
     const p = game.player;
 
+    // Collect items
     game.world.collectibles.forEach((c, idx) => {
         const dist = p.position.distanceTo(c.position);
         if (dist < 3) {
@@ -2775,22 +2853,58 @@ function checkCollisions() {
         }
     });
 
+    // Real-time enemy contact damage (no battle screen!)
     game.world.enemies.forEach(enemy => {
-        if (enemy.mesh) {
+        if (enemy.mesh && enemy.hp > 0) {
             const dist = p.position.distanceTo(enemy.mesh.position);
-            if (dist < 4) {
-                startBattle(enemy);
+            // Contact damage when very close
+            if (dist < 3 && enemy.attackCooldown <= 0) {
+                const dmg = enemy.attack + Math.floor(Math.random() * 3);
+                const dealt = p.takeDamage(dmg);
+                showMessage(`${enemy.name} hits you for ${dealt}!`, 'damage');
+                enemy.attackCooldown = 1.5; // 1.5 second cooldown
+
+                // Knockback player away from enemy
+                const knockback = new THREE.Vector3()
+                    .subVectors(p.position, enemy.mesh.position)
+                    .normalize()
+                    .multiplyScalar(3);
+                p.velocity.add(knockback);
+
+                updateHUD();
+
+                if (p.hp <= 0) {
+                    gameOver();
+                }
             }
         }
     });
 
-    if (game.world.boss && game.world.boss.mesh) {
+    // Boss contact damage
+    if (game.world.boss && game.world.boss.mesh && game.world.boss.hp > 0) {
         const dist = p.position.distanceTo(game.world.boss.mesh.position);
-        if (dist < 5) {
-            startBattle(game.world.boss);
+        if (dist < 4 && game.world.boss.attackCooldown <= 0) {
+            const dmg = game.world.boss.attack + Math.floor(Math.random() * 5);
+            const dealt = p.takeDamage(dmg);
+            showMessage(`${game.world.boss.name} SMASHES you for ${dealt}!`, 'damage');
+            game.world.boss.attackCooldown = 2.0;
+
+            // Stronger knockback from boss
+            const knockback = new THREE.Vector3()
+                .subVectors(p.position, game.world.boss.mesh.position)
+                .normalize()
+                .multiplyScalar(5);
+            p.velocity.add(knockback);
+
+            updateHUD();
+
+            if (p.hp <= 0) {
+                gameOver();
+            }
         }
     }
 
+    // Portal travel
     game.world.portals.forEach(portal => {
         const dist = p.position.distanceTo(portal.position);
         if (dist < 4) {
@@ -2935,11 +3049,11 @@ function handleGameInput(e) {
 
     switch (e.code) {
         case 'Space':
-            if (game.player.isGrounded && game.player.stamina > 20) {
-                game.player.velocity.y = CONFIG.JUMP_FORCE * 0.1;
+            if (game.player.isGrounded && game.player.stamina > 15) {
+                game.player.velocity.y = CONFIG.JUMP_FORCE;
                 game.player.isFlying = true;
                 game.player.isGrounded = false;
-                showMessage('Taking flight!', 'info');
+                showMessage('Taking flight! SPACE to rise, CTRL to descend', 'info');
             }
             break;
 
