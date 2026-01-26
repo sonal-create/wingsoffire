@@ -244,7 +244,7 @@ const LOCATIONS = {
         fogColor: 0x5A4030,
         fogDensity: 0.012,
         features: 'swamp',
-        enemies: ['Swamp Serpent', 'Mud Crawler', 'MudWing Scout'],
+        enemies: ['Swamp Serpent', 'Mud Crawler', 'MudWing Scout', 'Cave Guard', 'Scavenger'],
         enemyLevel: [1, 3],
         bossName: 'Marshal Marsh',
         bossLevel: 4,
