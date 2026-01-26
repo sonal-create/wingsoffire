@@ -1,78 +1,114 @@
-// Wings of Fire - Visual Adventure Game
-// Keyboard-controlled with moving dragon character
+// Wings of Fire - 3D Dragon Adventure Game
+// Three.js based with realistic dragons and landscapes
 
 // ============================================
 // GAME CONFIGURATION
 // ============================================
 
 const CONFIG = {
-    TILE_SIZE: 40,
-    PLAYER_SPEED: 4,
-    FLYING_SPEED: 6,
-    STAMINA_DRAIN: 0.5,
-    STAMINA_REGEN: 0.2
+    MOVE_SPEED: 0.15,
+    FLY_SPEED: 0.25,
+    SPRINT_MULTIPLIER: 1.8,
+    ROTATION_SPEED: 0.002,
+    GRAVITY: 0.015,
+    JUMP_FORCE: 0.35,
+    FLY_LIFT: 0.02,
+    STAMINA_DRAIN: 0.3,
+    STAMINA_REGEN: 0.15,
+    GROUND_LEVEL: 0
 };
 
 // ============================================
-// TRIBE DATA
+// TRIBE DATA - Based on Wings of Fire books
 // ============================================
 
 const TRIBES = {
     MudWing: {
         name: 'MudWing',
-        color: '#8B4513',
-        baseStats: { hp: 120, attack: 12, defense: 15 },
+        primaryColor: 0x8B4513,
+        secondaryColor: 0x654321,
+        wingColor: 0x5D3A1A,
+        eyeColor: 0xD4A574,
+        baseStats: { hp: 140, attack: 14, defense: 18, speed: 0.8 },
         special: 'Mud Shield',
-        specialDesc: '+50% defense for 3 turns',
-        flightBonus: { stamina: 80, speed: 0.8 }
+        specialDesc: 'Thick mud armor reduces damage by 60%',
+        breathType: 'fire',
+        breathColor: 0xFF4500
     },
     SandWing: {
         name: 'SandWing',
-        color: '#DEB887',
-        baseStats: { hp: 100, attack: 18, defense: 10 },
+        primaryColor: 0xDEB887,
+        secondaryColor: 0xD2B48C,
+        wingColor: 0xF5DEB3,
+        eyeColor: 0x000000,
+        baseStats: { hp: 100, attack: 20, defense: 10, speed: 1.0 },
         special: 'Venom Strike',
-        specialDesc: 'Poison enemy for 3 turns',
-        flightBonus: { stamina: 100, speed: 1.0 }
+        specialDesc: 'Barbed tail injects deadly venom',
+        breathType: 'fire',
+        breathColor: 0xFF6600
     },
     SkyWing: {
         name: 'SkyWing',
-        color: '#DC143C',
-        baseStats: { hp: 100, attack: 20, defense: 8 },
-        special: 'Inferno',
-        specialDesc: 'Fire damage + burn',
-        flightBonus: { stamina: 150, speed: 1.5 }
+        primaryColor: 0xDC143C,
+        secondaryColor: 0xB22222,
+        wingColor: 0xFF4500,
+        eyeColor: 0xFFD700,
+        baseStats: { hp: 95, attack: 22, defense: 8, speed: 1.5 },
+        special: 'Inferno Dive',
+        specialDesc: 'Blazing aerial attack from above',
+        breathType: 'fire',
+        breathColor: 0xFF0000
     },
     SeaWing: {
         name: 'SeaWing',
-        color: '#20B2AA',
-        baseStats: { hp: 110, attack: 14, defense: 12 },
-        special: 'Tidal Crush',
-        specialDesc: 'Water attack + stun chance',
-        flightBonus: { stamina: 90, speed: 0.9 }
+        primaryColor: 0x20B2AA,
+        secondaryColor: 0x008B8B,
+        wingColor: 0x40E0D0,
+        eyeColor: 0x00FFFF,
+        glowStripes: true,
+        baseStats: { hp: 115, attack: 16, defense: 14, speed: 1.1 },
+        special: 'Tidal Wave',
+        specialDesc: 'Crushing wave of water',
+        breathType: 'water',
+        breathColor: 0x00BFFF
     },
     RainWing: {
         name: 'RainWing',
-        color: '#9932CC',
-        baseStats: { hp: 85, attack: 22, defense: 8 },
-        special: 'Death Spit',
-        specialDesc: 'Acid melts armor',
-        flightBonus: { stamina: 110, speed: 1.1 }
+        primaryColor: 0x9932CC,
+        secondaryColor: 0x8B008B,
+        wingColor: 0xDA70D6,
+        eyeColor: 0x00FF00,
+        colorShift: true,
+        baseStats: { hp: 85, attack: 25, defense: 7, speed: 1.0 },
+        special: 'Venom Spit',
+        specialDesc: 'Corrosive acid melts through anything',
+        breathType: 'acid',
+        breathColor: 0x32CD32
     },
     IceWing: {
         name: 'IceWing',
-        color: '#87CEEB',
-        baseStats: { hp: 105, attack: 14, defense: 14 },
+        primaryColor: 0xADD8E6,
+        secondaryColor: 0x87CEEB,
+        wingColor: 0xE0FFFF,
+        eyeColor: 0x4169E1,
+        baseStats: { hp: 105, attack: 18, defense: 16, speed: 1.2 },
         special: 'Frost Breath',
-        specialDesc: 'Freeze enemy, slow them',
-        flightBonus: { stamina: 120, speed: 1.2 }
+        specialDesc: 'Freezing breath that slows enemies',
+        breathType: 'ice',
+        breathColor: 0x00FFFF
     },
     NightWing: {
         name: 'NightWing',
-        color: '#4B0082',
-        baseStats: { hp: 100, attack: 16, defense: 12 },
+        primaryColor: 0x2F2F4F,
+        secondaryColor: 0x191970,
+        wingColor: 0x4B0082,
+        eyeColor: 0xC0C0C0,
+        starScales: true,
+        baseStats: { hp: 100, attack: 19, defense: 13, speed: 1.1 },
         special: 'Nightmare',
-        specialDesc: 'Psychic attack + confuse',
-        flightBonus: { stamina: 100, speed: 1.0 }
+        specialDesc: 'Psychic attack confuses the enemy',
+        breathType: 'fire',
+        breathColor: 0x800080
     }
 };
 
@@ -83,66 +119,101 @@ const TRIBES = {
 const LOCATIONS = {
     mudKingdom: {
         name: 'The Mud Kingdom',
-        color: '#3d2817',
-        groundColor: '#5a3d1a',
-        enemies: ['Swamp Snake', 'Mud Crawler', 'MudWing Scout'],
+        skyColor: 0x4A3728,
+        groundColor: 0x3D2817,
+        fogColor: 0x5A4030,
+        fogDensity: 0.015,
+        features: 'swamp',
+        enemies: ['Swamp Serpent', 'Mud Crawler', 'MudWing Scout'],
+        enemyColors: [0x4A5D23, 0x8B4513, 0x654321],
         enemyLevel: [1, 3],
-        bossLevel: 5,
-        bossName: 'Marsh King'
+        bossName: 'Marsh King',
+        bossLevel: 4,
+        ambientLight: 0x6B5344
     },
     sandKingdom: {
         name: 'The Sand Kingdom',
-        color: '#c4a35a',
-        groundColor: '#e6c87a',
+        skyColor: 0xC4A35A,
+        groundColor: 0xE6C87A,
+        fogColor: 0xD4B896,
+        fogDensity: 0.008,
+        features: 'desert',
         enemies: ['Sand Viper', 'Scorpion', 'SandWing Patrol'],
+        enemyColors: [0xC4A35A, 0x8B0000, 0xDEB887],
         enemyLevel: [2, 4],
-        bossLevel: 7,
-        bossName: 'Queen Scorpion'
+        bossName: 'Queen Scorpion',
+        bossLevel: 5,
+        ambientLight: 0xFFE4B5
     },
     skyKingdom: {
         name: 'The Sky Kingdom',
-        color: '#4a6fa5',
-        groundColor: '#7a8a8a',
-        enemies: ['Mountain Eagle', 'Rock Snake', 'SkyWing Guard'],
+        skyColor: 0x87CEEB,
+        groundColor: 0x808080,
+        fogColor: 0xB0C4DE,
+        fogDensity: 0.005,
+        features: 'mountains',
+        enemies: ['Mountain Eagle', 'Rock Golem', 'SkyWing Guard'],
+        enemyColors: [0x8B4513, 0x696969, 0xDC143C],
         enemyLevel: [3, 5],
-        bossLevel: 9,
-        bossName: 'Thunderwing'
+        bossName: 'Thunderwing',
+        bossLevel: 6,
+        ambientLight: 0xFFFFFF
     },
     seaKingdom: {
         name: 'The Sea Kingdom',
-        color: '#1a5a6a',
-        groundColor: '#2a7a8a',
+        skyColor: 0x1A5A6A,
+        groundColor: 0x2A7A8A,
+        fogColor: 0x20B2AA,
+        fogDensity: 0.02,
+        features: 'underwater',
         enemies: ['Giant Crab', 'Shark', 'SeaWing Warrior'],
+        enemyColors: [0xFF6347, 0x4682B4, 0x20B2AA],
         enemyLevel: [2, 4],
-        bossLevel: 8,
-        bossName: 'Leviathan'
+        bossName: 'Leviathan',
+        bossLevel: 5,
+        ambientLight: 0x40E0D0
     },
     rainforest: {
         name: 'The Rainforest',
-        color: '#1a4a2a',
-        groundColor: '#2a6a3a',
+        skyColor: 0x228B22,
+        groundColor: 0x2E8B57,
+        fogColor: 0x3CB371,
+        fogDensity: 0.025,
+        features: 'jungle',
         enemies: ['Jungle Cat', 'Poison Frog', 'RainWing Sentry'],
+        enemyColors: [0xFFD700, 0x32CD32, 0x9932CC],
         enemyLevel: [3, 5],
-        bossLevel: 10,
-        bossName: 'Jungle Hydra'
+        bossName: 'Jungle Hydra',
+        bossLevel: 6,
+        ambientLight: 0x90EE90
     },
     iceKingdom: {
         name: 'The Ice Kingdom',
-        color: '#a0c0d0',
-        groundColor: '#d0e0f0',
+        skyColor: 0xAFEEEE,
+        groundColor: 0xE0FFFF,
+        fogColor: 0xF0FFFF,
+        fogDensity: 0.01,
+        features: 'arctic',
         enemies: ['Frost Wolf', 'Ice Bear', 'IceWing Soldier'],
+        enemyColors: [0xC0C0C0, 0xFFFFFF, 0xADD8E6],
         enemyLevel: [4, 6],
-        bossLevel: 11,
-        bossName: 'Frost Wyrm'
+        bossName: 'Frost Wyrm',
+        bossLevel: 7,
+        ambientLight: 0xF0F8FF
     },
     nightKingdom: {
         name: 'The Night Kingdom',
-        color: '#1a1a2a',
-        groundColor: '#2a2a4a',
+        skyColor: 0x0A0A1A,
+        groundColor: 0x1A1A2A,
+        fogColor: 0x2A2A4A,
+        fogDensity: 0.03,
+        features: 'volcanic',
         enemies: ['Shadow Bat', 'Lava Serpent', 'NightWing Shadow'],
+        enemyColors: [0x2F2F2F, 0xFF4500, 0x4B0082],
         enemyLevel: [5, 7],
-        bossLevel: 15,
-        bossName: 'Darkstalker'
+        bossName: 'Darkstalker',
+        bossLevel: 8,
+        ambientLight: 0x4B0082
     }
 };
 
@@ -152,9 +223,9 @@ const LOCATIONS = {
 
 const ITEMS = {
     healingPotion: { name: 'Healing Potion', icon: '🧪', effect: 'heal', value: 50 },
-    megaPotion: { name: 'Mega Potion', icon: '💊', effect: 'heal', value: 150 },
-    antidote: { name: 'Antidote', icon: '💉', effect: 'cure', cures: 'poison' },
-    energyDrink: { name: 'Energy Drink', icon: '⚡', effect: 'stamina', value: 50 }
+    megaPotion: { name: 'Mega Potion', icon: '💊', effect: 'heal', value: 100 },
+    energyDrink: { name: 'Energy Drink', icon: '⚡', effect: 'stamina', value: 50 },
+    strengthElixir: { name: 'Strength Elixir', icon: '💪', effect: 'attack', value: 10, duration: 3 }
 };
 
 // ============================================
@@ -166,14 +237,561 @@ const game = {
     player: null,
     world: null,
     battle: null,
+
+    // Three.js
+    scene: null,
+    camera: null,
+    renderer: null,
+
+    // Input
     keys: {},
+    mouse: { x: 0, y: 0, locked: false },
+
+    // Character creation
     selectedTribe: 0,
     tribeList: Object.keys(TRIBES),
-    canvas: null,
-    ctx: null,
-    animationFrame: null,
-    lastTime: 0
+    previewScene: null,
+    previewCamera: null,
+    previewRenderer: null,
+    previewDragon: null,
+
+    // Animation
+    clock: null,
+    animationFrame: null
 };
+
+// ============================================
+// THREE.JS INITIALIZATION
+// ============================================
+
+function initThreeJS() {
+    // Main scene
+    game.scene = new THREE.Scene();
+
+    // Camera
+    game.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    game.camera.position.set(0, 5, 10);
+
+    // Renderer
+    game.renderer = new THREE.WebGLRenderer({ antialias: true });
+    game.renderer.setSize(window.innerWidth, window.innerHeight);
+    game.renderer.shadowMap.enabled = true;
+    game.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.getElementById('canvas-container').appendChild(game.renderer.domElement);
+
+    // Clock for animations
+    game.clock = new THREE.Clock();
+
+    // Handle resize
+    window.addEventListener('resize', onWindowResize);
+}
+
+function onWindowResize() {
+    if (game.camera && game.renderer) {
+        game.camera.aspect = window.innerWidth / window.innerHeight;
+        game.camera.updateProjectionMatrix();
+        game.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+}
+
+// ============================================
+// 3D DRAGON MODEL BUILDER
+// ============================================
+
+function createDragon3D(tribe, scale = 1, isEnemy = false) {
+    const t = TRIBES[tribe] || TRIBES.MudWing;
+    const dragon = new THREE.Group();
+
+    // Materials
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: isEnemy ? 0x8B0000 : t.primaryColor,
+        roughness: 0.6,
+        metalness: 0.2
+    });
+
+    const wingMat = new THREE.MeshStandardMaterial({
+        color: isEnemy ? 0x660000 : t.wingColor,
+        roughness: 0.7,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+
+    const eyeMat = new THREE.MeshStandardMaterial({
+        color: t.eyeColor,
+        emissive: t.eyeColor,
+        emissiveIntensity: 0.5
+    });
+
+    // Body - elongated ellipsoid
+    const bodyGeo = new THREE.SphereGeometry(1, 16, 12);
+    bodyGeo.scale(1.5, 0.8, 0.9);
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.castShadow = true;
+    dragon.add(body);
+
+    // Neck
+    const neckGeo = new THREE.CylinderGeometry(0.3, 0.5, 1.2, 8);
+    const neck = new THREE.Mesh(neckGeo, bodyMat);
+    neck.position.set(1.2, 0.4, 0);
+    neck.rotation.z = -Math.PI / 4;
+    neck.castShadow = true;
+    dragon.add(neck);
+
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.45, 12, 10);
+    headGeo.scale(1.4, 1, 1);
+    const head = new THREE.Mesh(headGeo, bodyMat);
+    head.position.set(2, 0.9, 0);
+    head.castShadow = true;
+    dragon.add(head);
+
+    // Snout
+    const snoutGeo = new THREE.ConeGeometry(0.25, 0.6, 8);
+    const snout = new THREE.Mesh(snoutGeo, bodyMat);
+    snout.position.set(2.5, 0.85, 0);
+    snout.rotation.z = -Math.PI / 2;
+    snout.castShadow = true;
+    dragon.add(snout);
+
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.1, 8, 8);
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(2.2, 1.05, 0.25);
+    dragon.add(leftEye);
+
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(2.2, 1.05, -0.25);
+    dragon.add(rightEye);
+
+    // Horns
+    const hornGeo = new THREE.ConeGeometry(0.08, 0.4, 6);
+    const hornMat = new THREE.MeshStandardMaterial({ color: 0x2F2F2F });
+
+    const leftHorn = new THREE.Mesh(hornGeo, hornMat);
+    leftHorn.position.set(1.8, 1.3, 0.2);
+    leftHorn.rotation.x = 0.3;
+    dragon.add(leftHorn);
+
+    const rightHorn = new THREE.Mesh(hornGeo, hornMat);
+    rightHorn.position.set(1.8, 1.3, -0.2);
+    rightHorn.rotation.x = -0.3;
+    dragon.add(rightHorn);
+
+    // Wings
+    const wingShape = new THREE.Shape();
+    wingShape.moveTo(0, 0);
+    wingShape.lineTo(2, 1.5);
+    wingShape.lineTo(2.5, 1);
+    wingShape.lineTo(2.8, 1.3);
+    wingShape.lineTo(3, 0.8);
+    wingShape.lineTo(2.5, 0);
+    wingShape.lineTo(0, 0);
+
+    const wingGeo = new THREE.ShapeGeometry(wingShape);
+
+    const leftWing = new THREE.Mesh(wingGeo, wingMat);
+    leftWing.position.set(0, 0.5, 0.5);
+    leftWing.rotation.x = Math.PI / 2;
+    leftWing.rotation.y = 0.2;
+    leftWing.castShadow = true;
+    dragon.add(leftWing);
+
+    const rightWing = new THREE.Mesh(wingGeo, wingMat);
+    rightWing.position.set(0, 0.5, -0.5);
+    rightWing.rotation.x = -Math.PI / 2;
+    rightWing.rotation.y = -0.2;
+    rightWing.castShadow = true;
+    dragon.add(rightWing);
+
+    // Tail
+    const tailSegments = 5;
+    let prevPos = { x: -1.5, y: 0, z: 0 };
+    for (let i = 0; i < tailSegments; i++) {
+        const tailSize = 0.3 - i * 0.05;
+        const tailGeo = new THREE.SphereGeometry(tailSize, 8, 6);
+        const tailSeg = new THREE.Mesh(tailGeo, bodyMat);
+        tailSeg.position.set(prevPos.x - 0.4, prevPos.y - i * 0.05, 0);
+        tailSeg.castShadow = true;
+        dragon.add(tailSeg);
+        prevPos = { x: tailSeg.position.x, y: tailSeg.position.y };
+    }
+
+    // Tail spike (for SandWing)
+    if (tribe === 'SandWing') {
+        const spikeGeo = new THREE.ConeGeometry(0.1, 0.5, 6);
+        const spikeMat = new THREE.MeshStandardMaterial({ color: 0x2F2F2F });
+        const spike = new THREE.Mesh(spikeGeo, spikeMat);
+        spike.position.set(-3.5, -0.2, 0);
+        spike.rotation.z = Math.PI / 2;
+        dragon.add(spike);
+    }
+
+    // Legs
+    const legGeo = new THREE.CylinderGeometry(0.15, 0.1, 0.8, 6);
+    const legPositions = [
+        { x: 0.5, z: 0.5 }, { x: 0.5, z: -0.5 },
+        { x: -0.5, z: 0.5 }, { x: -0.5, z: -0.5 }
+    ];
+
+    legPositions.forEach(pos => {
+        const leg = new THREE.Mesh(legGeo, bodyMat);
+        leg.position.set(pos.x, -0.6, pos.z);
+        leg.castShadow = true;
+        dragon.add(leg);
+
+        // Claws
+        const clawGeo = new THREE.ConeGeometry(0.05, 0.15, 4);
+        const claw = new THREE.Mesh(clawGeo, hornMat);
+        claw.position.set(pos.x, -1.05, pos.z);
+        claw.rotation.x = Math.PI;
+        dragon.add(claw);
+    });
+
+    // Spines along back
+    for (let i = 0; i < 8; i++) {
+        const spineGeo = new THREE.ConeGeometry(0.05, 0.3, 4);
+        const spine = new THREE.Mesh(spineGeo, bodyMat);
+        spine.position.set(1 - i * 0.35, 0.7 - i * 0.02, 0);
+        spine.rotation.z = 0.2;
+        dragon.add(spine);
+    }
+
+    // Glow effect for SeaWing
+    if (tribe === 'SeaWing' && t.glowStripes) {
+        const glowMat = new THREE.MeshBasicMaterial({
+            color: 0x00FFFF,
+            transparent: true,
+            opacity: 0.6
+        });
+        for (let i = 0; i < 5; i++) {
+            const stripeGeo = new THREE.BoxGeometry(0.3, 0.05, 0.8);
+            const stripe = new THREE.Mesh(stripeGeo, glowMat);
+            stripe.position.set(0.8 - i * 0.4, 0.4, 0);
+            dragon.add(stripe);
+        }
+    }
+
+    // Star scales for NightWing
+    if (tribe === 'NightWing' && t.starScales) {
+        const starMat = new THREE.MeshBasicMaterial({ color: 0xC0C0C0 });
+        for (let i = 0; i < 15; i++) {
+            const starGeo = new THREE.SphereGeometry(0.03, 4, 4);
+            const star = new THREE.Mesh(starGeo, starMat);
+            star.position.set(
+                (Math.random() - 0.5) * 3,
+                0.6 + Math.random() * 0.3,
+                (Math.random() - 0.5) * 0.8
+            );
+            dragon.add(star);
+        }
+    }
+
+    dragon.scale.set(scale, scale, scale);
+
+    // Store wing references for animation
+    dragon.userData = {
+        leftWing,
+        rightWing,
+        tribe,
+        wingAngle: 0,
+        isFlying: false
+    };
+
+    return dragon;
+}
+
+// ============================================
+// TERRAIN GENERATION
+// ============================================
+
+function createTerrain(locationId) {
+    const loc = LOCATIONS[locationId];
+    const terrain = new THREE.Group();
+
+    // Ground plane
+    const groundGeo = new THREE.PlaneGeometry(200, 200, 50, 50);
+
+    // Add height variation
+    const vertices = groundGeo.attributes.position.array;
+    for (let i = 0; i < vertices.length; i += 3) {
+        const x = vertices[i];
+        const y = vertices[i + 1];
+        vertices[i + 2] = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 2 + Math.random() * 0.5;
+    }
+    groundGeo.computeVertexNormals();
+
+    const groundMat = new THREE.MeshStandardMaterial({
+        color: loc.groundColor,
+        roughness: 0.9,
+        metalness: 0.1
+    });
+
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    terrain.add(ground);
+
+    // Location-specific features
+    switch (loc.features) {
+        case 'swamp':
+            addSwampFeatures(terrain, loc);
+            break;
+        case 'desert':
+            addDesertFeatures(terrain, loc);
+            break;
+        case 'mountains':
+            addMountainFeatures(terrain, loc);
+            break;
+        case 'underwater':
+            addUnderwaterFeatures(terrain, loc);
+            break;
+        case 'jungle':
+            addJungleFeatures(terrain, loc);
+            break;
+        case 'arctic':
+            addArcticFeatures(terrain, loc);
+            break;
+        case 'volcanic':
+            addVolcanicFeatures(terrain, loc);
+            break;
+    }
+
+    return terrain;
+}
+
+function addSwampFeatures(terrain, loc) {
+    // Murky water pools
+    const waterMat = new THREE.MeshStandardMaterial({
+        color: 0x4A5D23,
+        transparent: true,
+        opacity: 0.7,
+        roughness: 0.3
+    });
+
+    for (let i = 0; i < 10; i++) {
+        const poolGeo = new THREE.CircleGeometry(3 + Math.random() * 5, 16);
+        const pool = new THREE.Mesh(poolGeo, waterMat);
+        pool.rotation.x = -Math.PI / 2;
+        pool.position.set(
+            (Math.random() - 0.5) * 80,
+            0.1,
+            (Math.random() - 0.5) * 80
+        );
+        terrain.add(pool);
+    }
+
+    // Dead trees
+    const treeMat = new THREE.MeshStandardMaterial({ color: 0x3D2817 });
+    for (let i = 0; i < 20; i++) {
+        const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 4 + Math.random() * 3, 6);
+        const trunk = new THREE.Mesh(trunkGeo, treeMat);
+        trunk.position.set(
+            (Math.random() - 0.5) * 80,
+            2,
+            (Math.random() - 0.5) * 80
+        );
+        trunk.rotation.z = (Math.random() - 0.5) * 0.3;
+        trunk.castShadow = true;
+        terrain.add(trunk);
+    }
+}
+
+function addDesertFeatures(terrain, loc) {
+    // Sand dunes
+    const duneMat = new THREE.MeshStandardMaterial({ color: 0xE6C87A });
+    for (let i = 0; i < 15; i++) {
+        const duneGeo = new THREE.SphereGeometry(5 + Math.random() * 10, 16, 8);
+        duneGeo.scale(1, 0.3, 1);
+        const dune = new THREE.Mesh(duneGeo, duneMat);
+        dune.position.set(
+            (Math.random() - 0.5) * 100,
+            1,
+            (Math.random() - 0.5) * 100
+        );
+        dune.castShadow = true;
+        dune.receiveShadow = true;
+        terrain.add(dune);
+    }
+
+    // Cacti
+    const cactusMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    for (let i = 0; i < 10; i++) {
+        const cactusGeo = new THREE.CylinderGeometry(0.3, 0.4, 2 + Math.random() * 2, 8);
+        const cactus = new THREE.Mesh(cactusGeo, cactusMat);
+        cactus.position.set(
+            (Math.random() - 0.5) * 80,
+            1.5,
+            (Math.random() - 0.5) * 80
+        );
+        cactus.castShadow = true;
+        terrain.add(cactus);
+    }
+}
+
+function addMountainFeatures(terrain, loc) {
+    // Mountains
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x696969 });
+    for (let i = 0; i < 8; i++) {
+        const height = 15 + Math.random() * 20;
+        const mountainGeo = new THREE.ConeGeometry(10 + Math.random() * 10, height, 8);
+        const mountain = new THREE.Mesh(mountainGeo, rockMat);
+        mountain.position.set(
+            (Math.random() - 0.5) * 150,
+            height / 2,
+            (Math.random() - 0.5) * 150
+        );
+        mountain.castShadow = true;
+        mountain.receiveShadow = true;
+        terrain.add(mountain);
+
+        // Snow cap
+        const snowMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
+        const snowGeo = new THREE.ConeGeometry(5, 5, 8);
+        const snow = new THREE.Mesh(snowGeo, snowMat);
+        snow.position.set(mountain.position.x, height - 2, mountain.position.z);
+        terrain.add(snow);
+    }
+}
+
+function addUnderwaterFeatures(terrain, loc) {
+    // Coral
+    const coralColors = [0xFF6B6B, 0xFFE66D, 0x4ECDC4, 0x95E1D3];
+    for (let i = 0; i < 30; i++) {
+        const coralMat = new THREE.MeshStandardMaterial({
+            color: coralColors[Math.floor(Math.random() * coralColors.length)]
+        });
+        const coralGeo = new THREE.SphereGeometry(0.5 + Math.random(), 8, 8);
+        const coral = new THREE.Mesh(coralGeo, coralMat);
+        coral.position.set(
+            (Math.random() - 0.5) * 60,
+            Math.random() * 2,
+            (Math.random() - 0.5) * 60
+        );
+        terrain.add(coral);
+    }
+
+    // Seaweed
+    const seaweedMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    for (let i = 0; i < 40; i++) {
+        const seaweedGeo = new THREE.CylinderGeometry(0.1, 0.1, 3 + Math.random() * 3, 4);
+        const seaweed = new THREE.Mesh(seaweedGeo, seaweedMat);
+        seaweed.position.set(
+            (Math.random() - 0.5) * 80,
+            2,
+            (Math.random() - 0.5) * 80
+        );
+        seaweed.rotation.x = (Math.random() - 0.5) * 0.5;
+        terrain.add(seaweed);
+    }
+}
+
+function addJungleFeatures(terrain, loc) {
+    // Trees
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+    const leavesMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+
+    for (let i = 0; i < 30; i++) {
+        const trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 8 + Math.random() * 5, 8);
+        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+        const x = (Math.random() - 0.5) * 100;
+        const z = (Math.random() - 0.5) * 100;
+        trunk.position.set(x, 5, z);
+        trunk.castShadow = true;
+        terrain.add(trunk);
+
+        const leavesGeo = new THREE.SphereGeometry(4 + Math.random() * 2, 8, 8);
+        const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+        leaves.position.set(x, 10 + Math.random() * 3, z);
+        leaves.castShadow = true;
+        terrain.add(leaves);
+    }
+
+    // Vines
+    const vineMat = new THREE.MeshStandardMaterial({ color: 0x32CD32 });
+    for (let i = 0; i < 20; i++) {
+        const vineGeo = new THREE.CylinderGeometry(0.05, 0.05, 10, 4);
+        const vine = new THREE.Mesh(vineGeo, vineMat);
+        vine.position.set(
+            (Math.random() - 0.5) * 80,
+            5,
+            (Math.random() - 0.5) * 80
+        );
+        terrain.add(vine);
+    }
+}
+
+function addArcticFeatures(terrain, loc) {
+    // Ice spires
+    const iceMat = new THREE.MeshStandardMaterial({
+        color: 0xE0FFFF,
+        transparent: true,
+        opacity: 0.8,
+        roughness: 0.1
+    });
+
+    for (let i = 0; i < 20; i++) {
+        const height = 3 + Math.random() * 8;
+        const iceGeo = new THREE.ConeGeometry(1 + Math.random(), height, 6);
+        const ice = new THREE.Mesh(iceGeo, iceMat);
+        ice.position.set(
+            (Math.random() - 0.5) * 80,
+            height / 2,
+            (Math.random() - 0.5) * 80
+        );
+        ice.castShadow = true;
+        terrain.add(ice);
+    }
+
+    // Snow mounds
+    const snowMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
+    for (let i = 0; i < 15; i++) {
+        const snowGeo = new THREE.SphereGeometry(2 + Math.random() * 4, 8, 6);
+        snowGeo.scale(1, 0.4, 1);
+        const snowMound = new THREE.Mesh(snowGeo, snowMat);
+        snowMound.position.set(
+            (Math.random() - 0.5) * 100,
+            0.5,
+            (Math.random() - 0.5) * 100
+        );
+        terrain.add(snowMound);
+    }
+}
+
+function addVolcanicFeatures(terrain, loc) {
+    // Lava pools
+    const lavaMat = new THREE.MeshStandardMaterial({
+        color: 0xFF4500,
+        emissive: 0xFF2200,
+        emissiveIntensity: 0.8
+    });
+
+    for (let i = 0; i < 8; i++) {
+        const lavaGeo = new THREE.CircleGeometry(2 + Math.random() * 4, 16);
+        const lava = new THREE.Mesh(lavaGeo, lavaMat);
+        lava.rotation.x = -Math.PI / 2;
+        lava.position.set(
+            (Math.random() - 0.5) * 60,
+            0.2,
+            (Math.random() - 0.5) * 60
+        );
+        terrain.add(lava);
+    }
+
+    // Volcanic rocks
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x2F2F2F });
+    for (let i = 0; i < 25; i++) {
+        const rockGeo = new THREE.DodecahedronGeometry(1 + Math.random() * 2);
+        const rock = new THREE.Mesh(rockGeo, rockMat);
+        rock.position.set(
+            (Math.random() - 0.5) * 80,
+            1,
+            (Math.random() - 0.5) * 80
+        );
+        rock.rotation.set(Math.random(), Math.random(), Math.random());
+        rock.castShadow = true;
+        terrain.add(rock);
+    }
+}
 
 // ============================================
 // PLAYER CLASS
@@ -195,30 +813,34 @@ class Player {
         this.baseDefense = t.baseStats.defense;
         this.attack = this.baseAttack;
         this.defense = this.baseDefense;
+        this.speedMod = t.baseStats.speed;
 
-        this.maxStamina = t.flightBonus.stamina;
+        this.maxStamina = 100;
         this.stamina = this.maxStamina;
-        this.flightSpeed = t.flightBonus.speed;
 
         this.special = t.special;
         this.specialCooldown = 0;
+        this.breathType = t.breathType;
 
         this.inventory = [
             { id: 'healingPotion', count: 3 },
-            { id: 'energyDrink', count: 1 }
+            { id: 'energyDrink', count: 2 }
         ];
 
-        this.equipment = { weapon: null, armor: null };
-        this.statusEffects = [];
+        // 3D properties
+        this.mesh = null;
+        this.position = new THREE.Vector3(0, 2, 0);
+        this.velocity = new THREE.Vector3(0, 0, 0);
+        this.rotation = new THREE.Euler(0, 0, 0);
+        this.isFlying = false;
+        this.isGrounded = true;
+        this.isSprinting = false;
+    }
 
-        // Position in world
-        this.x = 400;
-        this.y = 250;
-        this.vx = 0;
-        this.vy = 0;
-        this.flying = false;
-        this.facing = 'right';
-        this.animFrame = 0;
+    createMesh() {
+        this.mesh = createDragon3D(this.tribe, 0.8);
+        this.mesh.position.copy(this.position);
+        return this.mesh;
     }
 
     heal(amount) {
@@ -244,10 +866,10 @@ class Player {
     levelUp() {
         this.xp -= this.xpToLevel;
         this.level++;
-        this.xpToLevel = Math.floor(this.xpToLevel * 1.4);
-        this.maxHp += 10;
+        this.xpToLevel = Math.floor(this.xpToLevel * 1.3);
+        this.maxHp += 12;
         this.hp = this.maxHp;
-        this.baseAttack += 2;
+        this.baseAttack += 3;
         this.baseDefense += 2;
         this.attack = this.baseAttack;
         this.defense = this.baseDefense;
@@ -255,16 +877,14 @@ class Player {
     }
 
     useItem(itemId) {
-        const itemSlot = this.inventory.find(i => i.id === itemId);
-        if (!itemSlot || itemSlot.count <= 0) return null;
+        const slot = this.inventory.find(i => i.id === itemId);
+        if (!slot || slot.count <= 0) return null;
 
-        const item = ITEMS[itemId];
-        itemSlot.count--;
-        if (itemSlot.count <= 0) {
+        slot.count--;
+        if (slot.count <= 0) {
             this.inventory = this.inventory.filter(i => i.count > 0);
         }
-
-        return item;
+        return ITEMS[itemId];
     }
 
     addItem(itemId, count = 1) {
@@ -282,27 +902,55 @@ class Player {
 // ============================================
 
 class Enemy {
-    constructor(name, level, isBoss = false) {
+    constructor(name, level, isBoss = false, color = 0x8B0000) {
         this.name = name;
         this.level = level;
         this.isBoss = isBoss;
+        this.color = color;
 
+        // WEAKER BOSSES - reduced stats
         if (isBoss) {
-            this.maxHp = 200 + level * 30;
-            this.attack = 15 + level * 3;
-            this.defense = 10 + level * 2;
-            this.xpReward = 100 + level * 20;
-            this.goldReward = 50 + level * 10;
+            this.maxHp = 80 + level * 15; // Reduced from 200 + level * 30
+            this.attack = 8 + level * 2;  // Reduced from 15 + level * 3
+            this.defense = 5 + level * 1; // Reduced from 10 + level * 2
+            this.xpReward = 80 + level * 15;
+            this.goldReward = 40 + level * 8;
         } else {
-            this.maxHp = 30 + level * 15;
-            this.attack = 5 + level * 3;
-            this.defense = 3 + level * 2;
-            this.xpReward = 15 + level * 8;
-            this.goldReward = 5 + level * 5;
+            this.maxHp = 25 + level * 10;
+            this.attack = 4 + level * 2;
+            this.defense = 2 + level;
+            this.xpReward = 12 + level * 6;
+            this.goldReward = 5 + level * 3;
         }
 
         this.hp = this.maxHp;
-        this.statusEffects = [];
+        this.isFlying = Math.random() > 0.5; // Some enemies fly
+
+        // 3D properties
+        this.mesh = null;
+        this.position = new THREE.Vector3(
+            (Math.random() - 0.5) * 40,
+            isBoss ? 5 : 2,
+            (Math.random() - 0.5) * 40
+        );
+    }
+
+    createMesh() {
+        const scale = this.isBoss ? 1.5 : 0.6;
+        this.mesh = createDragon3D('MudWing', scale, true);
+
+        // Color the enemy
+        this.mesh.traverse(child => {
+            if (child.isMesh && child.material) {
+                if (child.material.color) {
+                    child.material = child.material.clone();
+                    child.material.color.setHex(this.color);
+                }
+            }
+        });
+
+        this.mesh.position.copy(this.position);
+        return this.mesh;
     }
 
     takeDamage(amount) {
@@ -320,389 +968,217 @@ class World {
     constructor(locationId) {
         this.locationId = locationId;
         this.location = LOCATIONS[locationId];
-        this.entities = [];
-        this.particles = [];
-        this.width = 1000;
-        this.height = 500;
+        this.terrain = null;
+        this.enemies = [];
+        this.collectibles = [];
+        this.portals = [];
+        this.boss = null;
+    }
 
+    generate() {
+        // Create terrain
+        this.terrain = createTerrain(this.locationId);
+        game.scene.add(this.terrain);
+
+        // Setup lighting
+        this.setupLighting();
+
+        // Setup fog
+        game.scene.fog = new THREE.FogExp2(this.location.fogColor, this.location.fogDensity);
+        game.scene.background = new THREE.Color(this.location.skyColor);
+
+        // Generate entities
         this.generateEntities();
     }
 
+    setupLighting() {
+        // Clear existing lights
+        game.scene.children = game.scene.children.filter(c => !c.isLight);
+
+        // Ambient light
+        const ambient = new THREE.AmbientLight(this.location.ambientLight, 0.5);
+        game.scene.add(ambient);
+
+        // Directional light (sun)
+        const sun = new THREE.DirectionalLight(0xFFFFFF, 1);
+        sun.position.set(50, 100, 50);
+        sun.castShadow = true;
+        sun.shadow.mapSize.width = 2048;
+        sun.shadow.mapSize.height = 2048;
+        sun.shadow.camera.near = 0.5;
+        sun.shadow.camera.far = 500;
+        sun.shadow.camera.left = -100;
+        sun.shadow.camera.right = 100;
+        sun.shadow.camera.top = 100;
+        sun.shadow.camera.bottom = -100;
+        game.scene.add(sun);
+
+        // Hemisphere light for sky/ground color
+        const hemi = new THREE.HemisphereLight(this.location.skyColor, this.location.groundColor, 0.3);
+        game.scene.add(hemi);
+    }
+
     generateEntities() {
-        // Add some collectibles
-        for (let i = 0; i < 5; i++) {
-            this.entities.push({
-                type: 'gold',
-                x: 100 + Math.random() * 800,
-                y: 100 + Math.random() * 300,
-                value: 10 + Math.floor(Math.random() * 20),
-                collected: false
-            });
-        }
-
-        // Add healing spots
-        for (let i = 0; i < 2; i++) {
-            this.entities.push({
-                type: 'heal',
-                x: 100 + Math.random() * 800,
-                y: 100 + Math.random() * 300,
-                value: 20 + Math.floor(Math.random() * 30),
-                collected: false
-            });
-        }
-
-        // Add enemies
         const loc = this.location;
-        for (let i = 0; i < 3; i++) {
+
+        // Enemies
+        for (let i = 0; i < 4; i++) {
             const enemyName = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
             const level = loc.enemyLevel[0] + Math.floor(Math.random() * (loc.enemyLevel[1] - loc.enemyLevel[0] + 1));
-            this.entities.push({
-                type: 'enemy',
-                x: 150 + Math.random() * 700,
-                y: 100 + Math.random() * 300,
-                name: enemyName,
-                level: level,
-                defeated: false,
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2
+            const color = loc.enemyColors[Math.floor(Math.random() * loc.enemyColors.length)];
+
+            const enemy = new Enemy(enemyName, level, false, color);
+            const mesh = enemy.createMesh();
+            game.scene.add(mesh);
+            this.enemies.push(enemy);
+        }
+
+        // Boss
+        const bossColor = loc.enemyColors[loc.enemyColors.length - 1];
+        this.boss = new Enemy(loc.bossName, loc.bossLevel, true, bossColor);
+        this.boss.position.set(40, 5, 0);
+        const bossMesh = this.boss.createMesh();
+        game.scene.add(bossMesh);
+
+        // Collectibles
+        for (let i = 0; i < 8; i++) {
+            const type = Math.random() > 0.5 ? 'gold' : 'heal';
+            const collectible = this.createCollectible(type);
+            this.collectibles.push(collectible);
+            game.scene.add(collectible);
+        }
+
+        // Portals
+        this.createPortals();
+    }
+
+    createCollectible(type) {
+        const geo = new THREE.SphereGeometry(0.5, 16, 16);
+        let mat;
+
+        if (type === 'gold') {
+            mat = new THREE.MeshStandardMaterial({
+                color: 0xFFD700,
+                emissive: 0xFFD700,
+                emissiveIntensity: 0.3,
+                metalness: 0.8
+            });
+        } else {
+            mat = new THREE.MeshStandardMaterial({
+                color: 0x00FF00,
+                emissive: 0x00FF00,
+                emissiveIntensity: 0.5
             });
         }
 
-        // Add boss if available
-        this.entities.push({
-            type: 'boss',
-            x: 850,
-            y: 250,
-            name: loc.bossName,
-            level: loc.bossLevel,
-            defeated: false
-        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(
+            (Math.random() - 0.5) * 60,
+            1.5 + Math.random() * 3,
+            (Math.random() - 0.5) * 60
+        );
+        mesh.userData = { type, value: type === 'gold' ? 10 + Math.floor(Math.random() * 20) : 30 };
 
-        // Add exit portals
-        this.entities.push({
-            type: 'portal',
-            x: 50,
-            y: 250,
-            destination: this.getPreviousLocation()
-        });
-        this.entities.push({
-            type: 'portal',
-            x: 950,
-            y: 250,
-            destination: this.getNextLocation()
-        });
+        return mesh;
     }
 
-    getPreviousLocation() {
+    createPortals() {
         const locs = Object.keys(LOCATIONS);
         const idx = locs.indexOf(this.locationId);
-        return locs[(idx - 1 + locs.length) % locs.length];
+
+        // Previous location portal
+        const prevLoc = locs[(idx - 1 + locs.length) % locs.length];
+        const prevPortal = this.createPortal(prevLoc, -50, 2, 0);
+        this.portals.push(prevPortal);
+        game.scene.add(prevPortal);
+
+        // Next location portal
+        const nextLoc = locs[(idx + 1) % locs.length];
+        const nextPortal = this.createPortal(nextLoc, 50, 2, 0);
+        this.portals.push(nextPortal);
+        game.scene.add(nextPortal);
     }
 
-    getNextLocation() {
-        const locs = Object.keys(LOCATIONS);
-        const idx = locs.indexOf(this.locationId);
-        return locs[(idx + 1) % locs.length];
+    createPortal(destination, x, y, z) {
+        const geo = new THREE.TorusGeometry(2, 0.3, 16, 32);
+        const mat = new THREE.MeshStandardMaterial({
+            color: 0x9B59B6,
+            emissive: 0x9B59B6,
+            emissiveIntensity: 0.5
+        });
+
+        const portal = new THREE.Mesh(geo, mat);
+        portal.position.set(x, y, z);
+        portal.rotation.y = Math.PI / 2;
+        portal.userData = { destination };
+
+        // Inner glow
+        const innerGeo = new THREE.CircleGeometry(1.7, 32);
+        const innerMat = new THREE.MeshBasicMaterial({
+            color: 0xDDA0DD,
+            transparent: true,
+            opacity: 0.5,
+            side: THREE.DoubleSide
+        });
+        const inner = new THREE.Mesh(innerGeo, innerMat);
+        inner.rotation.y = Math.PI / 2;
+        portal.add(inner);
+
+        return portal;
     }
 
-    update(player, dt) {
-        // Move enemies
-        this.entities.forEach(e => {
-            if (e.type === 'enemy' && !e.defeated) {
-                e.x += e.vx;
-                e.y += e.vy;
-
-                // Bounce off walls
-                if (e.x < 100 || e.x > 900) e.vx *= -1;
-                if (e.y < 50 || e.y > 400) e.vy *= -1;
-
-                e.x = Math.max(100, Math.min(900, e.x));
-                e.y = Math.max(50, Math.min(400, e.y));
-            }
+    update(delta) {
+        // Animate collectibles
+        this.collectibles.forEach(c => {
+            c.rotation.y += delta * 2;
+            c.position.y = c.userData.baseY || c.position.y;
+            c.position.y += Math.sin(Date.now() * 0.003) * 0.1;
+            c.userData.baseY = c.userData.baseY || c.position.y;
         });
 
-        // Check collisions with player
-        this.entities.forEach(e => {
-            if (e.collected || e.defeated) return;
+        // Animate enemies
+        this.enemies.forEach(enemy => {
+            if (enemy.mesh) {
+                // Simple patrol movement
+                enemy.mesh.position.x += Math.sin(Date.now() * 0.001 + enemy.position.x) * 0.02;
+                enemy.mesh.position.z += Math.cos(Date.now() * 0.001 + enemy.position.z) * 0.02;
 
-            const dist = Math.sqrt((player.x - e.x) ** 2 + (player.y - e.y) ** 2);
-
-            if (dist < 30) {
-                this.handleCollision(player, e);
-            }
-        });
-
-        // Update particles
-        this.particles = this.particles.filter(p => {
-            p.life -= dt;
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.1; // gravity
-            return p.life > 0;
-        });
-    }
-
-    handleCollision(player, entity) {
-        switch (entity.type) {
-            case 'gold':
-                entity.collected = true;
-                player.gold += entity.value;
-                addLog(`Found ${entity.value} gold!`, 'reward');
-                this.spawnParticles(entity.x, entity.y, '#FFD700', 10);
-                break;
-
-            case 'heal':
-                entity.collected = true;
-                const healed = player.heal(entity.value);
-                addLog(`Found healing herbs! +${healed} HP`, 'reward');
-                this.spawnParticles(entity.x, entity.y, '#2ecc71', 10);
-                break;
-
-            case 'enemy':
-                if (!entity.defeated) {
-                    startBattle(entity.name, entity.level, false, entity);
-                }
-                break;
-
-            case 'boss':
-                if (!entity.defeated) {
-                    if (player.level >= this.location.bossLevel) {
-                        startBattle(entity.name, entity.level, true, entity);
-                    } else {
-                        addLog(`Need level ${this.location.bossLevel} to fight ${entity.name}!`, 'info');
+                // Flying animation
+                if (enemy.isFlying && enemy.mesh.userData) {
+                    enemy.mesh.userData.wingAngle = Math.sin(Date.now() * 0.01) * 0.5;
+                    if (enemy.mesh.userData.leftWing) {
+                        enemy.mesh.userData.leftWing.rotation.z = enemy.mesh.userData.wingAngle;
+                    }
+                    if (enemy.mesh.userData.rightWing) {
+                        enemy.mesh.userData.rightWing.rotation.z = -enemy.mesh.userData.wingAngle;
                     }
                 }
-                break;
-
-            case 'portal':
-                addLog(`Traveling to ${LOCATIONS[entity.destination].name}...`, 'info');
-                setTimeout(() => {
-                    game.world = new World(entity.destination);
-                    player.x = entity.destination === this.getNextLocation() ? 100 : 900;
-                    updateHUD();
-                }, 500);
-                break;
-        }
-    }
-
-    spawnParticles(x, y, color, count) {
-        for (let i = 0; i < count; i++) {
-            this.particles.push({
-                x, y,
-                vx: (Math.random() - 0.5) * 5,
-                vy: -Math.random() * 5,
-                color,
-                life: 1
-            });
-        }
-    }
-
-    draw(ctx, player) {
-        const loc = this.location;
-
-        // Background
-        ctx.fillStyle = loc.color;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-        // Ground
-        ctx.fillStyle = loc.groundColor;
-        ctx.fillRect(0, ctx.canvas.height - 100, ctx.canvas.width, 100);
-
-        // Draw decorations based on location
-        this.drawDecorations(ctx);
-
-        // Draw entities
-        this.entities.forEach(e => {
-            if (e.collected || e.defeated) return;
-            this.drawEntity(ctx, e);
+            }
         });
 
-        // Draw particles
-        this.particles.forEach(p => {
-            ctx.globalAlpha = p.life;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-            ctx.fill();
+        // Animate portals
+        this.portals.forEach(p => {
+            p.rotation.x += delta;
         });
-        ctx.globalAlpha = 1;
 
-        // Draw player
-        this.drawPlayer(ctx, player);
-    }
-
-    drawDecorations(ctx) {
-        // Simple decorations based on location
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        for (let i = 0; i < 5; i++) {
-            ctx.beginPath();
-            ctx.arc(100 + i * 200, ctx.canvas.height - 80, 30, 0, Math.PI * 2);
-            ctx.fill();
+        // Animate boss
+        if (this.boss && this.boss.mesh) {
+            this.boss.mesh.position.y = 5 + Math.sin(Date.now() * 0.002) * 0.5;
         }
     }
 
-    drawEntity(ctx, e) {
-        ctx.save();
-        ctx.translate(e.x, e.y);
-
-        switch (e.type) {
-            case 'gold':
-                ctx.fillStyle = '#FFD700';
-                ctx.beginPath();
-                ctx.arc(0, 0, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#FFA500';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('$', 0, 5);
-                break;
-
-            case 'heal':
-                ctx.fillStyle = '#2ecc71';
-                ctx.beginPath();
-                ctx.arc(0, 0, 12, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('+', 0, 6);
-                break;
-
-            case 'enemy':
-                ctx.fillStyle = '#c0392b';
-                ctx.beginPath();
-                ctx.arc(0, 0, 20, 0, Math.PI * 2);
-                ctx.fill();
-                // Eyes
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(-6, -5, 4, 0, Math.PI * 2);
-                ctx.arc(6, -5, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#000';
-                ctx.beginPath();
-                ctx.arc(-5, -5, 2, 0, Math.PI * 2);
-                ctx.arc(7, -5, 2, 0, Math.PI * 2);
-                ctx.fill();
-                // Level
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Arial';
-                ctx.fillText(`Lv.${e.level}`, 0, 35);
-                break;
-
-            case 'boss':
-                ctx.fillStyle = '#8e44ad';
-                ctx.beginPath();
-                ctx.arc(0, 0, 35, 0, Math.PI * 2);
-                ctx.fill();
-                // Crown
-                ctx.fillStyle = '#FFD700';
-                ctx.font = '20px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('👑', 0, -25);
-                // Eyes
-                ctx.fillStyle = '#ff0000';
-                ctx.beginPath();
-                ctx.arc(-10, -5, 6, 0, Math.PI * 2);
-                ctx.arc(10, -5, 6, 0, Math.PI * 2);
-                ctx.fill();
-                // Name
-                ctx.fillStyle = '#FFD700';
-                ctx.font = '12px Arial';
-                ctx.fillText(e.name, 0, 55);
-                ctx.fillText(`Lv.${e.level}`, 0, 70);
-                break;
-
-            case 'portal':
-                ctx.strokeStyle = '#9b59b6';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(0, 0, 25, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.fillStyle = 'rgba(155, 89, 182, 0.3)';
-                ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('EXIT', 0, 5);
-                break;
+    cleanup() {
+        if (this.terrain) {
+            game.scene.remove(this.terrain);
         }
-
-        ctx.restore();
-    }
-
-    drawPlayer(ctx, player) {
-        ctx.save();
-        ctx.translate(player.x, player.y);
-
-        // Shadow when flying
-        if (player.flying) {
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath();
-            ctx.ellipse(0, 30, 25, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.translate(0, -20); // Float up when flying
+        this.enemies.forEach(e => {
+            if (e.mesh) game.scene.remove(e.mesh);
+        });
+        this.collectibles.forEach(c => game.scene.remove(c));
+        this.portals.forEach(p => game.scene.remove(p));
+        if (this.boss && this.boss.mesh) {
+            game.scene.remove(this.boss.mesh);
         }
-
-        // Body
-        const tribe = TRIBES[player.tribe];
-        ctx.fillStyle = tribe.color;
-
-        // Main body
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 25, 18, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Head
-        const headX = player.facing === 'right' ? 20 : -20;
-        ctx.beginPath();
-        ctx.arc(headX, -10, 12, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eye
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(headX + (player.facing === 'right' ? 5 : -5), -12, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(headX + (player.facing === 'right' ? 6 : -6), -12, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Wings
-        ctx.fillStyle = tribe.color;
-        const wingY = player.flying ? Math.sin(Date.now() / 100) * 10 - 20 : -5;
-        ctx.beginPath();
-        ctx.moveTo(-10, -5);
-        ctx.lineTo(-30, wingY);
-        ctx.lineTo(-15, 0);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(10, -5);
-        ctx.lineTo(30, wingY);
-        ctx.lineTo(15, 0);
-        ctx.closePath();
-        ctx.fill();
-
-        // Tail
-        ctx.beginPath();
-        ctx.moveTo(player.facing === 'right' ? -25 : 25, 5);
-        ctx.lineTo(player.facing === 'right' ? -45 : 45, 15);
-        ctx.lineTo(player.facing === 'right' ? -40 : 40, 5);
-        ctx.closePath();
-        ctx.fill();
-
-        // Flying indicator
-        if (player.flying) {
-            ctx.fillStyle = '#20b2aa';
-            ctx.font = 'bold 10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('FLYING', 0, -45);
-        }
-
-        ctx.restore();
     }
 }
 
@@ -718,6 +1194,13 @@ function showScreen(screenName) {
 
     // Close overlays
     document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
+
+    // Unlock pointer when not in game
+    if (screenName !== 'game' && screenName !== 'battle') {
+        if (document.pointerLockElement) {
+            document.exitPointerLock();
+        }
+    }
 }
 
 function toggleOverlay(overlayId) {
@@ -738,73 +1221,73 @@ function updateHUD() {
 
     document.getElementById('player-name-display').textContent = p.name;
     document.getElementById('player-tribe-badge').textContent = p.tribe;
-    document.getElementById('player-tribe-badge').style.background = TRIBES[p.tribe].color;
-    document.getElementById('player-level').textContent = `Lv.${p.level}`;
+    document.getElementById('level-value').textContent = p.level;
 
-    document.getElementById('hud-hp-bar').style.width = `${(p.hp / p.maxHp) * 100}%`;
+    document.getElementById('hp-bar').style.width = `${(p.hp / p.maxHp) * 100}%`;
     document.getElementById('hp-text').textContent = `${p.hp}/${p.maxHp}`;
 
-    document.getElementById('hud-stamina-bar').style.width = `${(p.stamina / p.maxStamina) * 100}%`;
+    document.getElementById('stamina-bar').style.width = `${(p.stamina / p.maxStamina) * 100}%`;
     document.getElementById('stamina-text').textContent = `${Math.floor(p.stamina)}/${p.maxStamina}`;
 
-    document.getElementById('hud-xp-bar').style.width = `${(p.xp / p.xpToLevel) * 100}%`;
+    document.getElementById('xp-bar').style.width = `${(p.xp / p.xpToLevel) * 100}%`;
     document.getElementById('xp-text').textContent = `${p.xp}/${p.xpToLevel}`;
 
-    document.getElementById('atk-stat').textContent = p.attack;
-    document.getElementById('def-stat').textContent = p.defense;
-    document.getElementById('gold-stat').textContent = p.gold;
+    document.getElementById('atk-value').textContent = p.attack;
+    document.getElementById('def-value').textContent = p.defense;
+    document.getElementById('gold-value').textContent = p.gold;
 
     if (game.world) {
-        document.getElementById('location-display').textContent = game.world.location.name;
+        document.getElementById('location-name').textContent = game.world.location.name;
     }
 
-    const flightInd = document.getElementById('flight-indicator');
-    if (p.flying) {
-        flightInd.classList.remove('hidden');
+    const flightStatus = document.getElementById('flight-status');
+    if (p.isFlying) {
+        flightStatus.classList.remove('hidden');
     } else {
-        flightInd.classList.add('hidden');
+        flightStatus.classList.add('hidden');
     }
 }
 
 // ============================================
-// GAME LOG
+// GAME MESSAGES
 // ============================================
 
-function addLog(message, type = 'info') {
-    const logContent = document.getElementById('log-content');
-    if (!logContent) return;
+function showMessage(text, type = 'info') {
+    const container = document.getElementById('game-messages');
+    if (!container) return;
 
-    const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
-    entry.textContent = message;
-    logContent.appendChild(entry);
-    logContent.scrollTop = logContent.scrollHeight;
+    const msg = document.createElement('div');
+    msg.className = `game-message ${type}`;
+    msg.textContent = text;
+    container.appendChild(msg);
 
-    while (logContent.children.length > 20) {
-        logContent.removeChild(logContent.firstChild);
-    }
+    setTimeout(() => msg.remove(), 3000);
 }
 
 // ============================================
-// BATTLE SYSTEM
+// BATTLE SYSTEM WITH AERIAL COMBAT
 // ============================================
 
-function startBattle(enemyName, level, isBoss, entityRef) {
+function startBattle(enemy) {
     game.battle = {
-        enemy: new Enemy(enemyName, level, isBoss),
-        entityRef: entityRef,
+        enemy: enemy,
         turn: 'player',
         combo: 0,
         defending: false,
-        canAct: true
+        canAct: true,
+        isAerial: game.player.isFlying || enemy.isFlying // AERIAL COMBAT
     };
 
     showScreen('battle');
     updateBattleUI();
-    addBattleLog(`A wild ${enemyName} appears!`, 'system');
 
-    if (isBoss) {
+    const battleType = game.battle.isAerial ? 'AERIAL BATTLE!' : 'Battle!';
+    addBattleLog(`${battleType} A wild ${enemy.name} appears!`, 'system');
+
+    if (enemy.isBoss) {
         document.getElementById('battle-title').textContent = '👑 BOSS BATTLE! 👑';
+    } else if (game.battle.isAerial) {
+        document.getElementById('battle-title').textContent = '🦅 Aerial Combat! 🦅';
     } else {
         document.getElementById('battle-title').textContent = 'Battle!';
     }
@@ -816,23 +1299,20 @@ function updateBattleUI() {
     const p = game.player;
     const e = game.battle.enemy;
 
-    document.getElementById('battle-player-name').textContent = p.name;
-    document.getElementById('player-hp-bar').style.width = `${(p.hp / p.maxHp) * 100}%`;
-    document.getElementById('player-hp-text').textContent = `${p.hp}/${p.maxHp}`;
-    document.getElementById('player-battle-display').textContent = '🐉';
-    document.getElementById('player-battle-display').style.color = TRIBES[p.tribe].color;
+    document.getElementById('battle-player-name').textContent = `${p.name} (Lv.${p.level})`;
+    document.getElementById('player-battle-hp').style.width = `${(p.hp / p.maxHp) * 100}%`;
+    document.getElementById('player-battle-hp-text').textContent = `${p.hp}/${p.maxHp}`;
 
-    document.getElementById('enemy-name').textContent = `${e.name} (Lv.${e.level})`;
-    document.getElementById('enemy-hp-bar').style.width = `${(e.hp / e.maxHp) * 100}%`;
-    document.getElementById('enemy-hp-text').textContent = `${e.hp}/${e.maxHp}`;
-    document.getElementById('enemy-display').textContent = e.isBoss ? '👑🐲' : '🐲';
+    document.getElementById('battle-enemy-name').textContent = `${e.name} (Lv.${e.level})`;
+    document.getElementById('enemy-battle-hp').style.width = `${(e.hp / e.maxHp) * 100}%`;
+    document.getElementById('enemy-battle-hp-text').textContent = `${e.hp}/${e.maxHp}`;
 
-    const comboDisplay = document.getElementById('combo-display');
+    const comboMeter = document.getElementById('combo-meter');
     if (game.battle.combo > 1) {
-        comboDisplay.classList.remove('hidden');
+        comboMeter.classList.remove('hidden');
         document.getElementById('combo-count').textContent = game.battle.combo;
     } else {
-        comboDisplay.classList.add('hidden');
+        comboMeter.classList.add('hidden');
     }
 }
 
@@ -854,22 +1334,27 @@ function battleAction(action) {
     const e = game.battle.enemy;
     game.battle.canAct = false;
 
+    // Aerial combat bonus
+    const aerialBonus = game.battle.isAerial ? 1.2 : 1;
+
     switch (action) {
         case 'attack':
-            const dmg = p.attack + Math.floor(Math.random() * 5);
+            let dmg = Math.floor((p.attack + Math.floor(Math.random() * 5)) * aerialBonus);
             const dealt = e.takeDamage(dmg);
             game.battle.combo++;
-            addBattleLog(`You attack for ${dealt} damage!`, 'player');
+            addBattleLog(`You attack for ${dealt} damage!${game.battle.isAerial ? ' (Aerial bonus!)' : ''}`, 'player');
             if (game.battle.combo > 2) {
                 addBattleLog(`${game.battle.combo}x Combo!`, 'critical');
             }
             break;
 
-        case 'heavy':
-            const heavyDmg = Math.floor(p.attack * 1.5) + Math.floor(Math.random() * 10);
-            const heavyDealt = e.takeDamage(heavyDmg);
+        case 'fire':
+            const breathDmg = Math.floor((p.attack * 1.3 + Math.floor(Math.random() * 8)) * aerialBonus);
+            const breathDealt = e.takeDamage(breathDmg);
             game.battle.combo++;
-            addBattleLog(`Heavy attack for ${heavyDealt} damage!`, 'player');
+            const breathName = p.breathType === 'ice' ? 'Frost Breath' :
+                              p.breathType === 'acid' ? 'Venom Spit' : 'Fire Breath';
+            addBattleLog(`${breathName} deals ${breathDealt} damage!`, 'player');
             break;
 
         case 'special':
@@ -878,9 +1363,9 @@ function battleAction(action) {
                 game.battle.canAct = true;
                 return;
             }
-            const specialDmg = Math.floor(p.attack * 2);
+            const specialDmg = Math.floor(p.attack * 2 * aerialBonus);
             const specialDealt = e.takeDamage(specialDmg);
-            p.specialCooldown = 4;
+            p.specialCooldown = 3;
             game.battle.combo++;
             addBattleLog(`${p.special}! ${specialDealt} damage!`, 'critical');
             break;
@@ -888,7 +1373,7 @@ function battleAction(action) {
         case 'defend':
             game.battle.defending = true;
             game.battle.combo = 0;
-            addBattleLog('You brace for attack! (50% damage reduction)', 'player');
+            addBattleLog('You brace for attack! (60% damage reduction)', 'player');
             break;
 
         case 'item':
@@ -902,7 +1387,9 @@ function battleAction(action) {
                 game.battle.canAct = true;
                 return;
             }
-            if (Math.random() < 0.6) {
+            // Easier to flee when flying
+            const fleeChance = game.battle.isAerial ? 0.8 : 0.6;
+            if (Math.random() < fleeChance) {
                 addBattleLog('You escaped!', 'system');
                 endBattle(false);
                 return;
@@ -920,9 +1407,7 @@ function battleAction(action) {
     }
 
     // Enemy turn
-    setTimeout(() => {
-        enemyTurn();
-    }, 800);
+    setTimeout(() => enemyTurn(), 800);
 }
 
 function enemyTurn() {
@@ -934,15 +1419,20 @@ function enemyTurn() {
     game.battle.turn = 'enemy';
 
     let dmg = e.attack + Math.floor(Math.random() * 5);
+
+    // Aerial combat - enemy also gets bonus if flying
+    if (game.battle.isAerial && e.isFlying) {
+        dmg = Math.floor(dmg * 1.15);
+    }
+
     if (game.battle.defending) {
-        dmg = Math.floor(dmg / 2);
+        dmg = Math.floor(dmg * 0.4); // 60% reduction
         game.battle.defending = false;
     }
 
     const dealt = p.takeDamage(dmg);
     addBattleLog(`${e.name} attacks for ${dealt} damage!`, 'enemy');
 
-    // Reduce cooldowns
     if (p.specialCooldown > 0) p.specialCooldown--;
 
     updateBattleUI();
@@ -963,19 +1453,28 @@ function endBattle(victory) {
         const leveledUp = game.player.gainXP(e.xpReward);
         game.player.gold += e.goldReward;
 
-        if (game.battle.entityRef) {
-            game.battle.entityRef.defeated = true;
+        // Remove enemy from world
+        if (e.mesh) {
+            game.scene.remove(e.mesh);
+        }
+        if (game.world) {
+            game.world.enemies = game.world.enemies.filter(en => en !== e);
+            if (e === game.world.boss) {
+                game.world.boss = null;
+            }
         }
 
-        document.getElementById('victory-title').textContent = e.isBoss ? '👑 BOSS DEFEATED! 👑' : 'Victory!';
+        document.getElementById('victory-title').textContent = e.isBoss ? '👑 BOSS DEFEATED!' : 'Victory!';
         document.getElementById('victory-message').textContent = `Defeated ${e.name}!`;
-        document.getElementById('victory-rewards').textContent = `+${e.xpReward} XP, +${e.goldReward} Gold`;
+        document.getElementById('xp-reward').textContent = `+${e.xpReward} XP`;
+        document.getElementById('gold-reward').textContent = `+${e.goldReward} Gold`;
 
-        if (Math.random() < 0.3) {
+        // Random loot
+        const lootSection = document.getElementById('loot-section');
+        lootSection.innerHTML = '';
+        if (Math.random() < 0.4) {
             game.player.addItem('healingPotion');
-            document.getElementById('loot-drops').innerHTML = '<div class="loot-item">🧪 Healing Potion</div>';
-        } else {
-            document.getElementById('loot-drops').innerHTML = '';
+            lootSection.innerHTML = '<div class="reward">🧪 Healing Potion</div>';
         }
 
         showScreen('victory');
@@ -989,7 +1488,7 @@ function endBattle(victory) {
         }
     } else {
         showScreen('game');
-        addLog('Escaped from battle!', 'info');
+        showMessage('Escaped from battle!', 'info');
     }
 
     game.battle = null;
@@ -1012,18 +1511,12 @@ function renderInventory() {
 
     const equipSlots = document.getElementById('equipment-slots');
     equipSlots.innerHTML = `
-        <div class="equipment-slot">
-            <div class="label">Weapon</div>
-            <div class="item">${game.player.equipment.weapon || 'None'}</div>
-        </div>
-        <div class="equipment-slot">
-            <div class="label">Armor</div>
-            <div class="item">${game.player.equipment.armor || 'None'}</div>
-        </div>
+        <div class="equipment-slot">Weapon: None</div>
+        <div class="equipment-slot">Armor: None</div>
     `;
 
-    const itemsList = document.getElementById('items-list');
-    itemsList.innerHTML = '';
+    const itemsGrid = document.getElementById('items-grid');
+    itemsGrid.innerHTML = '';
 
     game.player.inventory.forEach(slot => {
         const item = ITEMS[slot.id];
@@ -1032,23 +1525,23 @@ function renderInventory() {
         const div = document.createElement('div');
         div.className = 'inventory-item';
         div.innerHTML = `
-            <div class="icon">${item.icon}</div>
-            <div class="name">${item.name}</div>
-            <div class="count">x${slot.count}</div>
+            <div class="item-icon">${item.icon}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-count">x${slot.count}</div>
         `;
-        div.onclick = () => useItemFromInventory(slot.id);
-        itemsList.appendChild(div);
+        div.onclick = () => useItem(slot.id);
+        itemsGrid.appendChild(div);
     });
 }
 
-function useItemFromInventory(itemId) {
+function useItem(itemId) {
     const item = game.player.useItem(itemId);
     if (!item) return;
 
     switch (item.effect) {
         case 'heal':
             const healed = game.player.heal(item.value);
-            addLog(`Used ${item.name}! +${healed} HP`, 'reward');
+            showMessage(`Used ${item.name}! +${healed} HP`, 'reward');
             if (game.battle) {
                 addBattleLog(`Used ${item.name}! +${healed} HP`, 'player');
                 game.battle.combo = 0;
@@ -1057,7 +1550,7 @@ function useItemFromInventory(itemId) {
             break;
         case 'stamina':
             game.player.stamina = Math.min(game.player.maxStamina, game.player.stamina + item.value);
-            addLog(`Used ${item.name}! +${item.value} Stamina`, 'reward');
+            showMessage(`Used ${item.name}! +${item.value} Stamina`, 'reward');
             break;
     }
 
@@ -1075,32 +1568,43 @@ function renderMap() {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    canvas.width = 400;
-    canvas.height = 300;
+    canvas.width = 700;
+    canvas.height = 400;
 
-    // Draw ocean
+    // Ocean background
     ctx.fillStyle = '#1a3a4a';
-    ctx.fillRect(0, 0, 400, 300);
+    ctx.fillRect(0, 0, 700, 400);
 
-    // Draw locations
     const locs = Object.entries(LOCATIONS);
     const positions = [
-        { x: 100, y: 150 }, // mud
-        { x: 50, y: 220 },  // sand
-        { x: 200, y: 80 },  // sky
-        { x: 80, y: 80 },   // sea
-        { x: 150, y: 250 }, // rain
-        { x: 300, y: 60 },  // ice
-        { x: 350, y: 200 }  // night
+        { x: 120, y: 200 }, // mud
+        { x: 80, y: 320 },  // sand
+        { x: 250, y: 100 }, // sky
+        { x: 100, y: 100 }, // sea
+        { x: 200, y: 320 }, // rain
+        { x: 400, y: 80 },  // ice
+        { x: 500, y: 280 }  // night
     ];
 
+    // Draw connections
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < positions.length; i++) {
+        const next = (i + 1) % positions.length;
+        ctx.beginPath();
+        ctx.moveTo(positions[i].x, positions[i].y);
+        ctx.lineTo(positions[next].x, positions[next].y);
+        ctx.stroke();
+    }
+
+    // Draw locations
     locs.forEach(([id, loc], i) => {
         const pos = positions[i];
         const isCurrent = game.world && game.world.locationId === id;
 
-        ctx.fillStyle = loc.color;
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, isCurrent ? 25 : 18, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, isCurrent ? 30 : 22, 0, Math.PI * 2);
+        ctx.fillStyle = '#' + loc.groundColor.toString(16).padStart(6, '0');
         ctx.fill();
 
         if (isCurrent) {
@@ -1110,81 +1614,211 @@ function renderMap() {
         }
 
         ctx.fillStyle = '#fff';
-        ctx.font = '10px Arial';
+        ctx.font = '11px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(loc.name.replace('The ', ''), pos.x, pos.y + 35);
+        ctx.fillText(loc.name.replace('The ', ''), pos.x, pos.y + 45);
+    });
+}
+
+// ============================================
+// PLAYER MOVEMENT & PHYSICS
+// ============================================
+
+function updatePlayer(delta) {
+    if (!game.player || !game.player.mesh) return;
+
+    const p = game.player;
+    const speed = p.isSprinting ? CONFIG.MOVE_SPEED * CONFIG.SPRINT_MULTIPLIER : CONFIG.MOVE_SPEED;
+    const flySpeed = CONFIG.FLY_SPEED;
+
+    // Get camera direction
+    const direction = new THREE.Vector3();
+    game.camera.getWorldDirection(direction);
+    direction.y = 0;
+    direction.normalize();
+
+    const right = new THREE.Vector3();
+    right.crossVectors(direction, new THREE.Vector3(0, 1, 0));
+
+    // Movement input
+    const moveDir = new THREE.Vector3();
+
+    if (game.keys['KeyW'] || game.keys['ArrowUp']) moveDir.add(direction);
+    if (game.keys['KeyS'] || game.keys['ArrowDown']) moveDir.sub(direction);
+    if (game.keys['KeyA'] || game.keys['ArrowLeft']) moveDir.sub(right);
+    if (game.keys['KeyD'] || game.keys['ArrowRight']) moveDir.add(right);
+
+    if (moveDir.length() > 0) {
+        moveDir.normalize();
+        if (p.isFlying) {
+            p.velocity.x = moveDir.x * flySpeed;
+            p.velocity.z = moveDir.z * flySpeed;
+        } else {
+            p.velocity.x = moveDir.x * speed * p.speedMod;
+            p.velocity.z = moveDir.z * speed * p.speedMod;
+        }
+    } else {
+        p.velocity.x *= 0.9;
+        p.velocity.z *= 0.9;
+    }
+
+    // Flying
+    if (p.isFlying) {
+        if (game.keys['Space']) {
+            p.velocity.y += CONFIG.FLY_LIFT;
+        }
+        if (game.keys['ControlLeft'] || game.keys['ControlRight']) {
+            p.velocity.y -= CONFIG.FLY_LIFT;
+        }
+
+        p.stamina -= CONFIG.STAMINA_DRAIN * delta * 60;
+        if (p.stamina <= 0) {
+            p.stamina = 0;
+            p.isFlying = false;
+            showMessage('Out of stamina! Landing...', 'info');
+        }
+
+        p.velocity.y *= 0.95;
+    } else {
+        // Gravity
+        if (!p.isGrounded) {
+            p.velocity.y -= CONFIG.GRAVITY;
+        }
+
+        // Stamina regen
+        p.stamina = Math.min(p.maxStamina, p.stamina + CONFIG.STAMINA_REGEN * delta * 60);
+    }
+
+    // Apply velocity
+    p.position.add(p.velocity);
+
+    // Ground collision
+    if (p.position.y <= CONFIG.GROUND_LEVEL + 1) {
+        p.position.y = CONFIG.GROUND_LEVEL + 1;
+        p.velocity.y = 0;
+        p.isGrounded = true;
+        if (p.isFlying) {
+            p.isFlying = false;
+            showMessage('Landed', 'info');
+        }
+    } else {
+        p.isGrounded = false;
+    }
+
+    // Boundaries
+    p.position.x = Math.max(-90, Math.min(90, p.position.x));
+    p.position.z = Math.max(-90, Math.min(90, p.position.z));
+
+    // Update mesh
+    p.mesh.position.copy(p.position);
+
+    // Rotate dragon to face movement direction
+    if (moveDir.length() > 0.1) {
+        const targetRotation = Math.atan2(moveDir.x, moveDir.z);
+        p.mesh.rotation.y = targetRotation;
+    }
+
+    // Wing animation
+    if (p.mesh.userData) {
+        if (p.isFlying) {
+            p.mesh.userData.wingAngle = Math.sin(Date.now() * 0.015) * 0.8;
+        } else {
+            p.mesh.userData.wingAngle = Math.sin(Date.now() * 0.005) * 0.1;
+        }
+
+        if (p.mesh.userData.leftWing) {
+            p.mesh.userData.leftWing.rotation.z = p.mesh.userData.wingAngle;
+        }
+        if (p.mesh.userData.rightWing) {
+            p.mesh.userData.rightWing.rotation.z = -p.mesh.userData.wingAngle;
+        }
+    }
+
+    // Camera follow (third person)
+    const cameraOffset = new THREE.Vector3(0, 5, 10);
+    cameraOffset.applyQuaternion(p.mesh.quaternion);
+    const targetCameraPos = p.position.clone().add(cameraOffset);
+    game.camera.position.lerp(targetCameraPos, 0.05);
+    game.camera.lookAt(p.position.x, p.position.y + 2, p.position.z);
+}
+
+function checkCollisions() {
+    if (!game.player || !game.world) return;
+
+    const p = game.player;
+
+    // Check collectibles
+    game.world.collectibles.forEach((c, idx) => {
+        const dist = p.position.distanceTo(c.position);
+        if (dist < 2) {
+            if (c.userData.type === 'gold') {
+                p.gold += c.userData.value;
+                showMessage(`+${c.userData.value} Gold!`, 'reward');
+            } else {
+                const healed = p.heal(c.userData.value);
+                showMessage(`+${healed} HP!`, 'reward');
+            }
+            game.scene.remove(c);
+            game.world.collectibles.splice(idx, 1);
+            updateHUD();
+        }
     });
 
-    // Info
-    if (game.world) {
-        document.getElementById('map-info').innerHTML = `
-            <strong>Current: ${game.world.location.name}</strong><br>
-            Enemies: Lv.${game.world.location.enemyLevel.join('-')}<br>
-            Boss: ${game.world.location.bossName} (Lv.${game.world.location.bossLevel})
-        `;
+    // Check enemies
+    game.world.enemies.forEach(enemy => {
+        if (enemy.mesh) {
+            const dist = p.position.distanceTo(enemy.mesh.position);
+            if (dist < 3) {
+                startBattle(enemy);
+            }
+        }
+    });
+
+    // Check boss
+    if (game.world.boss && game.world.boss.mesh) {
+        const dist = p.position.distanceTo(game.world.boss.mesh.position);
+        if (dist < 4) {
+            startBattle(game.world.boss);
+        }
     }
+
+    // Check portals
+    game.world.portals.forEach(portal => {
+        const dist = p.position.distanceTo(portal.position);
+        if (dist < 3) {
+            const dest = portal.userData.destination;
+            showMessage(`Traveling to ${LOCATIONS[dest].name}...`, 'info');
+            setTimeout(() => {
+                game.world.cleanup();
+                game.world = new World(dest);
+                game.world.generate();
+                p.position.set(0, 2, 0);
+                updateHUD();
+            }, 500);
+        }
+    });
 }
 
 // ============================================
 // GAME LOOP
 // ============================================
 
-function gameLoop(timestamp) {
-    const dt = (timestamp - game.lastTime) / 1000;
-    game.lastTime = timestamp;
+function gameLoop() {
+    game.animationFrame = requestAnimationFrame(gameLoop);
+
+    const delta = game.clock.getDelta();
 
     if (game.currentScreen === 'game' && game.player && game.world) {
-        update(dt);
-        render();
+        updatePlayer(delta);
+        game.world.update(delta);
+        checkCollisions();
+        updateHUD();
     }
 
-    game.animationFrame = requestAnimationFrame(gameLoop);
-}
-
-function update(dt) {
-    const p = game.player;
-    const speed = p.flying ? CONFIG.FLYING_SPEED : CONFIG.PLAYER_SPEED;
-
-    // Movement
-    p.vx = 0;
-    p.vy = 0;
-
-    if (game.keys['KeyW'] || game.keys['ArrowUp']) p.vy = -speed;
-    if (game.keys['KeyS'] || game.keys['ArrowDown']) p.vy = speed;
-    if (game.keys['KeyA'] || game.keys['ArrowLeft']) { p.vx = -speed; p.facing = 'left'; }
-    if (game.keys['KeyD'] || game.keys['ArrowRight']) { p.vx = speed; p.facing = 'right'; }
-
-    p.x += p.vx;
-    p.y += p.vy;
-
-    // Boundaries
-    p.x = Math.max(30, Math.min(game.world.width - 30, p.x));
-    p.y = Math.max(30, Math.min(game.world.height - 130, p.y));
-
-    // Flight stamina
-    if (p.flying) {
-        p.stamina -= CONFIG.STAMINA_DRAIN;
-        if (p.stamina <= 0) {
-            p.stamina = 0;
-            p.flying = false;
-            addLog('Out of stamina! Landed.', 'info');
-        }
-    } else {
-        p.stamina = Math.min(p.maxStamina, p.stamina + CONFIG.STAMINA_REGEN);
+    // Render
+    if (game.renderer && game.scene && game.camera) {
+        game.renderer.render(game.scene, game.camera);
     }
-
-    // Update world
-    game.world.update(p, dt);
-    updateHUD();
-}
-
-function render() {
-    if (!game.canvas || !game.ctx) return;
-
-    game.canvas.width = game.canvas.parentElement.clientWidth;
-    game.canvas.height = game.canvas.parentElement.clientHeight;
-
-    game.world.draw(game.ctx, game.player);
 }
 
 // ============================================
@@ -1194,7 +1828,6 @@ function render() {
 function handleKeyDown(e) {
     game.keys[e.code] = true;
 
-    // Prevent default for game keys
     if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         e.preventDefault();
     }
@@ -1203,7 +1836,8 @@ function handleKeyDown(e) {
         case 'title':
             if (e.code === 'Enter') {
                 showScreen('character');
-                setupCharacterScreen();
+                updateTribeSelection();
+                document.getElementById('dragon-name').focus();
             }
             break;
 
@@ -1239,33 +1873,35 @@ function handleKeyUp(e) {
 }
 
 function handleCharacterInput(e) {
-    const cards = document.querySelectorAll('.tribe-card');
-
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
         game.selectedTribe = (game.selectedTribe - 1 + game.tribeList.length) % game.tribeList.length;
         updateTribeSelection();
-    }
-    else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+    } else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
         game.selectedTribe = (game.selectedTribe + 1) % game.tribeList.length;
         updateTribeSelection();
-    }
-    else if (e.code === 'Enter') {
+    } else if (e.code === 'Enter') {
         const nameInput = document.getElementById('dragon-name');
         const name = nameInput.value.trim() || 'Dragon';
         const tribe = game.tribeList[game.selectedTribe];
 
+        // Create player
         game.player = new Player(name, tribe);
+        const playerMesh = game.player.createMesh();
+        game.scene.add(playerMesh);
+
+        // Create world
         game.world = new World('mudKingdom');
+        game.world.generate();
 
         showScreen('game');
         updateHUD();
-        addLog(`Welcome, ${name} the ${tribe}! Your adventure begins...`, 'info');
-        addLog('Use WASD to move. Press H for help.', 'info');
+        showMessage(`Welcome, ${name} the ${tribe}!`, 'info');
+        showMessage('WASD to move, SPACE to fly, MOUSE to look', 'info');
     }
 }
 
 function handleGameInput(e) {
-    // Close overlays first
+    // Close overlays with ESC
     if (e.code === 'Escape') {
         document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
         return;
@@ -1276,21 +1912,20 @@ function handleGameInput(e) {
                         !document.getElementById('map-overlay').classList.contains('hidden') ||
                         !document.getElementById('help-overlay').classList.contains('hidden');
 
-    if (overlayOpen) {
-        if (e.code === 'KeyI') toggleOverlay('inventory');
-        if (e.code === 'KeyM') toggleOverlay('map');
-        if (e.code === 'KeyH') toggleOverlay('help');
-        return;
-    }
+    if (overlayOpen) return;
 
     switch (e.code) {
-        case 'KeyF':
-            if (game.player.stamina > 10) {
-                game.player.flying = !game.player.flying;
-                addLog(game.player.flying ? 'Taking flight!' : 'Landing...', 'info');
-            } else {
-                addLog('Not enough stamina to fly!', 'info');
+        case 'Space':
+            if (game.player.isGrounded && game.player.stamina > 20) {
+                game.player.velocity.y = CONFIG.JUMP_FORCE;
+                game.player.isFlying = true;
+                game.player.isGrounded = false;
+                showMessage('Taking flight!', 'info');
             }
+            break;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+            game.player.isSprinting = true;
             break;
         case 'KeyI':
             renderInventory();
@@ -1304,9 +1939,9 @@ function handleGameInput(e) {
             toggleOverlay('help');
             break;
         case 'KeyR':
-            const hpRecovered = game.player.heal(Math.floor(game.player.maxHp * 0.3));
-            game.player.stamina = Math.min(game.player.maxStamina, game.player.stamina + 30);
-            addLog(`Resting... +${hpRecovered} HP, +30 Stamina`, 'reward');
+            const hpRec = game.player.heal(Math.floor(game.player.maxHp * 0.2));
+            game.player.stamina = Math.min(game.player.maxStamina, game.player.stamina + 20);
+            showMessage(`Resting... +${hpRec} HP, +20 Stamina`, 'reward');
             updateHUD();
             break;
     }
@@ -1315,7 +1950,7 @@ function handleGameInput(e) {
 function handleBattleInput(e) {
     if (!game.battle || !game.battle.canAct) return;
 
-    // Check for inventory overlay
+    // Check inventory overlay
     if (!document.getElementById('inventory-overlay').classList.contains('hidden')) {
         if (e.code === 'Escape' || e.code === 'KeyI') {
             toggleOverlay('inventory');
@@ -1325,11 +1960,10 @@ function handleBattleInput(e) {
 
     switch (e.code) {
         case 'Space':
-            if (e.shiftKey) {
-                battleAction('heavy');
-            } else {
-                battleAction('attack');
-            }
+            battleAction('attack');
+            break;
+        case 'KeyF':
+            battleAction('fire');
             break;
         case 'KeyE':
             battleAction('special');
@@ -1352,32 +1986,42 @@ function updateTribeSelection() {
     cards.forEach((card, i) => {
         if (i === game.selectedTribe) {
             card.classList.add('selected');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } else {
             card.classList.remove('selected');
         }
     });
 }
 
-function setupCharacterScreen() {
-    // Add dragon icons to tribe cards
-    document.querySelectorAll('.tribe-card').forEach((card, i) => {
-        const tribe = game.tribeList[i];
-        const icon = card.querySelector('.tribe-icon');
-        icon.innerHTML = `<div style="width:50px;height:50px;background:${TRIBES[tribe].color};border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:24px;">🐉</div>`;
-    });
+// Mouse controls
+function handleMouseMove(e) {
+    if (game.currentScreen !== 'game' || !document.pointerLockElement) return;
 
-    updateTribeSelection();
-    document.getElementById('dragon-name').focus();
+    game.camera.rotation.y -= e.movementX * CONFIG.ROTATION_SPEED;
+    game.camera.rotation.x -= e.movementY * CONFIG.ROTATION_SPEED;
+    game.camera.rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, game.camera.rotation.x));
+}
+
+function handleClick(e) {
+    if (game.currentScreen === 'game') {
+        game.renderer.domElement.requestPointerLock();
+    }
 }
 
 function resetGame() {
+    if (game.world) {
+        game.world.cleanup();
+    }
+    if (game.player && game.player.mesh) {
+        game.scene.remove(game.player.mesh);
+    }
+
     game.player = null;
     game.world = null;
     game.battle = null;
     game.selectedTribe = 0;
 
     document.getElementById('dragon-name').value = '';
-    document.getElementById('log-content').innerHTML = '';
 
     showScreen('title');
 }
@@ -1387,17 +2031,16 @@ function resetGame() {
 // ============================================
 
 function init() {
-    // Get canvas
-    game.canvas = document.getElementById('game-canvas');
-    if (game.canvas) {
-        game.ctx = game.canvas.getContext('2d');
-    }
+    // Initialize Three.js
+    initThreeJS();
 
     // Event listeners
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('click', handleClick);
 
-    // Click handlers for tribe cards
+    // Tribe card click handlers
     document.querySelectorAll('.tribe-card').forEach((card, i) => {
         card.addEventListener('click', () => {
             game.selectedTribe = i;
@@ -1405,11 +2048,17 @@ function init() {
         });
     });
 
-    // Start game loop
-    game.lastTime = performance.now();
-    gameLoop(game.lastTime);
+    // Sprint release
+    document.addEventListener('keyup', (e) => {
+        if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+            if (game.player) game.player.isSprinting = false;
+        }
+    });
 
-    console.log('Wings of Fire initialized! Press ENTER to start.');
+    // Start game loop
+    gameLoop();
+
+    console.log('Wings of Fire 3D initialized! Press ENTER to start.');
 }
 
 // Start when DOM is ready

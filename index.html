@@ -3,89 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wings of Fire - Dragon Adventure</title>
+    <title>Wings of Fire - 3D Dragon Adventure</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Three.js for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="game-container">
+        <!-- 3D Canvas Container -->
+        <div id="canvas-container"></div>
+
         <!-- Title Screen -->
         <div id="title-screen" class="screen active">
-            <h1 class="game-title">Wings of Fire</h1>
-            <p class="subtitle">Dragon Adventure</p>
-            <p class="controls-hint">Press ENTER to Start</p>
-            <div class="title-controls">
-                <p>Controls: WASD or Arrow Keys to move</p>
-                <p>SPACE - Attack | E - Special | Q - Defend | F - Fly</p>
-                <p>I - Inventory | M - Map | H - Help</p>
+            <div class="title-content">
+                <h1 class="game-title">Wings of Fire</h1>
+                <p class="subtitle">3D Dragon Adventure</p>
+                <div class="dragon-preview" id="title-dragon"></div>
+                <p class="press-start">Press ENTER to Begin Your Journey</p>
+                <div class="title-controls">
+                    <div class="control-group">
+                        <h3>Controls</h3>
+                        <p><span class="key">WASD</span> Move</p>
+                        <p><span class="key">SPACE</span> Jump / Fly</p>
+                        <p><span class="key">SHIFT</span> Sprint</p>
+                        <p><span class="key">MOUSE</span> Look Around</p>
+                    </div>
+                    <div class="control-group">
+                        <h3>Combat</h3>
+                        <p><span class="key">LMB</span> Attack</p>
+                        <p><span class="key">RMB</span> Fire Breath</p>
+                        <p><span class="key">E</span> Special Ability</p>
+                        <p><span class="key">Q</span> Defend</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Character Creation Screen -->
         <div id="character-screen" class="screen">
-            <h2>Create Your Dragon</h2>
-            <div class="form-group">
-                <label for="dragon-name">Dragon Name:</label>
-                <input type="text" id="dragon-name" placeholder="Enter your dragon's name" maxlength="20" autofocus>
-            </div>
-            <p class="controls-hint">Use LEFT/RIGHT arrows to select tribe, ENTER to confirm</p>
-            <div class="form-group">
-                <label>Choose Your Tribe:</label>
-                <div id="tribe-selection" class="tribe-grid">
-                    <div class="tribe-card selected" data-tribe="MudWing">
-                        <div class="tribe-icon"></div>
-                        <h3>MudWing</h3>
-                        <p>Strong and resilient</p>
-                        <div class="tribe-stats">
-                            <span>HP: High | ATK: Med | DEF: High</span>
-                        </div>
+            <div class="character-content">
+                <h2>Create Your Dragon</h2>
+                <div class="creation-layout">
+                    <div class="dragon-viewer">
+                        <div id="dragon-preview-3d"></div>
+                        <p class="viewer-hint">Your dragon will appear here</p>
                     </div>
-                    <div class="tribe-card" data-tribe="SandWing">
-                        <div class="tribe-icon"></div>
-                        <h3>SandWing</h3>
-                        <p>Venomous tail barbs</p>
-                        <div class="tribe-stats">
-                            <span>HP: Med | ATK: High | DEF: Med</span>
+                    <div class="creation-form">
+                        <div class="form-group">
+                            <label for="dragon-name">Dragon Name</label>
+                            <input type="text" id="dragon-name" placeholder="Enter name..." maxlength="20" autofocus>
                         </div>
-                    </div>
-                    <div class="tribe-card" data-tribe="SkyWing">
-                        <div class="tribe-icon"></div>
-                        <h3>SkyWing</h3>
-                        <p>Fastest flyers</p>
-                        <div class="tribe-stats">
-                            <span>HP: Med | ATK: High | DEF: Low</span>
+                        <div class="form-group">
+                            <label>Select Your Tribe</label>
+                            <p class="nav-hint">Use <span class="key">A</span> <span class="key">D</span> to browse tribes</p>
+                            <div id="tribe-carousel">
+                                <div class="tribe-card selected" data-tribe="MudWing">
+                                    <h3>MudWing</h3>
+                                    <p class="tribe-desc">Large, powerful dragons with thick scales. Born from blood-red eggs in the marshes.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Fire Resistance</span>
+                                        <span class="ability">Mud Camouflage</span>
+                                        <span class="ability">Sibling Bond</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:90%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:60%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:85%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:40%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="SandWing">
+                                    <h3>SandWing</h3>
+                                    <p class="tribe-desc">Desert dwellers with venomous barbed tails and heat resistance. Ruled by three sisters.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Venom Tail</span>
+                                        <span class="ability">Heat Survival</span>
+                                        <span class="ability">Fire Breath</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:60%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:85%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:55%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:70%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="SkyWing">
+                                    <h3>SkyWing</h3>
+                                    <p class="tribe-desc">The fastest and most powerful flyers. Warriors with enormous wings and fierce fire.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Powerful Fire</span>
+                                        <span class="ability">Superior Flight</span>
+                                        <span class="ability">Battle Fury</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:55%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:90%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:45%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:95%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="SeaWing">
+                                    <h3>SeaWing</h3>
+                                    <p class="tribe-desc">Aquatic dragons with glowing stripes for underwater communication. Masters of the deep.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Underwater Breathing</span>
+                                        <span class="ability">Bioluminescence</span>
+                                        <span class="ability">Aquatic Speed</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:70%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:65%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:70%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:75%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="RainWing">
+                                    <h3>RainWing</h3>
+                                    <p class="tribe-desc">Colorful dragons who can change their scales and spit deadly venom. Peaceful but dangerous.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Color Shifting</span>
+                                        <span class="ability">Venom Spit</span>
+                                        <span class="ability">Camouflage</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:50%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:95%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:40%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:65%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="IceWing">
+                                    <h3>IceWing</h3>
+                                    <p class="tribe-desc">Arctic dragons with freezing death breath and razor-sharp claws. Noble and dangerous.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Frost Breath</span>
+                                        <span class="ability">Ice Resistance</span>
+                                        <span class="ability">Serrated Claws</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:65%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:70%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:80%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:80%"></div></div></div>
+                                    </div>
+                                </div>
+                                <div class="tribe-card" data-tribe="NightWing">
+                                    <h3>NightWing</h3>
+                                    <p class="tribe-desc">Mysterious dragons of the night. Some have powers of prophecy or mind reading.</p>
+                                    <div class="tribe-abilities">
+                                        <span class="ability">Night Vision</span>
+                                        <span class="ability">Fire Breath</span>
+                                        <span class="ability">Stealth</span>
+                                    </div>
+                                    <div class="tribe-stats">
+                                        <div class="stat"><span class="label">Health</span><div class="stat-bar"><div class="fill" style="width:60%"></div></div></div>
+                                        <div class="stat"><span class="label">Attack</span><div class="stat-bar"><div class="fill" style="width:75%"></div></div></div>
+                                        <div class="stat"><span class="label">Defense</span><div class="stat-bar"><div class="fill" style="width:65%"></div></div></div>
+                                        <div class="stat"><span class="label">Speed</span><div class="stat-bar"><div class="fill" style="width:70%"></div></div></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="tribe-card" data-tribe="SeaWing">
-                        <div class="tribe-icon"></div>
-                        <h3>SeaWing</h3>
-                        <p>Aquatic glow</p>
-                        <div class="tribe-stats">
-                            <span>HP: Med | ATK: Med | DEF: Med</span>
-                        </div>
-                    </div>
-                    <div class="tribe-card" data-tribe="RainWing">
-                        <div class="tribe-icon"></div>
-                        <h3>RainWing</h3>
-                        <p>Color-changing scales</p>
-                        <div class="tribe-stats">
-                            <span>HP: Low | ATK: VHigh | DEF: Low</span>
-                        </div>
-                    </div>
-                    <div class="tribe-card" data-tribe="IceWing">
-                        <div class="tribe-icon"></div>
-                        <h3>IceWing</h3>
-                        <p>Frost breath</p>
-                        <div class="tribe-stats">
-                            <span>HP: Med | ATK: Med | DEF: High</span>
-                        </div>
-                    </div>
-                    <div class="tribe-card" data-tribe="NightWing">
-                        <div class="tribe-icon"></div>
-                        <h3>NightWing</h3>
-                        <p>Mysterious powers</p>
-                        <div class="tribe-stats">
-                            <span>HP: Med | ATK: Med | DEF: Med</span>
-                        </div>
+                        <p class="confirm-hint">Press <span class="key">ENTER</span> to Start Adventure</p>
                     </div>
                 </div>
             </div>
@@ -96,212 +175,277 @@
             <!-- HUD -->
             <div id="hud">
                 <div id="hud-left">
-                    <div id="player-info">
-                        <span id="player-name-display">Dragon</span>
-                        <span id="player-tribe-badge" class="tribe-badge">Tribe</span>
-                        <span id="player-level">Lv.1</span>
-                    </div>
-                    <div id="hp-display">
-                        <span>HP</span>
-                        <div class="hud-bar-container">
-                            <div id="hud-hp-bar" class="hud-bar hp"></div>
+                    <div id="player-panel">
+                        <div id="player-portrait"></div>
+                        <div id="player-info">
+                            <span id="player-name-display">Dragon</span>
+                            <span id="player-tribe-badge">Tribe</span>
                         </div>
-                        <span id="hp-text">100/100</span>
                     </div>
-                    <div id="stamina-display">
-                        <span>ST</span>
-                        <div class="hud-bar-container">
-                            <div id="hud-stamina-bar" class="hud-bar stamina"></div>
+                    <div id="bars-container">
+                        <div class="bar-row">
+                            <span class="bar-label">HP</span>
+                            <div class="bar-track hp-track">
+                                <div id="hp-bar" class="bar-fill hp-fill"></div>
+                            </div>
+                            <span id="hp-text" class="bar-value">100/100</span>
                         </div>
-                        <span id="stamina-text">100/100</span>
-                    </div>
-                    <div id="xp-display">
-                        <span>XP</span>
-                        <div class="hud-bar-container">
-                            <div id="hud-xp-bar" class="hud-bar xp"></div>
+                        <div class="bar-row">
+                            <span class="bar-label">ST</span>
+                            <div class="bar-track stamina-track">
+                                <div id="stamina-bar" class="bar-fill stamina-fill"></div>
+                            </div>
+                            <span id="stamina-text" class="bar-value">100/100</span>
                         </div>
-                        <span id="xp-text">0/100</span>
+                        <div class="bar-row">
+                            <span class="bar-label">XP</span>
+                            <div class="bar-track xp-track">
+                                <div id="xp-bar" class="bar-fill xp-fill"></div>
+                            </div>
+                            <span id="xp-text" class="bar-value">0/100</span>
+                        </div>
                     </div>
                 </div>
+
                 <div id="hud-center">
-                    <div id="location-display">The Mud Kingdom</div>
-                    <div id="flight-indicator" class="hidden">FLYING</div>
+                    <div id="location-indicator">
+                        <span id="location-name">The Mud Kingdom</span>
+                    </div>
+                    <div id="compass"></div>
+                    <div id="flight-status" class="hidden">
+                        <span class="flight-icon">🦅</span>
+                        <span>FLYING</span>
+                    </div>
                 </div>
+
                 <div id="hud-right">
-                    <div id="stats-display">
-                        <span>ATK: <span id="atk-stat">10</span></span>
-                        <span>DEF: <span id="def-stat">10</span></span>
-                        <span>Gold: <span id="gold-stat">0</span></span>
+                    <div id="mini-stats">
+                        <div class="mini-stat">
+                            <span class="stat-icon">⚔️</span>
+                            <span id="atk-value">10</span>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="stat-icon">🛡️</span>
+                            <span id="def-value">10</span>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="stat-icon">💰</span>
+                            <span id="gold-value">0</span>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="stat-icon">⭐</span>
+                            <span>Lv.<span id="level-value">1</span></span>
+                        </div>
                     </div>
-                    <div id="controls-reminder">
-                        WASD: Move | SPACE: Attack | F: Fly | H: Help
+                    <div id="quick-slots">
+                        <div class="quick-slot" data-key="1"><span class="slot-key">1</span><span class="slot-icon">🧪</span></div>
+                        <div class="quick-slot" data-key="2"><span class="slot-key">2</span><span class="slot-icon">💊</span></div>
+                        <div class="quick-slot" data-key="3"><span class="slot-key">3</span><span class="slot-icon">⚡</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Game World -->
-            <div id="game-world">
-                <canvas id="game-canvas"></canvas>
-                <!-- Message overlay -->
-                <div id="message-overlay" class="hidden">
-                    <div id="message-content"></div>
-                </div>
+            <!-- Crosshair -->
+            <div id="crosshair">+</div>
+
+            <!-- Game Messages -->
+            <div id="game-messages"></div>
+
+            <!-- Interaction Prompt -->
+            <div id="interaction-prompt" class="hidden">
+                <span class="key">E</span> to interact
             </div>
 
-            <!-- Game Log -->
-            <div id="game-log">
-                <div id="log-content"></div>
+            <!-- Controls Hint -->
+            <div id="controls-hint">
+                <span>WASD Move</span>
+                <span>SPACE Jump/Fly</span>
+                <span>MOUSE Look</span>
+                <span>I Inventory</span>
+                <span>M Map</span>
+                <span>H Help</span>
             </div>
         </div>
 
         <!-- Battle Screen -->
         <div id="battle-screen" class="screen">
-            <div id="battle-header">
-                <div id="battle-title">Battle!</div>
-                <div id="combo-display" class="hidden">
-                    <span id="combo-count">0</span> COMBO!
+            <div id="battle-ui">
+                <div id="battle-header">
+                    <h2 id="battle-title">Battle!</h2>
                 </div>
-            </div>
 
-            <div id="battle-arena">
-                <div id="enemy-side">
-                    <div id="enemy-name">Enemy</div>
-                    <div id="enemy-display"></div>
-                    <div id="enemy-hp-container">
+                <div id="battle-stats">
+                    <div id="player-battle-stats">
+                        <h3 id="battle-player-name">Your Dragon</h3>
                         <div class="battle-bar-container">
-                            <div id="enemy-hp-bar" class="battle-bar hp"></div>
+                            <div id="player-battle-hp" class="battle-bar"></div>
                         </div>
-                        <span id="enemy-hp-text">100/100</span>
+                        <span id="player-battle-hp-text">100/100</span>
                     </div>
-                    <div id="enemy-status"></div>
-                </div>
 
-                <div id="battle-center">
-                    <div id="battle-log">
-                        <div id="battle-log-content"></div>
-                    </div>
-                </div>
+                    <div id="vs-indicator">VS</div>
 
-                <div id="player-side">
-                    <div id="battle-player-name">Your Dragon</div>
-                    <div id="player-battle-display"></div>
-                    <div id="player-hp-container">
+                    <div id="enemy-battle-stats">
+                        <h3 id="battle-enemy-name">Enemy</h3>
                         <div class="battle-bar-container">
-                            <div id="player-hp-bar" class="battle-bar hp"></div>
+                            <div id="enemy-battle-hp" class="battle-bar"></div>
                         </div>
-                        <span id="player-hp-text">100/100</span>
+                        <span id="enemy-battle-hp-text">100/100</span>
                     </div>
-                    <div id="player-status"></div>
                 </div>
-            </div>
 
-            <div id="battle-controls">
-                <div class="battle-control" data-action="attack">
-                    <span class="key">SPACE</span>
-                    <span class="action">Attack</span>
+                <div id="battle-log">
+                    <div id="battle-log-content"></div>
                 </div>
-                <div class="battle-control" data-action="heavy">
-                    <span class="key">SHIFT+SPACE</span>
-                    <span class="action">Heavy</span>
+
+                <div id="battle-actions">
+                    <div class="action-btn" data-action="attack">
+                        <span class="action-key">LMB</span>
+                        <span class="action-name">Attack</span>
+                    </div>
+                    <div class="action-btn" data-action="fire">
+                        <span class="action-key">RMB</span>
+                        <span class="action-name">Fire Breath</span>
+                    </div>
+                    <div class="action-btn" data-action="special">
+                        <span class="action-key">E</span>
+                        <span class="action-name">Special</span>
+                    </div>
+                    <div class="action-btn" data-action="defend">
+                        <span class="action-key">Q</span>
+                        <span class="action-name">Defend</span>
+                    </div>
+                    <div class="action-btn" data-action="item">
+                        <span class="action-key">I</span>
+                        <span class="action-name">Item</span>
+                    </div>
+                    <div class="action-btn" data-action="flee">
+                        <span class="action-key">ESC</span>
+                        <span class="action-name">Flee</span>
+                    </div>
                 </div>
-                <div class="battle-control" data-action="special">
-                    <span class="key">E</span>
-                    <span class="action">Special</span>
-                </div>
-                <div class="battle-control" data-action="defend">
-                    <span class="key">Q</span>
-                    <span class="action">Defend</span>
-                </div>
-                <div class="battle-control" data-action="item">
-                    <span class="key">I</span>
-                    <span class="action">Item</span>
-                </div>
-                <div class="battle-control" data-action="flee">
-                    <span class="key">ESC</span>
-                    <span class="action">Flee</span>
+
+                <div id="combo-meter" class="hidden">
+                    <span id="combo-count">0</span>x COMBO!
                 </div>
             </div>
         </div>
 
-        <!-- Inventory Screen (Overlay) -->
+        <!-- Inventory Overlay -->
         <div id="inventory-overlay" class="overlay hidden">
-            <div class="overlay-content">
+            <div class="overlay-panel">
                 <h2>Inventory</h2>
-                <div id="equipment-display">
-                    <h3>Equipment</h3>
-                    <div id="equipment-slots"></div>
+                <div id="inventory-content">
+                    <div id="equipment-section">
+                        <h3>Equipment</h3>
+                        <div id="equipment-slots"></div>
+                    </div>
+                    <div id="items-section">
+                        <h3>Items</h3>
+                        <div id="items-grid"></div>
+                    </div>
                 </div>
-                <div id="items-display">
-                    <h3>Items</h3>
-                    <div id="items-list"></div>
-                </div>
-                <p class="overlay-hint">Press I or ESC to close</p>
+                <p class="close-hint">Press <span class="key">I</span> or <span class="key">ESC</span> to close</p>
             </div>
         </div>
 
-        <!-- Map Screen (Overlay) -->
+        <!-- Map Overlay -->
         <div id="map-overlay" class="overlay hidden">
-            <div class="overlay-content">
+            <div class="overlay-panel large">
                 <h2>Map of Pyrrhia</h2>
-                <div id="map-display">
+                <div id="map-container">
                     <canvas id="map-canvas"></canvas>
                 </div>
-                <div id="map-info"></div>
-                <p class="overlay-hint">Arrow keys to select, ENTER to travel, M or ESC to close</p>
+                <div id="map-legend"></div>
+                <p class="close-hint">Press <span class="key">M</span> or <span class="key">ESC</span> to close</p>
             </div>
         </div>
 
-        <!-- Help Screen (Overlay) -->
+        <!-- Help Overlay -->
         <div id="help-overlay" class="overlay hidden">
-            <div class="overlay-content">
+            <div class="overlay-panel">
                 <h2>How to Play</h2>
-                <div class="help-section">
-                    <h3>Movement</h3>
-                    <p>WASD or Arrow Keys - Move your dragon</p>
-                    <p>F - Toggle flight (uses stamina)</p>
+                <div class="help-grid">
+                    <div class="help-section">
+                        <h3>Movement</h3>
+                        <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> - Move</p>
+                        <p><span class="key">SPACE</span> - Jump / Start Flying</p>
+                        <p><span class="key">SHIFT</span> - Sprint</p>
+                        <p><span class="key">CTRL</span> - Land</p>
+                        <p><span class="key">MOUSE</span> - Look Around</p>
+                    </div>
+                    <div class="help-section">
+                        <h3>Combat</h3>
+                        <p><span class="key">LMB</span> - Basic Attack</p>
+                        <p><span class="key">RMB</span> - Fire/Frost/Venom Breath</p>
+                        <p><span class="key">E</span> - Special Ability</p>
+                        <p><span class="key">Q</span> - Defend</p>
+                    </div>
+                    <div class="help-section">
+                        <h3>Menus</h3>
+                        <p><span class="key">I</span> - Inventory</p>
+                        <p><span class="key">M</span> - Map</p>
+                        <p><span class="key">H</span> - Help</p>
+                        <p><span class="key">ESC</span> - Close Menu</p>
+                    </div>
+                    <div class="help-section">
+                        <h3>Quick Items</h3>
+                        <p><span class="key">1</span><span class="key">2</span><span class="key">3</span> - Use Quick Slot Items</p>
+                        <p><span class="key">R</span> - Rest (Recover HP/Stamina)</p>
+                    </div>
                 </div>
-                <div class="help-section">
-                    <h3>Exploration</h3>
-                    <p>Walk into objects to interact</p>
-                    <p>Find gold, items, and enemies while exploring</p>
-                </div>
-                <div class="help-section">
-                    <h3>Combat</h3>
-                    <p>SPACE - Attack (builds combo)</p>
-                    <p>SHIFT+SPACE - Heavy Attack (more damage)</p>
-                    <p>E - Special Ability (tribe-specific)</p>
-                    <p>Q - Defend (reduces damage)</p>
-                </div>
-                <div class="help-section">
-                    <h3>Other</h3>
-                    <p>I - Inventory | M - Map | H - Help</p>
-                    <p>R - Rest (recover HP and stamina)</p>
-                </div>
-                <p class="overlay-hint">Press H or ESC to close</p>
+                <p class="close-hint">Press <span class="key">H</span> or <span class="key">ESC</span> to close</p>
             </div>
         </div>
 
         <!-- Victory Screen -->
         <div id="victory-screen" class="screen">
-            <h2 id="victory-title">Victory!</h2>
-            <div id="victory-message"></div>
-            <div id="victory-rewards"></div>
-            <div id="loot-drops"></div>
-            <p class="controls-hint">Press ENTER to continue</p>
+            <div class="result-content">
+                <h2 id="victory-title">Victory!</h2>
+                <div id="victory-dragon"></div>
+                <p id="victory-message">Enemy Defeated!</p>
+                <div id="rewards-display">
+                    <div class="reward"><span class="reward-icon">⭐</span><span id="xp-reward">+50 XP</span></div>
+                    <div class="reward"><span class="reward-icon">💰</span><span id="gold-reward">+25 Gold</span></div>
+                </div>
+                <div id="loot-section"></div>
+                <p class="continue-hint">Press <span class="key">ENTER</span> to continue</p>
+            </div>
         </div>
 
         <!-- Game Over Screen -->
         <div id="gameover-screen" class="screen">
-            <h2>You Have Fallen...</h2>
-            <p id="gameover-message">Your dragon has been defeated.</p>
-            <p class="controls-hint">Press ENTER to try again</p>
+            <div class="result-content">
+                <h2>You Have Fallen</h2>
+                <p id="gameover-message">Your dragon has been defeated...</p>
+                <p class="continue-hint">Press <span class="key">ENTER</span> to try again</p>
+            </div>
         </div>
 
         <!-- Level Up Screen -->
         <div id="levelup-screen" class="screen">
-            <h2>Level Up!</h2>
-            <div id="levelup-message"></div>
-            <p class="controls-hint">Press ENTER to continue</p>
+            <div class="result-content">
+                <h2>Level Up!</h2>
+                <div class="level-up-effect"></div>
+                <p id="levelup-message">You are now Level 2!</p>
+                <div id="stat-increases">
+                    <div class="stat-up">+10 Max HP</div>
+                    <div class="stat-up">+2 Attack</div>
+                    <div class="stat-up">+2 Defense</div>
+                </div>
+                <p class="continue-hint">Press <span class="key">ENTER</span> to continue</p>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="loading-content">
+                <h2>Loading...</h2>
+                <div class="loading-bar">
+                    <div id="loading-progress"></div>
+                </div>
+                <p id="loading-text">Preparing your adventure...</p>
+            </div>
         </div>
     </div>
 
