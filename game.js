@@ -1507,17 +1507,18 @@ class Enemy {
         this.isBoss = isBoss;
 
         if (isBoss) {
-            this.maxHp = 60 + level * 12;
-            this.attack = 6 + level * 2;
-            this.defense = 3 + level;
-            this.xpReward = 60 + level * 12;
-            this.goldReward = 30 + level * 6;
+            // BOSSES ARE TOUGH - like in the books!
+            this.maxHp = 250 + level * 40;
+            this.attack = 15 + level * 5;
+            this.defense = 10 + level * 3;
+            this.xpReward = 150 + level * 25;
+            this.goldReward = 75 + level * 15;
         } else {
-            this.maxHp = 20 + level * 8;
-            this.attack = 3 + level * 2;
-            this.defense = 1 + level;
-            this.xpReward = 10 + level * 5;
-            this.goldReward = 3 + level * 2;
+            this.maxHp = 30 + level * 10;
+            this.attack = 5 + level * 2;
+            this.defense = 2 + level;
+            this.xpReward = 15 + level * 8;
+            this.goldReward = 5 + level * 3;
         }
 
         this.hp = this.maxHp;
@@ -2700,7 +2701,7 @@ function renderMap() {
 }
 
 // ============================================
-// PLAYER MOVEMENT - FIXED
+// PLAYER MOVEMENT - COMPLETELY REWRITTEN
 // ============================================
 
 function updatePlayer(delta) {
@@ -2708,126 +2709,100 @@ function updatePlayer(delta) {
 
     const p = game.player;
 
-    // Clamp delta to avoid huge jumps if tab is unfocused
-    const dt = Math.min(delta, 0.1);
-
-    // Movement speed
-    let speed = CONFIG.MOVE_SPEED;
-    if (p.isFlying) speed = CONFIG.FLY_SPEED;
+    // Simple movement speed
+    let speed = 0.3;
+    if (p.isFlying) speed = 0.4;
     if (game.keys['ShiftLeft'] || game.keys['ShiftRight']) {
-        speed *= CONFIG.SPRINT_MULTIPLIER;
-        p.isSprinting = true;
-    } else {
-        p.isSprinting = false;
+        speed *= 1.5;
     }
 
-    // Calculate movement direction based on player rotation
-    const moveX = Math.sin(p.rotation);
-    const moveZ = Math.cos(p.rotation);
+    // Get direction from player rotation
+    const dirX = Math.sin(p.rotation);
+    const dirZ = Math.cos(p.rotation);
 
-    // Handle movement input - direct velocity for responsiveness
-    let moving = false;
+    // WASD Movement - simple and direct
     if (game.keys['KeyW'] || game.keys['ArrowUp']) {
-        p.velocity.x = moveX * speed * dt * 60;
-        p.velocity.z = moveZ * speed * dt * 60;
-        moving = true;
+        p.position.x += dirX * speed;
+        p.position.z += dirZ * speed;
     }
     if (game.keys['KeyS'] || game.keys['ArrowDown']) {
-        p.velocity.x = -moveX * speed * dt * 60 * 0.6; // Slower backward
-        p.velocity.z = -moveZ * speed * dt * 60 * 0.6;
-        moving = true;
+        p.position.x -= dirX * speed * 0.5;
+        p.position.z -= dirZ * speed * 0.5;
     }
 
-    // Turn with A/D
+    // A/D to turn
     if (game.keys['KeyA'] || game.keys['ArrowLeft']) {
-        p.rotation += CONFIG.TURN_SPEED * dt;
+        p.rotation += 0.05;
     }
     if (game.keys['KeyD'] || game.keys['ArrowRight']) {
-        p.rotation -= CONFIG.TURN_SPEED * dt;
+        p.rotation -= 0.05;
     }
 
-    // Apply friction when not actively moving
-    if (!moving) {
-        p.velocity.x *= CONFIG.FRICTION;
-        p.velocity.z *= CONFIG.FRICTION;
-    }
-
-    // Flying controls
+    // Flying - SPACE to go up, CTRL to go down
     if (p.isFlying) {
         if (game.keys['Space']) {
-            p.velocity.y += CONFIG.FLY_LIFT;
+            p.position.y += 0.2;
         }
         if (game.keys['ControlLeft'] || game.keys['ControlRight']) {
-            p.velocity.y -= CONFIG.FLY_LIFT * 1.5; // Faster descent
+            p.position.y -= 0.3;
         }
 
-        p.stamina -= CONFIG.STAMINA_DRAIN * dt * 60;
+        // Drain stamina while flying
+        p.stamina -= 0.1;
         if (p.stamina <= 0) {
             p.stamina = 0;
             p.isFlying = false;
-            showMessage('Out of stamina! Landing...', 'info');
+            showMessage('Out of stamina!', 'info');
         }
-
-        p.velocity.y *= 0.92; // Air resistance
     } else {
-        // Gravity when not flying
-        if (!p.isGrounded) {
-            p.velocity.y -= CONFIG.GRAVITY * dt * 60;
+        // On ground - regenerate stamina
+        p.stamina = Math.min(p.maxStamina, p.stamina + 0.05);
+
+        // Gravity if not grounded
+        if (p.position.y > 2) {
+            p.position.y -= 0.15;
         }
-        // Stamina regen on ground
-        p.stamina = Math.min(p.maxStamina, p.stamina + CONFIG.STAMINA_REGEN * dt * 60);
     }
 
-    // Apply velocity to position
-    p.position.x += p.velocity.x * dt;
-    p.position.y += p.velocity.y * dt;
-    p.position.z += p.velocity.z * dt;
-
-    // Ground collision
-    const groundY = CONFIG.GROUND_LEVEL + 2;
-    if (p.position.y <= groundY) {
-        p.position.y = groundY;
-        p.velocity.y = 0;
+    // Keep on ground if not flying
+    if (!p.isFlying && p.position.y < 2) {
+        p.position.y = 2;
         p.isGrounded = true;
-        if (p.isFlying) {
-            p.isFlying = false;
-        }
-    } else {
+    } else if (p.position.y > 2) {
         p.isGrounded = false;
     }
 
     // World boundaries
-    p.position.x = Math.max(-115, Math.min(115, p.position.x));
-    p.position.z = Math.max(-115, Math.min(115, p.position.z));
+    p.position.x = Math.max(-100, Math.min(100, p.position.x));
+    p.position.z = Math.max(-100, Math.min(100, p.position.z));
+    p.position.y = Math.max(2, Math.min(50, p.position.y));
 
-    // Update mesh position and rotation
+    // Update mesh
     p.mesh.position.copy(p.position);
     p.mesh.rotation.y = p.rotation;
 
     // Wing animation
     if (p.mesh.userData) {
-        const wingSpeed = p.isFlying ? 0.015 : 0.003;
-        const wingAmount = p.isFlying ? 0.8 : 0.1;
-        p.mesh.userData.wingAngle = Math.sin(Date.now() * wingSpeed) * wingAmount;
+        const wingSpeed = p.isFlying ? 0.02 : 0.005;
+        const wingAmount = p.isFlying ? 0.6 : 0.1;
+        const wingAngle = Math.sin(Date.now() * wingSpeed) * wingAmount;
 
         if (p.mesh.userData.leftWing) {
-            p.mesh.userData.leftWing.rotation.x = Math.PI / 2.5 + p.mesh.userData.wingAngle;
+            p.mesh.userData.leftWing.rotation.x = Math.PI / 2.5 + wingAngle;
         }
         if (p.mesh.userData.rightWing) {
-            p.mesh.userData.rightWing.rotation.x = -Math.PI / 2.5 - p.mesh.userData.wingAngle;
+            p.mesh.userData.rightWing.rotation.x = -Math.PI / 2.5 - wingAngle;
         }
     }
 
-    // Smooth camera follow - orbit around player
-    const targetCamX = p.position.x - Math.sin(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
-    const targetCamY = p.position.y + Math.sin(game.cameraAngleX) * game.cameraDist + CONFIG.CAMERA_HEIGHT;
-    const targetCamZ = p.position.z - Math.cos(game.cameraAngleY) * game.cameraDist * Math.cos(game.cameraAngleX);
+    // Camera follows player
+    const camDist = 20;
+    const camHeight = 12;
+    const camX = p.position.x - Math.sin(game.cameraAngleY) * camDist;
+    const camY = p.position.y + camHeight;
+    const camZ = p.position.z - Math.cos(game.cameraAngleY) * camDist;
 
-    // Smooth camera movement
-    game.camera.position.x += (targetCamX - game.camera.position.x) * 0.1;
-    game.camera.position.y += (targetCamY - game.camera.position.y) * 0.1;
-    game.camera.position.z += (targetCamZ - game.camera.position.z) * 0.1;
-
+    game.camera.position.set(camX, camY, camZ);
     game.camera.lookAt(p.position.x, p.position.y + 2, p.position.z);
 }
 
@@ -3049,11 +3024,11 @@ function handleGameInput(e) {
 
     switch (e.code) {
         case 'Space':
-            if (game.player.isGrounded && game.player.stamina > 15) {
-                game.player.velocity.y = CONFIG.JUMP_FORCE;
+            if (!game.player.isFlying && game.player.stamina > 15) {
                 game.player.isFlying = true;
                 game.player.isGrounded = false;
-                showMessage('Taking flight! SPACE to rise, CTRL to descend', 'info');
+                game.player.position.y += 3; // Lift off!
+                showMessage('Flying! SPACE=up, CTRL=down', 'info');
             }
             break;
 
