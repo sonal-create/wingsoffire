@@ -405,7 +405,14 @@ const game = {
 
     // Animation
     clock: null,
-    animationFrame: null
+    animationFrame: null,
+
+    // Real-time combat
+    attackCooldown: 0,
+    breathCooldown: 0,
+    specialCooldown: 0,
+    combatEffects: [],
+    damageNumbers: []
 };
 
 // ============================================
@@ -1777,7 +1784,372 @@ function showMessage(text, type = 'info') {
 }
 
 // ============================================
-// BATTLE SYSTEM
+// REAL-TIME COMBAT (Attack while moving!)
+// ============================================
+
+function realTimeAttack() {
+    if (game.attackCooldown > 0 || !game.player || !game.world) return false;
+
+    const p = game.player;
+    const attackRange = 8;
+    const attackAngle = Math.PI / 3; // 60 degree cone
+    let hitEnemy = null;
+    let hitDist = Infinity;
+
+    // Find closest enemy in attack range and direction
+    game.world.enemies.forEach(enemy => {
+        if (!enemy.mesh) return;
+        const dist = p.position.distanceTo(enemy.mesh.position);
+        if (dist > attackRange) return;
+
+        // Check if enemy is in front of player
+        const toEnemy = new THREE.Vector3().subVectors(enemy.mesh.position, p.position).normalize();
+        const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
+        const angle = Math.acos(facing.dot(toEnemy));
+
+        if (angle < attackAngle && dist < hitDist) {
+            hitDist = dist;
+            hitEnemy = enemy;
+        }
+    });
+
+    // Also check boss
+    if (game.world.boss && game.world.boss.mesh) {
+        const dist = p.position.distanceTo(game.world.boss.mesh.position);
+        if (dist <= attackRange) {
+            const toEnemy = new THREE.Vector3().subVectors(game.world.boss.mesh.position, p.position).normalize();
+            const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
+            const angle = Math.acos(facing.dot(toEnemy));
+            if (angle < attackAngle && dist < hitDist) {
+                hitEnemy = game.world.boss;
+            }
+        }
+    }
+
+    if (hitEnemy) {
+        // Calculate damage with crits and bonuses
+        let baseDmg = p.attack + Math.floor(Math.random() * 6);
+        let isCrit = Math.random() < 0.15; // 15% crit chance
+        let isMoving = Math.abs(p.velocity.x) > 0.1 || Math.abs(p.velocity.z) > 0.1;
+
+        if (isCrit) baseDmg = Math.floor(baseDmg * 1.8);
+        if (p.isFlying) baseDmg = Math.floor(baseDmg * 1.25); // Aerial bonus
+        if (isMoving) baseDmg = Math.floor(baseDmg * 1.1); // Movement bonus
+
+        const dealt = hitEnemy.takeDamage(baseDmg);
+
+        // Show damage number
+        spawnDamageNumber(hitEnemy.mesh.position, dealt, isCrit);
+
+        // Visual effect
+        spawnCombatEffect(hitEnemy.mesh.position, 'slash');
+
+        // Message
+        let msg = `Hit ${hitEnemy.name} for ${dealt}!`;
+        if (isCrit) msg = `CRITICAL! ${dealt} damage to ${hitEnemy.name}!`;
+        showMessage(msg, isCrit ? 'critical' : 'damage');
+
+        // Check if enemy died
+        if (hitEnemy.hp <= 0) {
+            defeatEnemy(hitEnemy);
+        }
+
+        game.attackCooldown = 0.4; // 400ms cooldown
+        return true;
+    }
+
+    game.attackCooldown = 0.2; // Short cooldown even on miss
+    return false;
+}
+
+function realTimeBreathAttack() {
+    if (game.breathCooldown > 0 || !game.player || !game.world) return false;
+
+    const p = game.player;
+    const attackRange = 15;
+    const attackAngle = Math.PI / 4; // 45 degree cone
+    let hitEnemies = [];
+
+    // Find all enemies in breath cone
+    game.world.enemies.forEach(enemy => {
+        if (!enemy.mesh) return;
+        const dist = p.position.distanceTo(enemy.mesh.position);
+        if (dist > attackRange) return;
+
+        const toEnemy = new THREE.Vector3().subVectors(enemy.mesh.position, p.position).normalize();
+        const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
+        const angle = Math.acos(facing.dot(toEnemy));
+
+        if (angle < attackAngle) {
+            hitEnemies.push({ enemy, dist });
+        }
+    });
+
+    // Check boss too
+    if (game.world.boss && game.world.boss.mesh) {
+        const dist = p.position.distanceTo(game.world.boss.mesh.position);
+        if (dist <= attackRange) {
+            const toEnemy = new THREE.Vector3().subVectors(game.world.boss.mesh.position, p.position).normalize();
+            const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
+            const angle = Math.acos(facing.dot(toEnemy));
+            if (angle < attackAngle) {
+                hitEnemies.push({ enemy: game.world.boss, dist });
+            }
+        }
+    }
+
+    // Spawn breath effect
+    spawnBreathEffect(p);
+
+    if (hitEnemies.length > 0) {
+        hitEnemies.forEach(({ enemy, dist }) => {
+            // Damage decreases with distance
+            const distMod = 1 - (dist / attackRange) * 0.5;
+            let dmg = Math.floor((p.attack * 1.4 + Math.random() * 10) * distMod);
+            if (p.isFlying) dmg = Math.floor(dmg * 1.25);
+
+            const dealt = enemy.takeDamage(dmg);
+            spawnDamageNumber(enemy.mesh.position, dealt, false);
+
+            if (enemy.hp <= 0) {
+                defeatEnemy(enemy);
+            }
+        });
+
+        const breathName = p.breathType === 'ice' ? 'Frost Breath' :
+                          p.breathType === 'acid' ? 'Venom Spit' :
+                          p.breathType === 'water' ? 'Tidal Blast' : 'Fire Breath';
+        showMessage(`${breathName} hits ${hitEnemies.length} enemies!`, 'player');
+    }
+
+    game.breathCooldown = 1.5; // 1.5 second cooldown
+    return hitEnemies.length > 0;
+}
+
+function realTimeSpecialAttack() {
+    if (game.specialCooldown > 0 || !game.player || !game.world) return false;
+
+    const p = game.player;
+    const attackRange = 12;
+    let hitEnemies = [];
+
+    // Special attacks hit all nearby enemies (360 degrees)
+    game.world.enemies.forEach(enemy => {
+        if (!enemy.mesh) return;
+        const dist = p.position.distanceTo(enemy.mesh.position);
+        if (dist <= attackRange) {
+            hitEnemies.push(enemy);
+        }
+    });
+
+    if (game.world.boss && game.world.boss.mesh) {
+        const dist = p.position.distanceTo(game.world.boss.mesh.position);
+        if (dist <= attackRange) {
+            hitEnemies.push(game.world.boss);
+        }
+    }
+
+    // Spawn special effect
+    spawnSpecialEffect(p);
+
+    if (hitEnemies.length > 0) {
+        hitEnemies.forEach(enemy => {
+            let dmg = Math.floor(p.attack * 2.2);
+            if (p.isFlying) dmg = Math.floor(dmg * 1.25);
+
+            const dealt = enemy.takeDamage(dmg);
+            spawnDamageNumber(enemy.mesh.position, dealt, true);
+
+            if (enemy.hp <= 0) {
+                defeatEnemy(enemy);
+            }
+        });
+
+        showMessage(`${p.special}! Hit ${hitEnemies.length} enemies!`, 'critical');
+    }
+
+    game.specialCooldown = 5; // 5 second cooldown
+    return hitEnemies.length > 0;
+}
+
+function defeatEnemy(enemy) {
+    const p = game.player;
+
+    // Give rewards
+    const leveledUp = p.gainXP(enemy.xpReward);
+    p.gold += enemy.goldReward;
+
+    showMessage(`Defeated ${enemy.name}! +${enemy.xpReward} XP, +${enemy.goldReward} Gold`, 'reward');
+
+    if (leveledUp) {
+        showMessage(`LEVEL UP! Now level ${p.level}!`, 'critical');
+    }
+
+    // Random loot
+    if (Math.random() < 0.35) {
+        p.addItem('healingPotion');
+        showMessage('Found a Healing Potion!', 'reward');
+    }
+
+    // Remove enemy
+    if (enemy.mesh) game.scene.remove(enemy.mesh);
+    game.world.enemies = game.world.enemies.filter(e => e !== enemy);
+    if (enemy === game.world.boss) game.world.boss = null;
+
+    updateHUD();
+}
+
+function spawnDamageNumber(position, damage, isCrit) {
+    game.damageNumbers.push({
+        position: position.clone(),
+        damage: damage,
+        isCrit: isCrit,
+        life: 1.5,
+        velocity: new THREE.Vector3((Math.random() - 0.5) * 2, 3, (Math.random() - 0.5) * 2)
+    });
+}
+
+function spawnCombatEffect(position, type) {
+    const effectMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.8 });
+    const effectGeo = new THREE.RingGeometry(0.5, 2, 8);
+    const effect = new THREE.Mesh(effectGeo, effectMat);
+    effect.position.copy(position);
+    effect.position.y += 2;
+    effect.rotation.x = -Math.PI / 2;
+    game.scene.add(effect);
+
+    game.combatEffects.push({
+        mesh: effect,
+        life: 0.3,
+        type: type
+    });
+}
+
+function spawnBreathEffect(player) {
+    const p = player;
+    const breathColor = p.breathType === 'ice' ? 0x00FFFF :
+                       p.breathType === 'acid' ? 0x00FF00 :
+                       p.breathType === 'water' ? 0x0066FF : 0xFF4500;
+
+    for (let i = 0; i < 10; i++) {
+        const particleMat = new THREE.MeshBasicMaterial({ color: breathColor, transparent: true, opacity: 0.7 });
+        const particleGeo = new THREE.SphereGeometry(0.3 + Math.random() * 0.3, 6, 6);
+        const particle = new THREE.Mesh(particleGeo, particleMat);
+
+        const offset = (Math.random() - 0.5) * 2;
+        particle.position.set(
+            p.position.x + Math.sin(p.rotation) * 2,
+            p.position.y + 1.5,
+            p.position.z + Math.cos(p.rotation) * 2
+        );
+
+        game.scene.add(particle);
+        game.combatEffects.push({
+            mesh: particle,
+            life: 0.8,
+            velocity: new THREE.Vector3(
+                Math.sin(p.rotation + offset * 0.3) * 20,
+                (Math.random() - 0.3) * 3,
+                Math.cos(p.rotation + offset * 0.3) * 20
+            ),
+            type: 'breath'
+        });
+    }
+}
+
+function spawnSpecialEffect(player) {
+    const p = player;
+    const tribeData = TRIBES[p.tribe];
+
+    for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const particleMat = new THREE.MeshBasicMaterial({
+            color: tribeData.colors.primary,
+            transparent: true,
+            opacity: 0.8
+        });
+        const particleGeo = new THREE.SphereGeometry(0.5, 6, 6);
+        const particle = new THREE.Mesh(particleGeo, particleMat);
+
+        particle.position.copy(p.position);
+        particle.position.y += 1;
+
+        game.scene.add(particle);
+        game.combatEffects.push({
+            mesh: particle,
+            life: 1.0,
+            velocity: new THREE.Vector3(Math.cos(angle) * 15, 2, Math.sin(angle) * 15),
+            type: 'special'
+        });
+    }
+}
+
+function updateCombatEffects(delta) {
+    // Update damage numbers (floating text)
+    game.damageNumbers = game.damageNumbers.filter(dn => {
+        dn.life -= delta;
+        dn.position.add(dn.velocity.clone().multiplyScalar(delta));
+        dn.velocity.y -= 5 * delta; // Gravity
+        return dn.life > 0;
+    });
+
+    // Update visual effects
+    game.combatEffects = game.combatEffects.filter(effect => {
+        effect.life -= delta;
+
+        if (effect.velocity) {
+            effect.mesh.position.add(effect.velocity.clone().multiplyScalar(delta));
+            effect.velocity.multiplyScalar(0.95); // Drag
+        }
+
+        if (effect.type === 'slash') {
+            effect.mesh.scale.multiplyScalar(1.1);
+        }
+
+        effect.mesh.material.opacity = effect.life / 1.0;
+
+        if (effect.life <= 0) {
+            game.scene.remove(effect.mesh);
+            return false;
+        }
+        return true;
+    });
+
+    // Update cooldowns
+    if (game.attackCooldown > 0) game.attackCooldown -= delta;
+    if (game.breathCooldown > 0) game.breathCooldown -= delta;
+    if (game.specialCooldown > 0) game.specialCooldown -= delta;
+}
+
+function renderDamageNumbers() {
+    // This uses CSS overlays for damage numbers
+    const container = document.getElementById('damage-numbers');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    game.damageNumbers.forEach(dn => {
+        // Project 3D position to 2D screen
+        const vector = dn.position.clone();
+        vector.project(game.camera);
+
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+        if (vector.z < 1) { // In front of camera
+            const div = document.createElement('div');
+            div.className = `damage-number ${dn.isCrit ? 'critical' : ''}`;
+            div.textContent = dn.damage;
+            div.style.left = `${x}px`;
+            div.style.top = `${y}px`;
+            div.style.opacity = Math.min(1, dn.life);
+            container.appendChild(div);
+        }
+    });
+}
+
+// ============================================
+// BATTLE SYSTEM (Turn-based for when close contact)
 // ============================================
 
 function startBattle(enemy) {
@@ -1787,7 +2159,15 @@ function startBattle(enemy) {
         combo: 0,
         defending: false,
         canAct: true,
-        isAerial: game.player.isFlying || enemy.isFlying
+        isAerial: game.player.isFlying || enemy.isFlying,
+        // Combat complexity additions
+        playerStatusEffects: [],
+        enemyStatusEffects: [],
+        counterReady: false,
+        perfectDodgeWindow: false,
+        momentum: 0, // Builds up for powerful finishers
+        critChance: 0.15,
+        dodgeChance: 0.1
     };
 
     showScreen('battle');
@@ -1798,8 +2178,11 @@ function startBattle(enemy) {
 
     if (enemy.isBoss) {
         document.getElementById('battle-title').textContent = '👑 BOSS BATTLE! 👑';
+        addBattleLog('Boss has enhanced abilities!', 'enemy');
     } else if (game.battle.isAerial) {
         document.getElementById('battle-title').textContent = '🦅 Aerial Combat! 🦅';
+        addBattleLog('Aerial advantage: +25% damage, +20% dodge!', 'system');
+        game.battle.dodgeChance += 0.2;
     } else {
         document.getElementById('battle-title').textContent = 'Battle!';
     }
@@ -1847,24 +2230,68 @@ function battleAction(action) {
     game.battle.canAct = false;
 
     const aerialBonus = game.battle.isAerial ? 1.25 : 1;
+    const comboBonus = 1 + (game.battle.combo * 0.05); // 5% per combo
+    const momentumBonus = 1 + (game.battle.momentum * 0.02); // 2% per momentum
+
+    // Check for critical hit
+    const isCrit = Math.random() < (game.battle.critChance + game.battle.combo * 0.03);
+    const critMult = isCrit ? 1.8 : 1;
+
+    // Apply status effect modifiers
+    let statusMod = 1;
+    game.battle.playerStatusEffects.forEach(effect => {
+        if (effect.type === 'strength') statusMod *= 1.3;
+        if (effect.type === 'weakness') statusMod *= 0.7;
+    });
 
     switch (action) {
         case 'attack':
-            let dmg = Math.floor((p.attack + Math.floor(Math.random() * 6)) * aerialBonus);
+            let dmg = Math.floor((p.attack + Math.floor(Math.random() * 6)) * aerialBonus * comboBonus * critMult * statusMod);
             const dealt = e.takeDamage(dmg);
             game.battle.combo++;
-            addBattleLog(`You attack for ${dealt} damage!${game.battle.isAerial ? ' (Aerial!)' : ''}`, 'player');
-            if (game.battle.combo > 2) addBattleLog(`${game.battle.combo}x Combo!`, 'critical');
+            game.battle.momentum = Math.min(10, game.battle.momentum + 1);
+
+            let attackMsg = `You attack for ${dealt} damage!`;
+            if (isCrit) attackMsg = `CRITICAL HIT! ${dealt} damage!`;
+            if (game.battle.isAerial) attackMsg += ' (Aerial!)';
+            addBattleLog(attackMsg, isCrit ? 'critical' : 'player');
+
+            if (game.battle.combo > 2) addBattleLog(`${game.battle.combo}x Combo! (+${Math.floor(comboBonus * 100 - 100)}% damage)`, 'critical');
+
+            // Chance to apply bleed
+            if (isCrit && Math.random() < 0.3) {
+                game.battle.enemyStatusEffects.push({ type: 'bleed', duration: 3, damage: 5 });
+                addBattleLog('Enemy is bleeding!', 'critical');
+            }
             break;
 
         case 'fire':
-            const breathDmg = Math.floor((p.attack * 1.4 + Math.floor(Math.random() * 10)) * aerialBonus);
+            const breathDmg = Math.floor((p.attack * 1.4 + Math.floor(Math.random() * 10)) * aerialBonus * momentumBonus * critMult * statusMod);
             const breathDealt = e.takeDamage(breathDmg);
             game.battle.combo++;
+            game.battle.momentum = Math.min(10, game.battle.momentum + 2);
+
             const breathName = p.breathType === 'ice' ? 'Frost Breath' :
                               p.breathType === 'acid' ? 'Venom Spit' :
                               p.breathType === 'water' ? 'Tidal Blast' : 'Fire Breath';
-            addBattleLog(`${breathName} deals ${breathDealt} damage!`, 'player');
+            addBattleLog(`${breathName} deals ${breathDealt} damage!${isCrit ? ' CRITICAL!' : ''}`, isCrit ? 'critical' : 'player');
+
+            // Status effect based on breath type
+            if (Math.random() < 0.35) {
+                if (p.breathType === 'ice') {
+                    game.battle.enemyStatusEffects.push({ type: 'frozen', duration: 2 });
+                    addBattleLog('Enemy is frozen! (-30% speed)', 'player');
+                } else if (p.breathType === 'acid') {
+                    game.battle.enemyStatusEffects.push({ type: 'poison', duration: 4, damage: 8 });
+                    addBattleLog('Enemy is poisoned!', 'player');
+                } else if (p.breathType === 'fire') {
+                    game.battle.enemyStatusEffects.push({ type: 'burn', duration: 3, damage: 6 });
+                    addBattleLog('Enemy is burning!', 'player');
+                } else if (p.breathType === 'water') {
+                    game.battle.enemyStatusEffects.push({ type: 'soaked', duration: 3 });
+                    addBattleLog('Enemy is soaked! (Vulnerable to attacks)', 'player');
+                }
+            }
             break;
 
         case 'special':
@@ -1873,11 +2300,35 @@ function battleAction(action) {
                 game.battle.canAct = true;
                 return;
             }
-            const specialDmg = Math.floor(p.attack * 2.2 * aerialBonus);
+            // Special always crits if momentum is high
+            const specialCrit = game.battle.momentum >= 5 || isCrit;
+            const specialCritMult = specialCrit ? 2.0 : 1;
+            const specialDmg = Math.floor(p.attack * 2.2 * aerialBonus * specialCritMult * statusMod);
             const specialDealt = e.takeDamage(specialDmg);
             p.specialCooldown = 3;
             game.battle.combo++;
-            addBattleLog(`${p.special}! ${specialDealt} damage!`, 'critical');
+            game.battle.momentum = 0; // Reset momentum after special
+
+            addBattleLog(`${p.special}! ${specialDealt} damage!${specialCrit ? ' DEVASTATING!' : ''}`, 'critical');
+
+            // Tribe-specific bonus effects
+            if (p.tribe === 'NightWing' && Math.random() < 0.5) {
+                game.battle.enemyStatusEffects.push({ type: 'fear', duration: 2 });
+                addBattleLog('Enemy is terrified! (May skip turn)', 'critical');
+            } else if (p.tribe === 'IceWing') {
+                game.battle.enemyStatusEffects.push({ type: 'frozen', duration: 1 });
+                addBattleLog('Enemy is flash-frozen!', 'critical');
+            } else if (p.tribe === 'RainWing') {
+                p.heal(Math.floor(p.maxHp * 0.15));
+                addBattleLog('Healing camouflage! +15% HP', 'player');
+            }
+            break;
+
+        case 'counter':
+            // Set up counter-attack stance
+            game.battle.counterReady = true;
+            game.battle.combo = 0;
+            addBattleLog('Counter stance! Will counter-attack if enemy strikes!', 'player');
             break;
 
         case 'defend':
@@ -1926,17 +2377,110 @@ function enemyTurn() {
 
     game.battle.turn = 'enemy';
 
+    // Process enemy status effects first
+    let canAct = true;
+    game.battle.enemyStatusEffects = game.battle.enemyStatusEffects.filter(effect => {
+        effect.duration--;
+
+        // Damage over time effects
+        if (effect.type === 'bleed' || effect.type === 'poison' || effect.type === 'burn') {
+            e.takeDamage(effect.damage);
+            addBattleLog(`${e.name} takes ${effect.damage} ${effect.type} damage!`, 'player');
+        }
+
+        // Fear may cause skip
+        if (effect.type === 'fear' && Math.random() < 0.4) {
+            addBattleLog(`${e.name} is too afraid to attack!`, 'player');
+            canAct = false;
+        }
+
+        // Frozen may cause skip
+        if (effect.type === 'frozen' && Math.random() < 0.5) {
+            addBattleLog(`${e.name} is frozen solid!`, 'player');
+            canAct = false;
+        }
+
+        return effect.duration > 0;
+    });
+
+    // Check if enemy died from status effects
+    if (e.hp <= 0) {
+        addBattleLog(`${e.name} succumbed to status effects!`, 'critical');
+        setTimeout(() => endBattle(true), 500);
+        return;
+    }
+
+    if (!canAct) {
+        // Skip to player turn
+        if (p.specialCooldown > 0) p.specialCooldown--;
+        game.battle.turn = 'player';
+        game.battle.canAct = true;
+        updateBattleUI();
+        return;
+    }
+
+    // Calculate enemy damage with status modifiers
     let dmg = e.attack + Math.floor(Math.random() * 5);
+
+    // Frozen enemies deal less damage
+    if (game.battle.enemyStatusEffects.some(ef => ef.type === 'frozen')) {
+        dmg = Math.floor(dmg * 0.7);
+    }
+
+    // Soaked enemies take more damage AND deal less
+    if (game.battle.enemyStatusEffects.some(ef => ef.type === 'soaked')) {
+        dmg = Math.floor(dmg * 0.85);
+    }
 
     if (game.battle.isAerial && e.isFlying) dmg = Math.floor(dmg * 1.1);
 
-    if (game.battle.defending) {
+    // Check for player dodge
+    if (Math.random() < game.battle.dodgeChance) {
+        addBattleLog(`You dodged ${e.name}'s attack!`, 'player');
+        game.battle.perfectDodgeWindow = true;
+    } else if (game.battle.counterReady) {
+        // Counter-attack!
+        game.battle.counterReady = false;
+        const counterDmg = Math.floor(p.attack * 1.5);
+        const counterDealt = e.takeDamage(counterDmg);
+        const reducedDmg = Math.floor(dmg * 0.5);
+        const dealt = p.takeDamage(reducedDmg);
+
+        addBattleLog(`Counter-attack! You deal ${counterDealt} and take only ${dealt}!`, 'critical');
+
+        if (e.hp <= 0) {
+            setTimeout(() => endBattle(true), 500);
+            return;
+        }
+    } else if (game.battle.defending) {
         dmg = Math.floor(dmg * 0.35);
         game.battle.defending = false;
+        const dealt = p.takeDamage(dmg);
+        addBattleLog(`Blocked! ${e.name} attacks for only ${dealt} damage!`, 'player');
+    } else {
+        // Normal attack
+        // Enemy can also crit
+        const enemyCrit = Math.random() < 0.1;
+        if (enemyCrit) {
+            dmg = Math.floor(dmg * 1.5);
+            const dealt = p.takeDamage(dmg);
+            addBattleLog(`${e.name} lands a CRITICAL HIT for ${dealt} damage!`, 'enemy');
+            game.battle.combo = 0; // Crit breaks combo
+        } else {
+            const dealt = p.takeDamage(dmg);
+            addBattleLog(`${e.name} attacks for ${dealt} damage!`, 'enemy');
+        }
     }
 
-    const dealt = p.takeDamage(dmg);
-    addBattleLog(`${e.name} attacks for ${dealt} damage!`, 'enemy');
+    // Process player status effects
+    game.battle.playerStatusEffects = game.battle.playerStatusEffects.filter(effect => {
+        effect.duration--;
+        if (effect.type === 'bleed' || effect.type === 'poison') {
+            p.takeDamage(effect.damage);
+            addBattleLog(`You take ${effect.damage} ${effect.type} damage!`, 'enemy');
+        }
+        return effect.duration > 0;
+    });
 
     if (p.specialCooldown > 0) p.specialCooldown--;
 
@@ -1950,6 +2494,7 @@ function enemyTurn() {
 
     game.battle.turn = 'player';
     game.battle.canAct = true;
+    game.battle.perfectDodgeWindow = false;
 }
 
 function endBattle(victory) {
@@ -2276,11 +2821,30 @@ function gameLoop() {
         updatePlayer(delta);
         game.world.update(delta);
         checkCollisions();
+        updateCombatEffects(delta);
+        renderDamageNumbers();
+        updateCooldownUI();
         updateHUD();
     }
 
     if (game.renderer && game.scene && game.camera) {
         game.renderer.render(game.scene, game.camera);
+    }
+}
+
+function updateCooldownUI() {
+    const attackCD = document.getElementById('attack-cooldown');
+    const breathCD = document.getElementById('breath-cooldown');
+    const specialCD = document.getElementById('special-cooldown');
+
+    if (attackCD) {
+        attackCD.style.width = `${Math.max(0, game.attackCooldown / 0.4) * 100}%`;
+    }
+    if (breathCD) {
+        breathCD.style.width = `${Math.max(0, game.breathCooldown / 1.5) * 100}%`;
+    }
+    if (specialCD) {
+        specialCD.style.width = `${Math.max(0, game.specialCooldown / 5) * 100}%`;
     }
 }
 
@@ -2353,6 +2917,7 @@ function handleCharacterInput(e) {
         updateHUD();
         showMessage(`Welcome, ${name} the ${tribe}!`, 'info');
         showMessage('W/S move, A/D turn, SPACE to fly', 'info');
+        showMessage('J attack, K breath, L special - Attack while moving!', 'info');
     }
 }
 
@@ -2377,6 +2942,18 @@ function handleGameInput(e) {
                 showMessage('Taking flight!', 'info');
             }
             break;
+
+        // Real-time combat controls - attack while moving!
+        case 'KeyJ':  // Basic attack (claw swipe)
+            realTimeAttack();
+            break;
+        case 'KeyK':  // Breath attack (fire/ice/acid/water)
+            realTimeBreathAttack();
+            break;
+        case 'KeyL':  // Special tribal ability
+            realTimeSpecialAttack();
+            break;
+
         case 'KeyI':
             renderInventory();
             toggleOverlay('inventory');

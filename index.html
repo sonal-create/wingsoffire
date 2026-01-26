@@ -261,9 +261,37 @@
                 <span>WASD Move</span>
                 <span>SPACE Jump/Fly</span>
                 <span>MOUSE Look</span>
+                <span>J/K/L Attack</span>
                 <span>I Inventory</span>
                 <span>M Map</span>
-                <span>H Help</span>
+            </div>
+
+            <!-- Damage Numbers Container -->
+            <div id="damage-numbers"></div>
+
+            <!-- Combat Cooldowns UI -->
+            <div id="combat-cooldowns">
+                <div class="cooldown-slot">
+                    <span class="cooldown-key">J</span>
+                    <span class="cooldown-name">Claw</span>
+                    <div class="cooldown-bar">
+                        <div id="attack-cooldown" class="cooldown-fill"></div>
+                    </div>
+                </div>
+                <div class="cooldown-slot">
+                    <span class="cooldown-key">K</span>
+                    <span class="cooldown-name">Breath</span>
+                    <div class="cooldown-bar">
+                        <div id="breath-cooldown" class="cooldown-fill"></div>
+                    </div>
+                </div>
+                <div class="cooldown-slot">
+                    <span class="cooldown-key">L</span>
+                    <span class="cooldown-name">Special</span>
+                    <div class="cooldown-bar">
+                        <div id="special-cooldown" class="cooldown-fill"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -375,11 +403,18 @@
                         <p><span class="key">MOUSE</span> - Look Around</p>
                     </div>
                     <div class="help-section">
-                        <h3>Combat</h3>
-                        <p><span class="key">LMB</span> - Basic Attack</p>
-                        <p><span class="key">RMB</span> - Fire/Frost/Venom Breath</p>
+                        <h3>Real-Time Combat</h3>
+                        <p><span class="key">J</span> - Claw Attack (while moving!)</p>
+                        <p><span class="key">K</span> - Breath Attack (cone AoE)</p>
+                        <p><span class="key">L</span> - Special Ability (360 AoE)</p>
+                        <p>Attack enemies without stopping!</p>
+                    </div>
+                    <div class="help-section">
+                        <h3>Turn-Based Combat</h3>
+                        <p><span class="key">SPACE</span> - Basic Attack</p>
+                        <p><span class="key">F</span> - Fire/Frost/Venom Breath</p>
                         <p><span class="key">E</span> - Special Ability</p>
-                        <p><span class="key">Q</span> - Defend</p>
+                        <p><span class="key">Q</span> - Defend / Counter</p>
                     </div>
                     <div class="help-section">
                         <h3>Menus</h3>
