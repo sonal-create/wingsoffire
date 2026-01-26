@@ -1227,3 +1227,215 @@ body {
     0%, 100% { transform: translateX(0) scale(1); }
     50% { transform: translateX(5px) scale(1.05); }
 }
+
+/* ==================== RPG SKILLS UI ==================== */
+
+.skills-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: rgba(243, 156, 18, 0.2);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.skill-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+}
+
+.skill-item.unlocked {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.2);
+}
+
+.skill-item.available {
+    border-color: #f39c12;
+    cursor: pointer;
+}
+
+.skill-item.available:hover {
+    background: rgba(243, 156, 18, 0.3);
+    transform: scale(1.02);
+}
+
+.skill-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #f39c12;
+    margin-bottom: 5px;
+}
+
+.skill-item.unlocked .skill-name {
+    color: #27ae60;
+}
+
+.skill-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+}
+
+.skill-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== RPG QUESTS UI ==================== */
+
+.no-quests {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+.quest-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.quest-item.main {
+    border-left: 4px solid #e74c3c;
+}
+
+.quest-item.side {
+    border-left: 4px solid #3498db;
+}
+
+.quest-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.quest-type {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.quest-item.main .quest-type {
+    background: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+}
+
+.quest-item.side .quest-type {
+    background: rgba(52, 152, 219, 0.3);
+    color: #3498db;
+}
+
+.quest-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.quest-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.quest-objectives {
+    margin-bottom: 10px;
+}
+
+.objective {
+    font-size: 0.9rem;
+    padding: 5px 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.objective.done {
+    color: #27ae60;
+    text-decoration: line-through;
+}
+
+.quest-rewards {
+    font-size: 0.85rem;
+    color: #f39c12;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== RPG DIALOGUE UI ==================== */
+
+.dialogue-box {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 700px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--ui-accent);
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 200;
+}
+
+.dialogue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#dialogue-npc-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #f39c12;
+}
+
+#dialogue-npc-role {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+#dialogue-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #fff;
+    min-height: 60px;
+}
+
+.dialogue-hint {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== RPG INTERACTION PROMPT ==================== */
+
+#interaction-prompt {
+    position: fixed;
+    bottom: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--ui-accent);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    z-index: 100;
+}

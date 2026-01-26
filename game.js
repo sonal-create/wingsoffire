@@ -373,7 +373,205 @@ const ITEMS = {
     healingPotion: { name: 'Healing Potion', icon: '🧪', effect: 'heal', value: 50 },
     megaPotion: { name: 'Mega Potion', icon: '💊', effect: 'heal', value: 100 },
     energyDrink: { name: 'Energy Drink', icon: '⚡', effect: 'stamina', value: 50 },
-    strengthElixir: { name: 'Strength Elixir', icon: '💪', effect: 'attack', value: 10, duration: 3 }
+    strengthElixir: { name: 'Strength Elixir', icon: '💪', effect: 'attack', value: 10, duration: 3 },
+    dragonScale: { name: 'Dragon Scale', icon: '🐉', effect: 'material', value: 0 },
+    goldCoin: { name: 'Gold Coin', icon: '🪙', effect: 'currency', value: 10 },
+    fireRuby: { name: 'Fire Ruby', icon: '🔴', effect: 'material', value: 0 },
+    frostSapphire: { name: 'Frost Sapphire', icon: '🔵', effect: 'material', value: 0 },
+    ancientScroll: { name: 'Ancient Scroll', icon: '📜', effect: 'quest', value: 0 }
+};
+
+// ============================================
+// RPG EQUIPMENT SYSTEM
+// ============================================
+
+const EQUIPMENT = {
+    // Armor (increases defense)
+    bronzeScales: { name: 'Bronze Scale Armor', slot: 'armor', defense: 5, icon: '🛡️' },
+    ironScales: { name: 'Iron Scale Armor', slot: 'armor', defense: 10, icon: '🛡️' },
+    steelScales: { name: 'Steel Scale Armor', slot: 'armor', defense: 18, icon: '🛡️' },
+    dragonsteelArmor: { name: 'Dragonsteel Armor', slot: 'armor', defense: 30, icon: '⚔️' },
+
+    // Claws (increases attack)
+    sharpClaws: { name: 'Sharpened Claws', slot: 'claws', attack: 5, icon: '🦅' },
+    steelClaws: { name: 'Steel-Tipped Claws', slot: 'claws', attack: 12, icon: '🦅' },
+    venomClaws: { name: 'Venom-Coated Claws', slot: 'claws', attack: 20, poison: true, icon: '☠️' },
+
+    // Accessories (special bonuses)
+    staminaRing: { name: 'Ring of Endurance', slot: 'accessory', staminaBonus: 30, icon: '💍' },
+    healthAmulet: { name: 'Amulet of Vitality', slot: 'accessory', hpBonus: 50, icon: '📿' },
+    fireCharm: { name: 'Charm of Flames', slot: 'accessory', fireBonus: 25, icon: '🔥' }
+};
+
+// ============================================
+// RPG SKILLS SYSTEM
+// ============================================
+
+const SKILLS = {
+    // Combat Skills
+    powerStrike: { name: 'Power Strike', desc: 'Deal 150% damage', type: 'combat', cost: 1, unlockLevel: 1 },
+    fireBreathPlus: { name: 'Fire Breath+', desc: 'Breath attacks deal 25% more', type: 'passive', cost: 1, unlockLevel: 3 },
+    criticalEye: { name: 'Critical Eye', desc: '+10% critical hit chance', type: 'passive', cost: 2, unlockLevel: 5 },
+    dragonRage: { name: 'Dragon Rage', desc: 'Double damage when HP < 25%', type: 'passive', cost: 2, unlockLevel: 7 },
+    wingSlash: { name: 'Wing Slash', desc: 'AoE attack hitting all nearby', type: 'combat', cost: 2, unlockLevel: 4 },
+
+    // Defense Skills
+    scaleHarden: { name: 'Scale Harden', desc: '+20% defense', type: 'passive', cost: 1, unlockLevel: 2 },
+    fireResist: { name: 'Fire Resistance', desc: 'Take 50% less fire damage', type: 'passive', cost: 1, unlockLevel: 3 },
+    quickDodge: { name: 'Quick Dodge', desc: '+15% dodge chance', type: 'passive', cost: 2, unlockLevel: 6 },
+
+    // Utility Skills
+    swiftFlight: { name: 'Swift Flight', desc: '+30% fly speed', type: 'passive', cost: 1, unlockLevel: 2 },
+    treasureScent: { name: 'Treasure Scent', desc: 'See nearby gold on minimap', type: 'passive', cost: 1, unlockLevel: 4 },
+    healingRoar: { name: 'Healing Roar', desc: 'Restore 25% HP (3 min cooldown)', type: 'active', cost: 2, unlockLevel: 8 }
+};
+
+// ============================================
+// RPG QUEST SYSTEM
+// ============================================
+
+const QUESTS = {
+    // Main Story Quests
+    theBeginning: {
+        id: 'theBeginning',
+        name: 'The Dragonet Prophecy',
+        desc: 'You are one of the dragonets of destiny. Speak to the elder dragon to learn your fate.',
+        type: 'main',
+        objectives: [{ type: 'talk', target: 'Elder Webs', done: false }],
+        rewards: { xp: 100, gold: 50 },
+        nextQuest: 'escapeTheMountain'
+    },
+    escapeTheMountain: {
+        id: 'escapeTheMountain',
+        name: 'Escape the Mountain',
+        desc: 'Find a way out of the mountain caves. Defeat the guards blocking your path.',
+        type: 'main',
+        objectives: [
+            { type: 'kill', target: 'Cave Guard', count: 3, current: 0, done: false },
+            { type: 'reach', target: 'Mountain Exit', done: false }
+        ],
+        rewards: { xp: 200, gold: 100, item: 'bronzeScales' },
+        nextQuest: 'seekingAllies'
+    },
+    seekingAllies: {
+        id: 'seekingAllies',
+        name: 'Seeking Allies',
+        desc: 'Travel to the Mud Kingdom and find dragons who will help your cause.',
+        type: 'main',
+        objectives: [
+            { type: 'travel', target: 'mudKingdom', done: false },
+            { type: 'talk', target: 'Commander Clay', done: false }
+        ],
+        rewards: { xp: 300, gold: 150 },
+        nextQuest: 'theWarBegins'
+    },
+
+    // Side Quests
+    lostEggs: {
+        id: 'lostEggs',
+        name: 'The Lost Eggs',
+        desc: 'A worried mother dragon has lost her eggs. Find them in the swamp.',
+        type: 'side',
+        objectives: [{ type: 'collect', target: 'Dragon Egg', count: 3, current: 0, done: false }],
+        rewards: { xp: 75, gold: 40, item: 'healingPotion' }
+    },
+    huntTheScavengers: {
+        id: 'huntTheScavengers',
+        name: 'Scavenger Problem',
+        desc: 'Scavengers have been stealing from the village. Deal with them.',
+        type: 'side',
+        objectives: [{ type: 'kill', target: 'Scavenger', count: 5, current: 0, done: false }],
+        rewards: { xp: 100, gold: 75 }
+    },
+    collectScales: {
+        id: 'collectScales',
+        name: 'Scale Collection',
+        desc: 'The blacksmith needs dragon scales to forge new armor.',
+        type: 'side',
+        objectives: [{ type: 'collect', target: 'dragonScale', count: 5, current: 0, done: false }],
+        rewards: { xp: 50, gold: 100, item: 'ironScales' }
+    },
+    bossSlayer: {
+        id: 'bossSlayer',
+        name: 'Champion of Pyrrhia',
+        desc: 'Defeat the legendary boss of each kingdom.',
+        type: 'side',
+        objectives: [{ type: 'killBoss', count: 7, current: 0, done: false }],
+        rewards: { xp: 1000, gold: 500, item: 'dragonsteelArmor' }
+    }
+};
+
+// ============================================
+// RPG NPC SYSTEM
+// ============================================
+
+const NPCS = {
+    elderWebs: {
+        id: 'elderWebs',
+        name: 'Elder Webs',
+        tribe: 'NightWing',
+        role: 'Quest Giver',
+        location: 'mudKingdom',
+        dialogue: {
+            greeting: "Ah, young dragonet... I have been expecting you. The prophecy speaks of five dragons who will end the war.",
+            quest: "You must prove yourself worthy. Seek out the other dragonets and unite the tribes!",
+            afterQuest: "You have done well. The prophecy unfolds as foretold..."
+        },
+        quests: ['theBeginning']
+    },
+    commanderClay: {
+        id: 'commanderClay',
+        name: 'Commander Clay',
+        tribe: 'MudWing',
+        role: 'Ally',
+        location: 'mudKingdom',
+        dialogue: {
+            greeting: "Greetings, traveler. I am Clay, leader of the MudWing forces here.",
+            quest: "We could use your help. The scavengers have been raiding our supplies.",
+            afterQuest: "Thank you for your help! You are a true friend to the MudWings."
+        },
+        quests: ['huntTheScavengers']
+    },
+    blacksmithEmber: {
+        id: 'blacksmithEmber',
+        name: 'Ember the Smith',
+        tribe: 'SkyWing',
+        role: 'Blacksmith',
+        location: 'skyKingdom',
+        dialogue: {
+            greeting: "Welcome to my forge! I craft the finest dragon armor in all of Pyrrhia.",
+            shop: "Want to see my wares? I can upgrade your equipment if you bring materials.",
+            quest: "I need dragon scales for a special project. Can you gather some for me?"
+        },
+        quests: ['collectScales'],
+        shop: ['bronzeScales', 'ironScales', 'sharpClaws', 'steelClaws']
+    },
+    healerTsunami: {
+        id: 'healerTsunami',
+        name: 'Healer Tsunami',
+        tribe: 'SeaWing',
+        role: 'Healer',
+        location: 'seaKingdom',
+        dialogue: {
+            greeting: "The seas welcome you, friend. I can heal your wounds.",
+            heal: "Let me tend to your injuries... There, good as new!",
+            shop: "I also sell healing supplies. Stay safe out there."
+        },
+        shop: ['healingPotion', 'megaPotion', 'energyDrink']
+    },
+    mysteriousStranger: {
+        id: 'mysteriousStranger',
+        name: 'Mysterious Stranger',
+        tribe: 'NightWing',
+        role: 'Secret',
+        location: 'nightKingdom',
+        dialogue: {
+            greeting: "Shhh... I know secrets. Dark secrets about the war...",
+            secret: "The queens are not what they seem. Trust no one.",
+            quest: "Find the ancient scrolls hidden in each kingdom. They reveal the truth."
+        },
+        quests: ['bossSlayer']
+    }
 };
 
 // ============================================
@@ -413,7 +611,15 @@ const game = {
     breathCooldown: 0,
     specialCooldown: 0,
     combatEffects: [],
-    damageNumbers: []
+    damageNumbers: [],
+
+    // RPG Systems
+    activeQuests: [],
+    completedQuests: [],
+    dialogueActive: false,
+    currentNPC: null,
+    currentDialogue: null,
+    worldNPCs: []
 };
 
 // ============================================
@@ -1412,13 +1618,12 @@ class Player {
         this.level = 1;
         this.xp = 0;
         this.xpToLevel = 100;
-        this.gold = 0;
+        this.gold = 50; // Start with some gold
 
         const t = TRIBES[tribe];
-        this.maxHp = t.baseStats.hp;
-        this.hp = this.maxHp;
-        this.attack = t.baseStats.attack;
-        this.defense = t.baseStats.defense;
+        this.baseHp = t.baseStats.hp;
+        this.baseAttack = t.baseStats.attack;
+        this.baseDefense = t.baseStats.defense;
         this.speedMod = t.baseStats.speed;
 
         this.maxStamina = 100;
@@ -1428,9 +1633,23 @@ class Player {
         this.specialCooldown = 0;
         this.breathType = t.breathType;
 
+        // RPG: Equipment slots
+        this.equipment = {
+            armor: null,
+            claws: null,
+            accessory: null
+        };
+
+        // RPG: Skills and skill points
+        this.skillPoints = 1; // Start with 1 skill point
+        this.unlockedSkills = [];
+
+        // Calculate stats with equipment
+        this.recalculateStats();
+
         this.inventory = [
-            { id: 'healingPotion', count: 3 },
-            { id: 'energyDrink', count: 2 }
+            { id: 'healingPotion', count: 5 },
+            { id: 'energyDrink', count: 3 }
         ];
 
         this.mesh = null;
@@ -1440,6 +1659,87 @@ class Player {
         this.isFlying = false;
         this.isGrounded = true;
         this.isSprinting = false;
+
+        // RPG: Tracked kills for quests
+        this.killCount = {};
+        this.bossKills = 0;
+    }
+
+    recalculateStats() {
+        // Base stats
+        this.maxHp = this.baseHp;
+        this.attack = this.baseAttack;
+        this.defense = this.baseDefense;
+
+        // Add equipment bonuses
+        if (this.equipment.armor) {
+            const armor = EQUIPMENT[this.equipment.armor];
+            if (armor) this.defense += armor.defense;
+        }
+        if (this.equipment.claws) {
+            const claws = EQUIPMENT[this.equipment.claws];
+            if (claws) this.attack += claws.attack;
+        }
+        if (this.equipment.accessory) {
+            const acc = EQUIPMENT[this.equipment.accessory];
+            if (acc) {
+                if (acc.hpBonus) this.maxHp += acc.hpBonus;
+                if (acc.staminaBonus) this.maxStamina += acc.staminaBonus;
+            }
+        }
+
+        // Add skill bonuses
+        if (this.hasSkill('scaleHarden')) {
+            this.defense = Math.floor(this.defense * 1.2);
+        }
+        if (this.hasSkill('criticalEye')) {
+            this.critBonus = 0.1;
+        }
+
+        // Level bonuses
+        this.maxHp += (this.level - 1) * 15;
+        this.attack += (this.level - 1) * 3;
+        this.defense += (this.level - 1) * 2;
+
+        // Make sure HP doesn't exceed max
+        if (this.hp > this.maxHp) this.hp = this.maxHp;
+    }
+
+    equipItem(itemId) {
+        const item = EQUIPMENT[itemId];
+        if (!item) return false;
+
+        // Unequip current item in slot
+        if (this.equipment[item.slot]) {
+            this.addItem(this.equipment[item.slot]);
+        }
+
+        // Equip new item
+        this.equipment[item.slot] = itemId;
+        this.removeItem(itemId);
+        this.recalculateStats();
+
+        showMessage(`Equipped ${item.name}!`, 'reward');
+        return true;
+    }
+
+    hasSkill(skillId) {
+        return this.unlockedSkills.includes(skillId);
+    }
+
+    unlockSkill(skillId) {
+        const skill = SKILLS[skillId];
+        if (!skill) return false;
+        if (this.hasSkill(skillId)) return false;
+        if (this.level < skill.unlockLevel) return false;
+        if (this.skillPoints < skill.cost) return false;
+
+        this.skillPoints -= skill.cost;
+        this.unlockedSkills.push(skillId);
+        this.recalculateStats();
+
+        showMessage(`Learned ${skill.name}!`, 'critical');
+        return true;
     }
 
     createMesh() {
@@ -1472,10 +1772,21 @@ class Player {
         this.xp -= this.xpToLevel;
         this.level++;
         this.xpToLevel = Math.floor(this.xpToLevel * 1.3);
-        this.maxHp += 12;
-        this.hp = this.maxHp;
-        this.attack += 3;
-        this.defense += 2;
+
+        // RPG: Give skill points on level up
+        this.skillPoints += 1;
+        if (this.level % 3 === 0) this.skillPoints += 1; // Bonus every 3 levels
+
+        // Increase base stats
+        this.baseHp += 15;
+        this.baseAttack += 3;
+        this.baseDefense += 2;
+
+        // Recalculate with equipment
+        this.recalculateStats();
+        this.hp = this.maxHp; // Full heal on level up
+        this.stamina = this.maxStamina;
+
         return true;
     }
 
@@ -1493,6 +1804,32 @@ class Player {
         const existing = this.inventory.find(i => i.id === itemId);
         if (existing) existing.count += count;
         else this.inventory.push({ id: itemId, count });
+    }
+
+    removeItem(itemId, count = 1) {
+        const slot = this.inventory.find(i => i.id === itemId);
+        if (!slot) return false;
+        slot.count -= count;
+        if (slot.count <= 0) {
+            this.inventory = this.inventory.filter(i => i.count > 0);
+        }
+        return true;
+    }
+
+    hasItem(itemId, count = 1) {
+        const slot = this.inventory.find(i => i.id === itemId);
+        return slot && slot.count >= count;
+    }
+
+    // Track kills for quests
+    recordKill(enemyName, isBoss = false) {
+        if (!this.killCount[enemyName]) this.killCount[enemyName] = 0;
+        this.killCount[enemyName]++;
+        if (isBoss) this.bossKills++;
+
+        // Update quest objectives
+        updateQuestProgress('kill', enemyName);
+        if (isBoss) updateQuestProgress('killBoss');
     }
 }
 
@@ -1594,6 +1931,277 @@ class Enemy {
 }
 
 // ============================================
+// RPG QUEST FUNCTIONS
+// ============================================
+
+function startQuest(questId) {
+    const quest = QUESTS[questId];
+    if (!quest) return false;
+    if (game.activeQuests.find(q => q.id === questId)) return false;
+    if (game.completedQuests.includes(questId)) return false;
+
+    // Deep copy the quest
+    const activeQuest = JSON.parse(JSON.stringify(quest));
+    game.activeQuests.push(activeQuest);
+
+    showMessage(`New Quest: ${quest.name}!`, 'critical');
+    return true;
+}
+
+function updateQuestProgress(type, target = null) {
+    game.activeQuests.forEach(quest => {
+        quest.objectives.forEach(obj => {
+            if (obj.done) return;
+
+            if (obj.type === type) {
+                if (type === 'kill' && obj.target === target) {
+                    obj.current = (obj.current || 0) + 1;
+                    if (obj.current >= obj.count) {
+                        obj.done = true;
+                        showMessage(`Objective complete: Kill ${obj.target}`, 'reward');
+                    }
+                } else if (type === 'killBoss') {
+                    obj.current = game.player.bossKills;
+                    if (obj.current >= obj.count) {
+                        obj.done = true;
+                        showMessage(`Objective complete: Boss slaying`, 'reward');
+                    }
+                } else if (type === 'collect' && obj.target === target) {
+                    obj.current = (obj.current || 0) + 1;
+                    if (obj.current >= obj.count) {
+                        obj.done = true;
+                        showMessage(`Objective complete: Collect ${obj.target}`, 'reward');
+                    }
+                } else if (type === 'travel' && obj.target === target) {
+                    obj.done = true;
+                    showMessage(`Reached ${LOCATIONS[target].name}!`, 'reward');
+                } else if (type === 'talk' && obj.target === target) {
+                    obj.done = true;
+                    showMessage(`Spoke with ${target}`, 'reward');
+                }
+            }
+        });
+
+        // Check if quest is complete
+        checkQuestCompletion(quest);
+    });
+}
+
+function checkQuestCompletion(quest) {
+    const allDone = quest.objectives.every(obj => obj.done);
+    if (allDone) {
+        completeQuest(quest.id);
+    }
+}
+
+function completeQuest(questId) {
+    const questIndex = game.activeQuests.findIndex(q => q.id === questId);
+    if (questIndex === -1) return;
+
+    const quest = game.activeQuests[questIndex];
+
+    // Give rewards
+    if (quest.rewards.xp) {
+        game.player.gainXP(quest.rewards.xp);
+        showMessage(`+${quest.rewards.xp} XP!`, 'reward');
+    }
+    if (quest.rewards.gold) {
+        game.player.gold += quest.rewards.gold;
+        showMessage(`+${quest.rewards.gold} Gold!`, 'reward');
+    }
+    if (quest.rewards.item) {
+        game.player.addItem(quest.rewards.item);
+        const item = ITEMS[quest.rewards.item] || EQUIPMENT[quest.rewards.item];
+        if (item) showMessage(`Received ${item.name}!`, 'reward');
+    }
+
+    // Remove from active, add to completed
+    game.activeQuests.splice(questIndex, 1);
+    game.completedQuests.push(questId);
+
+    showMessage(`Quest Complete: ${quest.name}!`, 'critical');
+
+    // Start next quest if there is one
+    if (quest.nextQuest) {
+        setTimeout(() => startQuest(quest.nextQuest), 1000);
+    }
+
+    updateHUD();
+}
+
+function getActiveQuestCount() {
+    return game.activeQuests.length;
+}
+
+// ============================================
+// RPG NPC FUNCTIONS
+// ============================================
+
+class NPC {
+    constructor(npcData, x, z) {
+        this.data = npcData;
+        this.position = new THREE.Vector3(x, 2, z);
+        this.mesh = null;
+    }
+
+    createMesh() {
+        // Create NPC dragon mesh
+        this.mesh = createDragon3D(this.data.tribe, 0.9, false);
+        this.mesh.position.copy(this.position);
+
+        // Add name tag above head
+        this.mesh.userData.npcId = this.data.id;
+        this.mesh.userData.npcName = this.data.name;
+
+        return this.mesh;
+    }
+
+    interact() {
+        game.currentNPC = this.data;
+        showDialogue(this.data, 'greeting');
+
+        // Check if NPC gives quests
+        if (this.data.quests) {
+            this.data.quests.forEach(questId => {
+                if (!game.activeQuests.find(q => q.id === questId) &&
+                    !game.completedQuests.includes(questId)) {
+                    setTimeout(() => startQuest(questId), 500);
+                }
+            });
+        }
+
+        // Update quest progress for talking
+        updateQuestProgress('talk', this.data.name);
+    }
+}
+
+function showDialogue(npc, type) {
+    const dialogue = npc.dialogue[type];
+    if (!dialogue) return;
+
+    game.dialogueActive = true;
+    game.currentDialogue = { npc, type, text: dialogue };
+
+    // Show dialogue UI
+    const overlay = document.getElementById('dialogue-overlay');
+    if (overlay) {
+        document.getElementById('dialogue-npc-name').textContent = npc.name;
+        document.getElementById('dialogue-npc-role').textContent = npc.role;
+        document.getElementById('dialogue-text').textContent = dialogue;
+        overlay.classList.remove('hidden');
+    }
+}
+
+function closeDialogue() {
+    game.dialogueActive = false;
+    game.currentDialogue = null;
+    game.currentNPC = null;
+
+    const overlay = document.getElementById('dialogue-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+function spawnNPCs(locationId) {
+    game.worldNPCs = [];
+
+    Object.values(NPCS).forEach(npcData => {
+        if (npcData.location === locationId) {
+            const x = (Math.random() - 0.5) * 40;
+            const z = (Math.random() - 0.5) * 40;
+            const npc = new NPC(npcData, x, z);
+            game.scene.add(npc.createMesh());
+            game.worldNPCs.push(npc);
+        }
+    });
+}
+
+function checkNPCInteraction() {
+    if (!game.player || game.dialogueActive) return;
+
+    const p = game.player.position;
+    game.worldNPCs.forEach(npc => {
+        if (npc.mesh) {
+            const dist = p.distanceTo(npc.mesh.position);
+            if (dist < 5) {
+                // Show interaction prompt
+                const prompt = document.getElementById('interaction-prompt');
+                if (prompt) {
+                    prompt.classList.remove('hidden');
+                    prompt.innerHTML = `<span class="key">E</span> Talk to ${npc.data.name}`;
+                }
+                return;
+            }
+        }
+    });
+}
+
+function interactWithNearbyNPC() {
+    if (!game.player || game.dialogueActive) return;
+
+    const p = game.player.position;
+    for (const npc of game.worldNPCs) {
+        if (npc.mesh) {
+            const dist = p.distanceTo(npc.mesh.position);
+            if (dist < 5) {
+                npc.interact();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ============================================
+// RPG SKILL FUNCTIONS
+// ============================================
+
+function showSkillsUI() {
+    renderSkillsOverlay();
+    toggleOverlay('skills');
+}
+
+function renderSkillsOverlay() {
+    const content = document.getElementById('skills-content');
+    if (!content) return;
+
+    content.innerHTML = '';
+
+    const p = game.player;
+    const header = document.createElement('div');
+    header.className = 'skills-header';
+    header.innerHTML = `<span>Skill Points: ${p.skillPoints}</span><span>Level: ${p.level}</span>`;
+    content.appendChild(header);
+
+    Object.entries(SKILLS).forEach(([id, skill]) => {
+        const div = document.createElement('div');
+        const unlocked = p.hasSkill(id);
+        const canUnlock = p.level >= skill.unlockLevel && p.skillPoints >= skill.cost && !unlocked;
+
+        div.className = `skill-item ${unlocked ? 'unlocked' : ''} ${canUnlock ? 'available' : ''}`;
+        div.innerHTML = `
+            <div class="skill-name">${skill.name}</div>
+            <div class="skill-desc">${skill.desc}</div>
+            <div class="skill-info">
+                <span>Cost: ${skill.cost} SP</span>
+                <span>Unlock: Lv.${skill.unlockLevel}</span>
+            </div>
+        `;
+
+        if (canUnlock) {
+            div.onclick = () => {
+                p.unlockSkill(id);
+                renderSkillsOverlay();
+                updateHUD();
+            };
+        }
+
+        content.appendChild(div);
+    });
+}
+
+// ============================================
 // WORLD CLASS
 // ============================================
 
@@ -1618,6 +2226,12 @@ class World {
         game.scene.background = new THREE.Color(this.location.skyColor);
 
         this.generateEntities();
+
+        // RPG: Spawn NPCs for this location
+        spawnNPCs(this.locationId);
+
+        // RPG: Update quest progress for travel
+        updateQuestProgress('travel', this.locationId);
     }
 
     setupLighting() {
@@ -1774,6 +2388,12 @@ class World {
         this.collectibles.forEach(c => game.scene.remove(c));
         this.portals.forEach(p => game.scene.remove(p));
         if (this.boss && this.boss.mesh) game.scene.remove(this.boss.mesh);
+
+        // RPG: Clean up NPCs
+        game.worldNPCs.forEach(npc => {
+            if (npc.mesh) game.scene.remove(npc.mesh);
+        });
+        game.worldNPCs = [];
     }
 }
 
@@ -2033,6 +2653,9 @@ function realTimeSpecialAttack() {
 function defeatEnemy(enemy) {
     const p = game.player;
 
+    // RPG: Record kill for quests
+    p.recordKill(enemy.name, enemy.isBoss);
+
     // Give rewards
     const leveledUp = p.gainXP(enemy.xpReward);
     p.gold += enemy.goldReward;
@@ -2040,13 +2663,37 @@ function defeatEnemy(enemy) {
     showMessage(`Defeated ${enemy.name}! +${enemy.xpReward} XP, +${enemy.goldReward} Gold`, 'reward');
 
     if (leveledUp) {
-        showMessage(`LEVEL UP! Now level ${p.level}!`, 'critical');
+        showMessage(`LEVEL UP! Now level ${p.level}! +1 Skill Point!`, 'critical');
     }
 
-    // Random loot
-    if (Math.random() < 0.35) {
+    // Random loot - RPG style
+    const lootRoll = Math.random();
+    if (lootRoll < 0.4) {
         p.addItem('healingPotion');
         showMessage('Found a Healing Potion!', 'reward');
+    } else if (lootRoll < 0.55) {
+        p.addItem('dragonScale');
+        showMessage('Found a Dragon Scale!', 'reward');
+    } else if (lootRoll < 0.65) {
+        p.addItem('energyDrink');
+        showMessage('Found an Energy Drink!', 'reward');
+    }
+
+    // Boss special loot
+    if (enemy.isBoss) {
+        const bossLoot = ['fireRuby', 'frostSapphire', 'strengthElixir', 'megaPotion'];
+        const loot = bossLoot[Math.floor(Math.random() * bossLoot.length)];
+        p.addItem(loot);
+        const item = ITEMS[loot];
+        showMessage(`Boss dropped ${item.name}!`, 'critical');
+
+        // Chance for equipment
+        if (Math.random() < 0.3) {
+            const equipLoot = ['bronzeScales', 'sharpClaws', 'staminaRing'];
+            const equip = equipLoot[Math.floor(Math.random() * equipLoot.length)];
+            p.addItem(equip);
+            showMessage(`Found ${EQUIPMENT[equip].name}!`, 'critical');
+        }
     }
 
     // Remove enemy
@@ -3005,12 +3652,25 @@ function handleCharacterInput(e) {
         showScreen('game');
         updateHUD();
         showMessage(`Welcome, ${name} the ${tribe}!`, 'info');
-        showMessage('W/S move, A/D turn, SPACE to fly', 'info');
-        showMessage('J attack, K breath, L special - Attack while moving!', 'info');
+        showMessage('WASD move, SPACE fly, J/K/L attack', 'info');
+        showMessage('E talk to NPCs, Q quests, P skills', 'info');
+
+        // RPG: Start the first quest
+        setTimeout(() => {
+            startQuest('theBeginning');
+        }, 2000);
     }
 }
 
 function handleGameInput(e) {
+    // Handle dialogue closing
+    if (game.dialogueActive) {
+        if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'Space') {
+            closeDialogue();
+        }
+        return;
+    }
+
     if (e.code === 'Escape') {
         document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
         return;
@@ -3018,7 +3678,9 @@ function handleGameInput(e) {
 
     const overlayOpen = !document.getElementById('inventory-overlay').classList.contains('hidden') ||
                         !document.getElementById('map-overlay').classList.contains('hidden') ||
-                        !document.getElementById('help-overlay').classList.contains('hidden');
+                        !document.getElementById('help-overlay').classList.contains('hidden') ||
+                        (document.getElementById('skills-overlay') && !document.getElementById('skills-overlay').classList.contains('hidden')) ||
+                        (document.getElementById('quests-overlay') && !document.getElementById('quests-overlay').classList.contains('hidden'));
 
     if (overlayOpen) return;
 
@@ -3043,6 +3705,11 @@ function handleGameInput(e) {
             realTimeSpecialAttack();
             break;
 
+        // RPG: Talk to NPC
+        case 'KeyE':
+            interactWithNearbyNPC();
+            break;
+
         case 'KeyI':
             renderInventory();
             toggleOverlay('inventory');
@@ -3054,6 +3721,17 @@ function handleGameInput(e) {
         case 'KeyH':
             toggleOverlay('help');
             break;
+
+        // RPG: Skills menu
+        case 'KeyP':
+            showSkillsUI();
+            break;
+
+        // RPG: Quests menu
+        case 'KeyQ':
+            showQuestsUI();
+            break;
+
         case 'KeyR':
             const hpRec = game.player.heal(Math.floor(game.player.maxHp * 0.25));
             game.player.stamina = Math.min(game.player.maxStamina, game.player.stamina + 25);
@@ -3061,6 +3739,61 @@ function handleGameInput(e) {
             updateHUD();
             break;
     }
+}
+
+function showQuestsUI() {
+    renderQuestsOverlay();
+    toggleOverlay('quests');
+}
+
+function renderQuestsOverlay() {
+    const content = document.getElementById('quests-content');
+    if (!content) return;
+
+    content.innerHTML = '';
+
+    if (game.activeQuests.length === 0) {
+        content.innerHTML = '<div class="no-quests">No active quests. Talk to NPCs to find quests!</div>';
+        return;
+    }
+
+    game.activeQuests.forEach(quest => {
+        const div = document.createElement('div');
+        div.className = `quest-item ${quest.type}`;
+
+        let objectivesHtml = '';
+        quest.objectives.forEach(obj => {
+            const status = obj.done ? '✓' : '○';
+            let text = '';
+            if (obj.type === 'kill') {
+                text = `Kill ${obj.target} (${obj.current || 0}/${obj.count})`;
+            } else if (obj.type === 'collect') {
+                text = `Collect ${obj.target} (${obj.current || 0}/${obj.count})`;
+            } else if (obj.type === 'talk') {
+                text = `Talk to ${obj.target}`;
+            } else if (obj.type === 'travel') {
+                text = `Travel to ${LOCATIONS[obj.target]?.name || obj.target}`;
+            } else if (obj.type === 'killBoss') {
+                text = `Defeat bosses (${obj.current || 0}/${obj.count})`;
+            }
+            objectivesHtml += `<div class="objective ${obj.done ? 'done' : ''}">${status} ${text}</div>`;
+        });
+
+        div.innerHTML = `
+            <div class="quest-header">
+                <span class="quest-type">[${quest.type.toUpperCase()}]</span>
+                <span class="quest-name">${quest.name}</span>
+            </div>
+            <div class="quest-desc">${quest.desc}</div>
+            <div class="quest-objectives">${objectivesHtml}</div>
+            <div class="quest-rewards">
+                Rewards: ${quest.rewards.xp} XP, ${quest.rewards.gold} Gold
+                ${quest.rewards.item ? ', ' + (ITEMS[quest.rewards.item]?.name || EQUIPMENT[quest.rewards.item]?.name || quest.rewards.item) : ''}
+            </div>
+        `;
+
+        content.appendChild(div);
+    });
 }
 
 function handleBattleInput(e) {

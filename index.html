@@ -420,16 +420,48 @@
                         <h3>Menus</h3>
                         <p><span class="key">I</span> - Inventory</p>
                         <p><span class="key">M</span> - Map</p>
+                        <p><span class="key">Q</span> - Quests</p>
+                        <p><span class="key">P</span> - Skills</p>
                         <p><span class="key">H</span> - Help</p>
-                        <p><span class="key">ESC</span> - Close Menu</p>
                     </div>
                     <div class="help-section">
-                        <h3>Quick Items</h3>
-                        <p><span class="key">1</span><span class="key">2</span><span class="key">3</span> - Use Quick Slot Items</p>
-                        <p><span class="key">R</span> - Rest (Recover HP/Stamina)</p>
+                        <h3>RPG</h3>
+                        <p><span class="key">E</span> - Talk to NPC</p>
+                        <p><span class="key">R</span> - Rest</p>
+                        <p>Defeat enemies for XP and loot!</p>
                     </div>
                 </div>
                 <p class="close-hint">Press <span class="key">H</span> or <span class="key">ESC</span> to close</p>
+            </div>
+        </div>
+
+        <!-- Skills Overlay (RPG) -->
+        <div id="skills-overlay" class="overlay hidden">
+            <div class="overlay-panel">
+                <h2>Skills & Abilities</h2>
+                <div id="skills-content"></div>
+                <p class="close-hint">Press <span class="key">P</span> or <span class="key">ESC</span> to close</p>
+            </div>
+        </div>
+
+        <!-- Quests Overlay (RPG) -->
+        <div id="quests-overlay" class="overlay hidden">
+            <div class="overlay-panel large">
+                <h2>Quest Journal</h2>
+                <div id="quests-content"></div>
+                <p class="close-hint">Press <span class="key">Q</span> or <span class="key">ESC</span> to close</p>
+            </div>
+        </div>
+
+        <!-- Dialogue Overlay (RPG) -->
+        <div id="dialogue-overlay" class="overlay hidden">
+            <div class="dialogue-box">
+                <div class="dialogue-header">
+                    <span id="dialogue-npc-name">NPC Name</span>
+                    <span id="dialogue-npc-role">Role</span>
+                </div>
+                <div id="dialogue-text">Dialogue text goes here...</div>
+                <p class="dialogue-hint">Press <span class="key">SPACE</span> or <span class="key">ENTER</span> to continue</p>
             </div>
         </div>
 
