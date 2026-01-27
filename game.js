@@ -2565,10 +2565,16 @@ function startQuest(questId) {
     game.activeQuests.push(activeQuest);
 
     showMessage(`New Quest: ${quest.name}!`, 'critical');
+
+    // Update quest markers
+    if (game.scene) spawnQuestMarkers();
+
     return true;
 }
 
 function updateQuestProgress(type, target = null) {
+    let objectiveChanged = false;
+
     game.activeQuests.forEach(quest => {
         quest.objectives.forEach(obj => {
             if (obj.done) return;
@@ -2576,27 +2582,32 @@ function updateQuestProgress(type, target = null) {
             if (obj.type === type) {
                 if (type === 'kill' && obj.target === target) {
                     obj.current = (obj.current || 0) + 1;
+                    objectiveChanged = true;
                     if (obj.current >= obj.count) {
                         obj.done = true;
                         showMessage(`Objective complete: Kill ${obj.target}`, 'reward');
                     }
                 } else if (type === 'killBoss') {
                     obj.current = game.player.bossKills;
+                    objectiveChanged = true;
                     if (obj.current >= obj.count) {
                         obj.done = true;
                         showMessage(`Objective complete: Boss slaying`, 'reward');
                     }
                 } else if (type === 'collect' && obj.target === target) {
                     obj.current = (obj.current || 0) + 1;
+                    objectiveChanged = true;
                     if (obj.current >= obj.count) {
                         obj.done = true;
                         showMessage(`Objective complete: Collect ${obj.target}`, 'reward');
                     }
                 } else if (type === 'travel' && obj.target === target) {
                     obj.done = true;
+                    objectiveChanged = true;
                     showMessage(`Reached ${LOCATIONS[target].name}!`, 'reward');
                 } else if (type === 'talk' && obj.target === target) {
                     obj.done = true;
+                    objectiveChanged = true;
                     showMessage(`Spoke with ${target}`, 'reward');
                 }
             }
@@ -2605,6 +2616,11 @@ function updateQuestProgress(type, target = null) {
         // Check if quest is complete
         checkQuestCompletion(quest);
     });
+
+    // Update markers when objectives change
+    if (objectiveChanged && game.scene) {
+        spawnQuestMarkers();
+    }
 }
 
 function checkQuestCompletion(quest) {
@@ -2641,6 +2657,9 @@ function completeQuest(questId) {
 
     showMessage(`Quest Complete: ${quest.name}!`, 'critical');
 
+    // Update quest markers
+    if (game.scene) spawnQuestMarkers();
+
     // Start next quest if there is one
     if (quest.nextQuest) {
         setTimeout(() => startQuest(quest.nextQuest), 1000);
@@ -2651,6 +2670,143 @@ function completeQuest(questId) {
 
 function getActiveQuestCount() {
     return game.activeQuests.length;
+}
+
+// Quest location markers - locations players can reach for objectives
+const QUEST_LOCATIONS = {
+    'Mountain Exit': { x: 0, z: -70, name: 'Mountain Exit' },
+    'mudKingdom': { x: 0, z: 0, name: 'Mud Kingdom Center' },
+    'sandKingdom': { x: -80, z: 0, name: 'Sand Kingdom' },
+    'skyKingdom': { x: 80, z: 0, name: 'Sky Kingdom' },
+    'seaKingdom': { x: 0, z: -80, name: 'Sea Kingdom' },
+    'rainforest': { x: 0, z: 80, name: 'Rainforest' },
+    'iceKingdom': { x: -60, z: -60, name: 'Ice Kingdom' },
+    'nightKingdom': { x: 60, z: -60, name: 'Night Kingdom' },
+    'poisonJungle': { x: -60, z: 60, name: 'Poison Jungle' },
+    'jewelHive': { x: 60, z: 60, name: 'Jewel Hive' }
+};
+
+// Check if player reached a quest location
+function checkQuestLocationReached(position) {
+    game.activeQuests.forEach(quest => {
+        quest.objectives.forEach(obj => {
+            if (obj.done) return;
+            if (obj.type === 'reach') {
+                const loc = QUEST_LOCATIONS[obj.target];
+                if (loc) {
+                    const dist = Math.sqrt(
+                        Math.pow(position.x - loc.x, 2) +
+                        Math.pow(position.z - loc.z, 2)
+                    );
+                    if (dist < 15) {
+                        obj.done = true;
+                        showMessage(`Reached ${loc.name}!`, 'reward');
+                        checkQuestCompletion(quest);
+                    }
+                }
+            }
+        });
+    });
+}
+
+// Create quest marker dot on ground
+function createQuestMarker(x, z, color = 0xFFD700) {
+    const marker = new THREE.Group();
+
+    // Glowing circle on ground
+    const ringGeo = new THREE.RingGeometry(1.5, 2.5, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.2;
+    marker.add(ring);
+
+    // Inner dot
+    const dotGeo = new THREE.CircleGeometry(1, 16);
+    const dotMat = new THREE.MeshBasicMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.6
+    });
+    const dot = new THREE.Mesh(dotGeo, dotMat);
+    dot.rotation.x = -Math.PI / 2;
+    dot.position.y = 0.3;
+    marker.add(dot);
+
+    // Vertical beam of light
+    const beamGeo = new THREE.CylinderGeometry(0.3, 0.3, 20, 8);
+    const beamMat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.3
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.y = 10;
+    marker.add(beam);
+
+    marker.position.set(x, 0.1, z);
+    marker.userData.isQuestMarker = true;
+
+    return marker;
+}
+
+// Spawn quest markers for active quests
+function spawnQuestMarkers() {
+    // Remove existing quest markers
+    game.scene.children
+        .filter(c => c.userData && c.userData.isQuestMarker)
+        .forEach(m => game.scene.remove(m));
+
+    game.activeQuests.forEach(quest => {
+        quest.objectives.forEach(obj => {
+            if (obj.done) return;
+
+            // Marker for reach objectives
+            if (obj.type === 'reach') {
+                const loc = QUEST_LOCATIONS[obj.target];
+                if (loc) {
+                    const marker = createQuestMarker(loc.x, loc.z, 0x00FF00); // Green for locations
+                    game.scene.add(marker);
+                }
+            }
+
+            // Marker for travel objectives
+            if (obj.type === 'travel') {
+                const loc = QUEST_LOCATIONS[obj.target];
+                if (loc) {
+                    const marker = createQuestMarker(loc.x, loc.z, 0x00BFFF); // Blue for travel
+                    game.scene.add(marker);
+                }
+            }
+
+            // Marker for talk objectives - find NPC
+            if (obj.type === 'talk') {
+                game.worldNPCs.forEach(npc => {
+                    if (npc.data.name === obj.target && npc.mesh) {
+                        const marker = createQuestMarker(
+                            npc.mesh.position.x,
+                            npc.mesh.position.z,
+                            0xFFD700 // Gold for NPCs
+                        );
+                        game.scene.add(marker);
+                    }
+                });
+            }
+
+            // Marker for kill objectives - mark general area where enemies spawn
+            if (obj.type === 'kill' && !obj.done) {
+                // Show marker at center where enemies are
+                const marker = createQuestMarker(0, 0, 0xFF4444); // Red for combat
+                game.scene.add(marker);
+            }
+        });
+    });
 }
 
 // ============================================
@@ -2853,6 +3009,9 @@ class World {
 
         // RPG: Update quest progress for travel
         updateQuestProgress('travel', this.locationId);
+
+        // Spawn quest markers after NPCs are placed
+        setTimeout(() => spawnQuestMarkers(), 100);
     }
 
     setupLighting() {
@@ -2920,21 +3079,22 @@ class World {
         return mesh;
     }
 
-    // Generate other kingdoms as regions in the vast world
+    // Generate other kingdoms as regions in the vast world - CLOSER TOGETHER
     generateKingdomRegions() {
         const allLocations = Object.entries(LOCATIONS);
+        // Kingdoms much closer together for easier exploration
         const regionPositions = [
             { x: 0, z: 0 },        // Current kingdom at center
-            { x: -300, z: 0 },     // West
-            { x: 300, z: 0 },      // East
-            { x: 0, z: -300 },     // North
-            { x: 0, z: 300 },      // South
-            { x: -200, z: -200 },  // NW
-            { x: 200, z: -200 },   // NE
-            { x: -200, z: 200 },   // SW
-            { x: 200, z: 200 },    // SE
-            { x: -350, z: -200 },  // Far NW
-            { x: 350, z: -200 },   // Far NE
+            { x: -80, z: 0 },      // West - close
+            { x: 80, z: 0 },       // East - close
+            { x: 0, z: -80 },      // North - close
+            { x: 0, z: 80 },       // South - close
+            { x: -60, z: -60 },    // NW
+            { x: 60, z: -60 },     // NE
+            { x: -60, z: 60 },     // SW
+            { x: 60, z: 60 },      // SE
+            { x: -100, z: -80 },   // Far NW
+            { x: 100, z: -80 },    // Far NE
         ];
 
         // Add signposts pointing to other kingdoms
@@ -2943,8 +3103,8 @@ class World {
 
             const pos = regionPositions[idx];
 
-            // Create a signpost for this kingdom
-            const signpost = this.createSignpost(loc.name, pos.x * 0.3, pos.z * 0.3);
+            // Create a signpost for this kingdom - closer to center
+            const signpost = this.createSignpost(loc.name, pos.x * 0.6, pos.z * 0.6);
             game.scene.add(signpost);
 
             // Add some enemies from this kingdom in that direction
@@ -2955,9 +3115,9 @@ class World {
                 const enemy = new Enemy(enemyType, lvl, false);
 
                 enemy.position.set(
-                    pos.x * 0.4 + (Math.random() - 0.5) * 80,
+                    pos.x + (Math.random() - 0.5) * 40,
                     enemy.isFlying ? 8 : 3,
-                    pos.z * 0.4 + (Math.random() - 0.5) * 80
+                    pos.z + (Math.random() - 0.5) * 40
                 );
                 this.enemies.push(enemy);
                 game.scene.add(enemy.createMesh());
@@ -4261,14 +4421,14 @@ function updateRegionDisplay(position) {
 
     let region = game.world.location.name;
 
-    // Determine region based on position
-    if (x < -200) {
+    // Determine region based on position - adjusted for closer kingdoms
+    if (x < -50) {
         region = 'Western Territories';
-    } else if (x > 200) {
+    } else if (x > 50) {
         region = 'Eastern Territories';
-    } else if (z < -200) {
+    } else if (z < -50) {
         region = 'Northern Reaches';
-    } else if (z > 200) {
+    } else if (z > 50) {
         region = 'Southern Lands';
     }
 
@@ -4276,6 +4436,9 @@ function updateRegionDisplay(position) {
     if (locationDisplay && locationDisplay.textContent !== region) {
         locationDisplay.textContent = region;
     }
+
+    // Check for quest location objectives (reach type)
+    checkQuestLocationReached(position);
 }
 
 // ============================================
@@ -4295,6 +4458,7 @@ function gameLoop() {
         renderDamageNumbers();
         updateCooldownUI();
         updateHUD();
+        updateQuestMarkers(delta);
 
         // Enemy respawn system - spawn new enemies every 20 seconds
         game.enemySpawnTimer += delta;
@@ -4311,6 +4475,28 @@ function gameLoop() {
     if (game.renderer && game.scene && game.camera) {
         game.renderer.render(game.scene, game.camera);
     }
+}
+
+// Animate quest markers (pulsing effect)
+function updateQuestMarkers(delta) {
+    const time = Date.now() * 0.003;
+    game.scene.children.forEach(child => {
+        if (child.userData && child.userData.isQuestMarker) {
+            // Pulsing scale
+            const pulse = 1 + Math.sin(time) * 0.2;
+            child.scale.set(pulse, 1, pulse);
+
+            // Rotate the beam
+            if (child.children[2]) {
+                child.children[2].rotation.y += delta * 2;
+            }
+
+            // Pulsing opacity on ring
+            if (child.children[0] && child.children[0].material) {
+                child.children[0].material.opacity = 0.5 + Math.sin(time) * 0.3;
+            }
+        }
+    });
 }
 
 function updateCooldownUI() {

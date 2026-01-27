@@ -249,6 +249,25 @@ function gameLoop() {
 - Timer-based respawn every 20 seconds (`game.ENEMY_SPAWN_INTERVAL`)
 - Controlled in `World.update()` method
 
+### Quest Marker System
+- Visual markers on ground guide players to quest objectives
+- Colors indicate objective type:
+  - **Gold (0xFFD700)**: Talk to NPC
+  - **Green (0x00FF00)**: Reach location
+  - **Blue (0x00BFFF)**: Travel to area
+  - **Red (0xFF4444)**: Kill enemies
+- Markers pulse and have vertical light beams for visibility
+- `QUEST_LOCATIONS` object defines reachable locations
+- `spawnQuestMarkers()` updates markers when quests change
+- `checkQuestLocationReached()` handles `reach` type objectives
+
+### World Layout
+- Kingdoms are positioned close together (~60-100 units apart)
+- Center (0,0): Current kingdom
+- Cardinal directions: Other kingdoms at ~80 units
+- Diagonal directions: Kingdoms at ~60 units
+- Signposts point to neighboring kingdoms
+
 ### Camera System
 - Third-person follow camera
 - Mouse controls rotation (`game.cameraAngleX`, `game.cameraAngleY`)
@@ -271,11 +290,13 @@ function gameLoop() {
 ## Recent Development History
 
 Based on recent commits:
-1. Removed portal system, created vast world, fixed movement bugs
-2. Added Pantala continent with LeafWing, SilkWing, HiveWing tribes
-3. Implemented enemy respawn system
-4. Fixed various screen/display bugs
-5. Added quest-related enemies (Cave Guard, Scavenger)
+1. Added quest marker system with colored dots and light beams
+2. Made kingdoms closer together for easier exploration
+3. Fixed quest progression (reach objectives now work)
+4. Removed portal system, created vast world, fixed movement bugs
+5. Added Pantala continent with LeafWing, SilkWing, HiveWing tribes
+6. Implemented enemy respawn system
+7. Added quest-related enemies (Cave Guard, Scavenger)
 
 ## Key Files Quick Edit Guide
 
@@ -285,6 +306,9 @@ Based on recent commits:
 | Dragon colors | game.js | `TRIBES.[TribeName].colors` |
 | Combat damage | game.js | `realTimeAttack()`, `battleAction()` |
 | Quest rewards | game.js | `QUESTS.[questId].rewards` |
+| Quest locations | game.js | `QUEST_LOCATIONS` object |
+| Kingdom distances | game.js | `generateKingdomRegions()` regionPositions |
+| Quest markers | game.js | `createQuestMarker()`, `spawnQuestMarkers()` |
 | UI layout | index.html | Screen divs with IDs |
 | Color scheme | styles.css | `:root` CSS variables |
 | Animations | styles.css | `@keyframes` rules |
