@@ -619,7 +619,11 @@ const game = {
     dialogueActive: false,
     currentNPC: null,
     currentDialogue: null,
-    worldNPCs: []
+    worldNPCs: [],
+
+    // Enemy respawn system
+    enemySpawnTimer: 0,
+    ENEMY_SPAWN_INTERVAL: 20 // Spawn enemies every 20 seconds
 };
 
 // ============================================
@@ -2260,12 +2264,9 @@ class World {
     generateEntities() {
         const loc = this.location;
 
-        for (let i = 0; i < 5; i++) {
-            const enemyName = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
-            const level = loc.enemyLevel[0] + Math.floor(Math.random() * (loc.enemyLevel[1] - loc.enemyLevel[0] + 1));
-            const enemy = new Enemy(enemyName, level, false);
-            game.scene.add(enemy.createMesh());
-            this.enemies.push(enemy);
+        // Spawn 15 enemies initially
+        for (let i = 0; i < 15; i++) {
+            this.spawnEnemy();
         }
 
         this.boss = new Enemy(loc.bossName, loc.bossLevel, true);
@@ -2338,6 +2339,21 @@ class World {
         portal.add(inner);
 
         return portal;
+    }
+
+    spawnEnemy() {
+        const loc = this.location;
+        const enemyType = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+        const lvl = Math.floor(Math.random() * 3) + loc.baseLevel;
+        const enemy = new Enemy(enemyType, lvl, false);
+        enemy.position.set(
+            (Math.random() - 0.5) * 120,
+            5 + Math.random() * 10,
+            (Math.random() - 0.5) * 120
+        );
+        this.enemies.push(enemy);
+        game.scene.add(enemy.createMesh());
+        return enemy;
     }
 
     update(delta) {
@@ -3579,6 +3595,17 @@ function gameLoop() {
         renderDamageNumbers();
         updateCooldownUI();
         updateHUD();
+
+        // Enemy respawn system - spawn new enemies every 20 seconds
+        game.enemySpawnTimer += delta;
+        if (game.enemySpawnTimer >= game.ENEMY_SPAWN_INTERVAL) {
+            game.enemySpawnTimer = 0;
+            // Spawn 3 new enemies
+            for (let i = 0; i < 3; i++) {
+                game.world.spawnEnemy();
+            }
+            showMessage('New enemies have appeared!', 'warning');
+        }
     }
 
     if (game.renderer && game.scene && game.camera) {
@@ -3759,10 +3786,18 @@ function handleGameInput(e) {
 
         // Unstuck - teleport to center
         case 'KeyT':
-            game.player.position.set(0, 5, 0);
+            game.player.position.set(0, 8, 0);
+            game.player.rotation = 0;
             game.player.isFlying = false;
             game.player.isGrounded = true;
-            showMessage('Teleported to safety!', 'info');
+            // Also update mesh immediately
+            if (game.player.mesh) {
+                game.player.mesh.position.set(0, 8, 0);
+                game.player.mesh.rotation.y = 0;
+            }
+            // Reset camera angle
+            game.cameraAngleY = 0;
+            showMessage('Teleported to safety! (T)', 'info');
             break;
     }
 }
