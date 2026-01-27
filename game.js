@@ -1634,7 +1634,8 @@ function createTerrain(locationId) {
     const terrain = new THREE.Group();
 
     // Ground
-    const groundGeo = new THREE.PlaneGeometry(300, 300, 80, 80);
+    // VAST WORLD - 1000x1000 terrain
+    const groundGeo = new THREE.PlaneGeometry(1000, 1000, 100, 100);
     const vertices = groundGeo.attributes.position.array;
     for (let i = 0; i < vertices.length; i += 3) {
         const x = vertices[i];
@@ -2540,9 +2541,9 @@ class Enemy {
             this.mesh.position.y = Math.max(groundLevel, Math.min(25, this.mesh.position.y));
         }
 
-        // Keep in bounds
-        this.mesh.position.x = Math.max(-95, Math.min(95, this.mesh.position.x));
-        this.mesh.position.z = Math.max(-95, Math.min(95, this.mesh.position.z));
+        // Keep in vast world bounds
+        this.mesh.position.x = Math.max(-480, Math.min(480, this.mesh.position.x));
+        this.mesh.position.z = Math.max(-480, Math.min(480, this.mesh.position.z));
 
         // Update position reference
         this.position.copy(this.mesh.position);
@@ -2831,7 +2832,8 @@ class World {
         this.terrain = null;
         this.enemies = [];
         this.collectibles = [];
-        this.portals = [];
+        // Portals removed - vast interconnected world instead
+        this.kingdomRegions = [];
         this.boss = null;
     }
 
@@ -2888,14 +2890,16 @@ class World {
         this.boss.position.set(0, 8, -40);
         game.scene.add(this.boss.createMesh());
 
-        for (let i = 0; i < 10; i++) {
+        // Spread collectibles across the vast kingdom
+        for (let i = 0; i < 50; i++) {
             const type = Math.random() > 0.5 ? 'gold' : 'heal';
             const collectible = this.createCollectible(type);
             this.collectibles.push(collectible);
             game.scene.add(collectible);
         }
 
-        this.createPortals();
+        // Generate other kingdom regions in the vast world
+        this.generateKingdomRegions();
     }
 
     createCollectible(type) {
@@ -2906,54 +2910,90 @@ class World {
             emissiveIntensity: 0.4
         });
         const mesh = new THREE.Mesh(geo, mat);
+        // Spread across the vast world
         mesh.position.set(
-            (Math.random() - 0.5) * 80,
+            (Math.random() - 0.5) * 400,
             2 + Math.random() * 3,
-            (Math.random() - 0.5) * 80
+            (Math.random() - 0.5) * 400
         );
         mesh.userData = { type, value: type === 'gold' ? 15 + Math.floor(Math.random() * 20) : 35 };
         return mesh;
     }
 
-    createPortals() {
-        const locs = Object.keys(LOCATIONS);
-        const idx = locs.indexOf(this.locationId);
+    // Generate other kingdoms as regions in the vast world
+    generateKingdomRegions() {
+        const allLocations = Object.entries(LOCATIONS);
+        const regionPositions = [
+            { x: 0, z: 0 },        // Current kingdom at center
+            { x: -300, z: 0 },     // West
+            { x: 300, z: 0 },      // East
+            { x: 0, z: -300 },     // North
+            { x: 0, z: 300 },      // South
+            { x: -200, z: -200 },  // NW
+            { x: 200, z: -200 },   // NE
+            { x: -200, z: 200 },   // SW
+            { x: 200, z: 200 },    // SE
+            { x: -350, z: -200 },  // Far NW
+            { x: 350, z: -200 },   // Far NE
+        ];
 
-        const prevLoc = locs[(idx - 1 + locs.length) % locs.length];
-        const prevPortal = this.createPortal(prevLoc, -70, 4, 0);
-        this.portals.push(prevPortal);
-        game.scene.add(prevPortal);
+        // Add signposts pointing to other kingdoms
+        allLocations.forEach(([locId, loc], idx) => {
+            if (locId === this.locationId || idx >= regionPositions.length) return;
 
-        const nextLoc = locs[(idx + 1) % locs.length];
-        const nextPortal = this.createPortal(nextLoc, 70, 4, 0);
-        this.portals.push(nextPortal);
-        game.scene.add(nextPortal);
+            const pos = regionPositions[idx];
+
+            // Create a signpost for this kingdom
+            const signpost = this.createSignpost(loc.name, pos.x * 0.3, pos.z * 0.3);
+            game.scene.add(signpost);
+
+            // Add some enemies from this kingdom in that direction
+            for (let i = 0; i < 5; i++) {
+                const enemyType = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+                const baseLevel = loc.baseLevel || 1;
+                const lvl = Math.floor(Math.random() * 3) + baseLevel;
+                const enemy = new Enemy(enemyType, lvl, false);
+
+                enemy.position.set(
+                    pos.x * 0.4 + (Math.random() - 0.5) * 80,
+                    enemy.isFlying ? 8 : 3,
+                    pos.z * 0.4 + (Math.random() - 0.5) * 80
+                );
+                this.enemies.push(enemy);
+                game.scene.add(enemy.createMesh());
+            }
+        });
     }
 
-    createPortal(destination, x, y, z) {
-        const geo = new THREE.TorusGeometry(3, 0.5, 16, 32);
-        const mat = new THREE.MeshStandardMaterial({
-            color: 0x9B59B6,
-            emissive: 0x9B59B6,
-            emissiveIntensity: 0.6
-        });
-        const portal = new THREE.Mesh(geo, mat);
-        portal.position.set(x, y, z);
-        portal.rotation.y = Math.PI / 2;
-        portal.userData = { destination };
+    createSignpost(kingdomName, x, z) {
+        const signpost = new THREE.Group();
 
-        const innerGeo = new THREE.CircleGeometry(2.5, 32);
-        const innerMat = new THREE.MeshBasicMaterial({
-            color: 0xDDA0DD,
-            transparent: true,
-            opacity: 0.6,
-            side: THREE.DoubleSide
-        });
-        const inner = new THREE.Mesh(innerGeo, innerMat);
-        inner.rotation.y = Math.PI / 2;
-        portal.add(inner);
+        // Post
+        const postGeo = new THREE.CylinderGeometry(0.3, 0.3, 8, 8);
+        const postMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const post = new THREE.Mesh(postGeo, postMat);
+        post.position.y = 4;
+        signpost.add(post);
 
-        return portal;
+        // Sign board
+        const boardGeo = new THREE.BoxGeometry(6, 2, 0.3);
+        const boardMat = new THREE.MeshStandardMaterial({ color: 0xDEB887 });
+        const board = new THREE.Mesh(boardGeo, boardMat);
+        board.position.y = 7;
+        signpost.add(board);
+
+        // Arrow pointing in direction
+        const arrowGeo = new THREE.ConeGeometry(0.8, 2, 4);
+        const arrowMat = new THREE.MeshStandardMaterial({ color: 0xFFD700 });
+        const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+        arrow.position.set(4, 7, 0);
+        arrow.rotation.z = -Math.PI / 2;
+        signpost.add(arrow);
+
+        signpost.position.set(x, 0, z);
+        signpost.lookAt(x * 2, 0, z * 2);
+
+        return signpost;
     }
 
     spawnEnemy() {
@@ -2963,13 +3003,23 @@ class World {
         const lvl = Math.floor(Math.random() * 3) + baseLevel;
         const enemy = new Enemy(enemyType, lvl, false);
 
-        // Spawn enemies at reasonable heights - ground level or slightly above
+        // Spawn enemies across the vast world - near player for respawns
+        const playerPos = game.player ? game.player.position : new THREE.Vector3(0, 0, 0);
         const spawnY = enemy.isFlying ? (5 + Math.random() * 8) : 3;
+
+        // Spawn within 150 units of player but not too close
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * 120;
         enemy.position.set(
-            (Math.random() - 0.5) * 100,
+            playerPos.x + Math.cos(angle) * distance,
             spawnY,
-            (Math.random() - 0.5) * 100
+            playerPos.z + Math.sin(angle) * distance
         );
+
+        // Keep in world bounds
+        enemy.position.x = Math.max(-480, Math.min(480, enemy.position.x));
+        enemy.position.z = Math.max(-480, Math.min(480, enemy.position.z));
+
         this.enemies.push(enemy);
         game.scene.add(enemy.createMesh());
         return enemy;
@@ -3005,11 +3055,6 @@ class World {
             }
         });
 
-        // Rotate portals
-        this.portals.forEach(p => {
-            p.rotation.z += delta * 0.5;
-        });
-
         // Boss AI and animation
         if (this.boss && this.boss.mesh && this.boss.hp > 0) {
             this.boss.updateAI(delta, playerPos);
@@ -3021,7 +3066,7 @@ class World {
         if (this.terrain) game.scene.remove(this.terrain);
         this.enemies.forEach(e => { if (e.mesh) game.scene.remove(e.mesh); });
         this.collectibles.forEach(c => game.scene.remove(c));
-        this.portals.forEach(p => game.scene.remove(p));
+        // No portals to clean up in vast world
         if (this.boss && this.boss.mesh) game.scene.remove(this.boss.mesh);
 
         // RPG: Clean up NPCs
@@ -3111,14 +3156,15 @@ function realTimeAttack() {
 
     // Find closest enemy in attack range and direction
     game.world.enemies.forEach(enemy => {
-        if (!enemy.mesh) return;
+        if (!enemy.mesh || enemy.hp <= 0) return;
         const dist = p.position.distanceTo(enemy.mesh.position);
         if (dist > attackRange) return;
 
         // Check if enemy is in front of player
         const toEnemy = new THREE.Vector3().subVectors(enemy.mesh.position, p.position).normalize();
         const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
-        const angle = Math.acos(facing.dot(toEnemy));
+        const dotProduct = Math.max(-1, Math.min(1, facing.dot(toEnemy))); // Clamp to prevent NaN
+        const angle = Math.acos(dotProduct);
 
         if (angle < attackAngle && dist < hitDist) {
             hitDist = dist;
@@ -3127,12 +3173,13 @@ function realTimeAttack() {
     });
 
     // Also check boss
-    if (game.world.boss && game.world.boss.mesh) {
+    if (game.world.boss && game.world.boss.mesh && game.world.boss.hp > 0) {
         const dist = p.position.distanceTo(game.world.boss.mesh.position);
         if (dist <= attackRange) {
             const toEnemy = new THREE.Vector3().subVectors(game.world.boss.mesh.position, p.position).normalize();
             const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
-            const angle = Math.acos(facing.dot(toEnemy));
+            const dotProduct = Math.max(-1, Math.min(1, facing.dot(toEnemy))); // Clamp to prevent NaN
+            const angle = Math.acos(dotProduct);
             if (angle < attackAngle && dist < hitDist) {
                 hitEnemy = game.world.boss;
             }
@@ -3140,14 +3187,18 @@ function realTimeAttack() {
     }
 
     if (hitEnemy) {
-        // Calculate damage with crits and bonuses
-        let baseDmg = p.attack + Math.floor(Math.random() * 6);
+        // Calculate damage with crits and bonuses - ensure no NaN
+        const baseAttack = p.attack || 10;
+        let baseDmg = baseAttack + Math.floor(Math.random() * 6) + 5;
         let isCrit = Math.random() < 0.15; // 15% crit chance
-        let isMoving = Math.abs(p.velocity.x) > 0.1 || Math.abs(p.velocity.z) > 0.1;
+        let isMoving = (p.velocity && (Math.abs(p.velocity.x) > 0.05 || Math.abs(p.velocity.z) > 0.05));
 
         if (isCrit) baseDmg = Math.floor(baseDmg * 1.8);
         if (p.isFlying) baseDmg = Math.floor(baseDmg * 1.25); // Aerial bonus
-        if (isMoving) baseDmg = Math.floor(baseDmg * 1.1); // Movement bonus
+        if (isMoving) baseDmg = Math.floor(baseDmg * 1.15); // Movement bonus
+
+        // Ensure damage is always a valid number
+        baseDmg = Math.max(1, Math.floor(baseDmg) || 10);
 
         const dealt = hitEnemy.takeDamage(baseDmg);
 
@@ -3185,13 +3236,14 @@ function realTimeBreathAttack() {
 
     // Find all enemies in breath cone
     game.world.enemies.forEach(enemy => {
-        if (!enemy.mesh) return;
+        if (!enemy.mesh || enemy.hp <= 0) return;
         const dist = p.position.distanceTo(enemy.mesh.position);
         if (dist > attackRange) return;
 
         const toEnemy = new THREE.Vector3().subVectors(enemy.mesh.position, p.position).normalize();
         const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
-        const angle = Math.acos(facing.dot(toEnemy));
+        const dotProduct = Math.max(-1, Math.min(1, facing.dot(toEnemy))); // Clamp to prevent NaN
+        const angle = Math.acos(dotProduct);
 
         if (angle < attackAngle) {
             hitEnemies.push({ enemy, dist });
@@ -3199,12 +3251,13 @@ function realTimeBreathAttack() {
     });
 
     // Check boss too
-    if (game.world.boss && game.world.boss.mesh) {
+    if (game.world.boss && game.world.boss.mesh && game.world.boss.hp > 0) {
         const dist = p.position.distanceTo(game.world.boss.mesh.position);
         if (dist <= attackRange) {
             const toEnemy = new THREE.Vector3().subVectors(game.world.boss.mesh.position, p.position).normalize();
             const facing = new THREE.Vector3(Math.sin(p.rotation), 0, Math.cos(p.rotation));
-            const angle = Math.acos(facing.dot(toEnemy));
+            const dotProduct = Math.max(-1, Math.min(1, facing.dot(toEnemy))); // Clamp to prevent NaN
+            const angle = Math.acos(dotProduct);
             if (angle < attackAngle) {
                 hitEnemies.push({ enemy: game.world.boss, dist });
             }
@@ -3216,10 +3269,14 @@ function realTimeBreathAttack() {
 
     if (hitEnemies.length > 0) {
         hitEnemies.forEach(({ enemy, dist }) => {
-            // Damage decreases with distance
-            const distMod = 1 - (dist / attackRange) * 0.5;
-            let dmg = Math.floor((p.attack * 1.4 + Math.random() * 10) * distMod);
+            // Damage decreases with distance - ensure no NaN
+            const distMod = Math.max(0.5, 1 - (dist / attackRange) * 0.5);
+            const baseAttack = p.attack || 10;
+            let dmg = Math.floor((baseAttack * 1.4 + Math.random() * 10 + 5) * distMod);
             if (p.isFlying) dmg = Math.floor(dmg * 1.25);
+
+            // Ensure damage is always valid
+            dmg = Math.max(1, Math.floor(dmg) || 10);
 
             const dealt = enemy.takeDamage(dmg);
             spawnDamageNumber(enemy.mesh.position, dealt, false);
@@ -3248,14 +3305,14 @@ function realTimeSpecialAttack() {
 
     // Special attacks hit all nearby enemies (360 degrees)
     game.world.enemies.forEach(enemy => {
-        if (!enemy.mesh) return;
+        if (!enemy.mesh || enemy.hp <= 0) return;
         const dist = p.position.distanceTo(enemy.mesh.position);
         if (dist <= attackRange) {
             hitEnemies.push(enemy);
         }
     });
 
-    if (game.world.boss && game.world.boss.mesh) {
+    if (game.world.boss && game.world.boss.mesh && game.world.boss.hp > 0) {
         const dist = p.position.distanceTo(game.world.boss.mesh.position);
         if (dist <= attackRange) {
             hitEnemies.push(game.world.boss);
@@ -3267,8 +3324,12 @@ function realTimeSpecialAttack() {
 
     if (hitEnemies.length > 0) {
         hitEnemies.forEach(enemy => {
-            let dmg = Math.floor(p.attack * 2.2);
+            const baseAttack = p.attack || 10;
+            let dmg = Math.floor(baseAttack * 2.2) + 10;
             if (p.isFlying) dmg = Math.floor(dmg * 1.25);
+
+            // Ensure damage is always valid
+            dmg = Math.max(1, Math.floor(dmg) || 15);
 
             const dealt = enemy.takeDamage(dmg);
             spawnDamageNumber(enemy.mesh.position, dealt, true);
@@ -3996,45 +4057,54 @@ function updatePlayer(delta) {
     const oldZ = p.position.z;
 
     // Simple movement speed
-    let speed = 0.35;
-    if (p.isFlying) speed = 0.5;
+    let speed = 0.45;
+    if (p.isFlying) speed = 0.6;
     if (game.keys['ShiftLeft'] || game.keys['ShiftRight']) {
-        speed *= 1.5;
+        speed *= 1.8;
     }
 
     // Get direction from player rotation
     const dirX = Math.sin(p.rotation);
     const dirZ = Math.cos(p.rotation);
 
+    // Reset velocity for this frame
+    p.velocity.set(0, 0, 0);
+
     // WASD Movement - simple and direct
     if (game.keys['KeyW'] || game.keys['ArrowUp']) {
-        p.position.x += dirX * speed;
-        p.position.z += dirZ * speed;
+        p.velocity.x = dirX * speed;
+        p.velocity.z = dirZ * speed;
     }
     if (game.keys['KeyS'] || game.keys['ArrowDown']) {
-        p.position.x -= dirX * speed * 0.5;
-        p.position.z -= dirZ * speed * 0.5;
+        p.velocity.x = -dirX * speed * 0.5;
+        p.velocity.z = -dirZ * speed * 0.5;
     }
+
+    // Apply velocity to position
+    p.position.x += p.velocity.x;
+    p.position.z += p.velocity.z;
 
     // A/D to turn
     if (game.keys['KeyA'] || game.keys['ArrowLeft']) {
-        p.rotation += 0.05;
+        p.rotation += 0.06;
     }
     if (game.keys['KeyD'] || game.keys['ArrowRight']) {
-        p.rotation -= 0.05;
+        p.rotation -= 0.06;
     }
 
     // Flying - SPACE to go up, CTRL to go down
     if (p.isFlying) {
         if (game.keys['Space']) {
-            p.position.y += 0.25;
+            p.position.y += 0.3;
+            p.velocity.y = 0.3;
         }
         if (game.keys['ControlLeft'] || game.keys['ControlRight']) {
-            p.position.y -= 0.35;
+            p.position.y -= 0.4;
+            p.velocity.y = -0.4;
         }
 
         // Drain stamina while flying
-        p.stamina -= 0.08;
+        p.stamina -= 0.06;
         if (p.stamina <= 0) {
             p.stamina = 0;
             p.isFlying = false;
@@ -4042,11 +4112,11 @@ function updatePlayer(delta) {
         }
     } else {
         // On ground - regenerate stamina
-        p.stamina = Math.min(p.maxStamina, p.stamina + 0.08);
+        p.stamina = Math.min(p.maxStamina, p.stamina + 0.1);
 
         // Gravity if not grounded
         if (p.position.y > 3) {
-            p.position.y -= 0.2;
+            p.position.y -= 0.25;
         }
     }
 
@@ -4061,10 +4131,10 @@ function updatePlayer(delta) {
         p.isGrounded = false;
     }
 
-    // World boundaries - keep player in bounds
-    p.position.x = Math.max(-90, Math.min(90, p.position.x));
-    p.position.z = Math.max(-90, Math.min(90, p.position.z));
-    p.position.y = Math.max(groundLevel, Math.min(60, p.position.y));
+    // VAST WORLD - much larger boundaries (1000x1000 map)
+    p.position.x = Math.max(-500, Math.min(500, p.position.x));
+    p.position.z = Math.max(-500, Math.min(500, p.position.z));
+    p.position.y = Math.max(groundLevel, Math.min(100, p.position.y));
 
     // Check if player is somehow stuck (NaN or invalid position)
     if (isNaN(p.position.x) || isNaN(p.position.y) || isNaN(p.position.z)) {
@@ -4179,22 +4249,33 @@ function checkCollisions() {
         }
     }
 
-    // Portal travel
-    game.world.portals.forEach(portal => {
-        const dist = p.position.distanceTo(portal.position);
-        if (dist < 4) {
-            const dest = portal.userData.destination;
-            showMessage(`Traveling to ${LOCATIONS[dest].name}...`, 'info');
-            setTimeout(() => {
-                game.world.cleanup();
-                game.world = new World(dest);
-                game.world.generate();
-                p.position.set(0, 2, 0);
-                p.rotation = 0;
-                updateHUD();
-            }, 500);
-        }
-    });
+    // No portals - vast interconnected world!
+    // Display current region based on position
+    updateRegionDisplay(p.position);
+}
+
+// Show which region of the vast world the player is in
+function updateRegionDisplay(position) {
+    const x = position.x;
+    const z = position.z;
+
+    let region = game.world.location.name;
+
+    // Determine region based on position
+    if (x < -200) {
+        region = 'Western Territories';
+    } else if (x > 200) {
+        region = 'Eastern Territories';
+    } else if (z < -200) {
+        region = 'Northern Reaches';
+    } else if (z > 200) {
+        region = 'Southern Lands';
+    }
+
+    const locationDisplay = document.getElementById('location-name');
+    if (locationDisplay && locationDisplay.textContent !== region) {
+        locationDisplay.textContent = region;
+    }
 }
 
 // ============================================
