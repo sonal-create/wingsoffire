@@ -2662,7 +2662,16 @@ function completeQuest(questId) {
 
     // Start next quest if there is one
     if (quest.nextQuest) {
-        setTimeout(() => startQuest(quest.nextQuest), 1000);
+        const nextQuestId = quest.nextQuest;
+        const nextQuestData = QUESTS[nextQuestId];
+        if (nextQuestData) {
+            showMessage(`New quest available: ${nextQuestData.name}`, 'info');
+        }
+        setTimeout(() => {
+            startQuest(nextQuestId);
+            // Refresh markers after new quest starts
+            setTimeout(() => spawnQuestMarkers(), 300);
+        }, 1500);
     }
 
     updateHUD();
@@ -2713,44 +2722,52 @@ function checkQuestLocationReached(position) {
 function createQuestMarker(x, z, color = 0xFFD700) {
     const marker = new THREE.Group();
 
-    // Glowing circle on ground
-    const ringGeo = new THREE.RingGeometry(1.5, 2.5, 32);
+    // Glowing circle on ground - BIGGER and more visible
+    const ringGeo = new THREE.RingGeometry(3, 5, 32);
     const ringMat = new THREE.MeshBasicMaterial({
         color: color,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.9
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.2;
+    ring.position.y = 0.5;
     marker.add(ring);
 
-    // Inner dot
-    const dotGeo = new THREE.CircleGeometry(1, 16);
+    // Inner dot - BIGGER
+    const dotGeo = new THREE.CircleGeometry(2, 16);
     const dotMat = new THREE.MeshBasicMaterial({
         color: color,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.6
+        opacity: 0.7
     });
     const dot = new THREE.Mesh(dotGeo, dotMat);
     dot.rotation.x = -Math.PI / 2;
-    dot.position.y = 0.3;
+    dot.position.y = 0.6;
     marker.add(dot);
 
-    // Vertical beam of light
-    const beamGeo = new THREE.CylinderGeometry(0.3, 0.3, 20, 8);
+    // Vertical beam of light - TALLER and THICKER
+    const beamGeo = new THREE.CylinderGeometry(0.8, 0.8, 50, 8);
     const beamMat = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.3
+        opacity: 0.4
     });
     const beam = new THREE.Mesh(beamGeo, beamMat);
-    beam.position.y = 10;
+    beam.position.y = 25;
     marker.add(beam);
 
-    marker.position.set(x, 0.1, z);
+    // Add a floating arrow pointing down
+    const arrowGeo = new THREE.ConeGeometry(1.5, 3, 8);
+    const arrowMat = new THREE.MeshBasicMaterial({ color: color });
+    const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+    arrow.rotation.x = Math.PI; // Point down
+    arrow.position.y = 8;
+    marker.add(arrow);
+
+    marker.position.set(x, 2, z); // Higher Y position
     marker.userData.isQuestMarker = true;
 
     return marker;
@@ -2758,10 +2775,19 @@ function createQuestMarker(x, z, color = 0xFFD700) {
 
 // Spawn quest markers for active quests
 function spawnQuestMarkers() {
-    // Remove existing quest markers
-    game.scene.children
-        .filter(c => c.userData && c.userData.isQuestMarker)
-        .forEach(m => game.scene.remove(m));
+    if (!game.scene) return;
+
+    // Remove existing quest markers - proper removal
+    const markersToRemove = [];
+    game.scene.children.forEach(c => {
+        if (c.userData && c.userData.isQuestMarker) {
+            markersToRemove.push(c);
+        }
+    });
+    markersToRemove.forEach(m => game.scene.remove(m));
+
+    // Don't spawn if no active quests
+    if (!game.activeQuests || game.activeQuests.length === 0) return;
 
     game.activeQuests.forEach(quest => {
         quest.objectives.forEach(obj => {
@@ -2785,24 +2811,34 @@ function spawnQuestMarkers() {
                 }
             }
 
-            // Marker for talk objectives - find NPC
+            // Marker for talk objectives - find NPC position
             if (obj.type === 'talk') {
-                game.worldNPCs.forEach(npc => {
-                    if (npc.data.name === obj.target && npc.mesh) {
-                        const marker = createQuestMarker(
-                            npc.mesh.position.x,
-                            npc.mesh.position.z,
-                            0xFFD700 // Gold for NPCs
-                        );
-                        game.scene.add(marker);
-                    }
-                });
+                // First check worldNPCs
+                let found = false;
+                if (game.worldNPCs && game.worldNPCs.length > 0) {
+                    game.worldNPCs.forEach(npc => {
+                        if (npc.data && npc.data.name === obj.target && npc.mesh) {
+                            const marker = createQuestMarker(
+                                npc.mesh.position.x,
+                                npc.mesh.position.z,
+                                0xFFD700 // Gold for NPCs
+                            );
+                            game.scene.add(marker);
+                            found = true;
+                        }
+                    });
+                }
+                // If NPC not found in worldNPCs, use default location near palace
+                if (!found) {
+                    const marker = createQuestMarker(15, 15, 0xFFD700); // Near palace
+                    game.scene.add(marker);
+                }
             }
 
-            // Marker for kill objectives - mark general area where enemies spawn
-            if (obj.type === 'kill' && !obj.done) {
-                // Show marker at center where enemies are
-                const marker = createQuestMarker(0, 0, 0xFF4444); // Red for combat
+            // Marker for kill objectives - mark area where enemies spawn
+            if (obj.type === 'kill') {
+                // Show multiple markers around the area
+                const marker = createQuestMarker(20, 20, 0xFF4444); // Red for combat
                 game.scene.add(marker);
             }
         });
@@ -3010,8 +3046,65 @@ class World {
         // RPG: Update quest progress for travel
         updateQuestProgress('travel', this.locationId);
 
-        // Spawn quest markers after NPCs are placed
-        setTimeout(() => spawnQuestMarkers(), 100);
+        // Add Mountain Exit landmark
+        this.createMountainExit();
+
+        // Spawn quest markers after NPCs are placed (longer delay to ensure NPCs ready)
+        setTimeout(() => spawnQuestMarkers(), 500);
+    }
+
+    // Create a visible Mountain Exit structure for quest objective
+    createMountainExit() {
+        const exitGroup = new THREE.Group();
+        const exitPos = QUEST_LOCATIONS['Mountain Exit'];
+
+        // Large cave entrance / archway
+        const archGeo = new THREE.TorusGeometry(8, 2, 8, 16, Math.PI);
+        const archMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
+        const arch = new THREE.Mesh(archGeo, archMat);
+        arch.rotation.x = Math.PI / 2;
+        arch.position.y = 8;
+        exitGroup.add(arch);
+
+        // Stone pillars on sides
+        const pillarGeo = new THREE.CylinderGeometry(2, 2.5, 16, 8);
+        const pillarMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+
+        const leftPillar = new THREE.Mesh(pillarGeo, pillarMat);
+        leftPillar.position.set(-8, 8, 0);
+        exitGroup.add(leftPillar);
+
+        const rightPillar = new THREE.Mesh(pillarGeo, pillarMat);
+        rightPillar.position.set(8, 8, 0);
+        exitGroup.add(rightPillar);
+
+        // Sign saying "Mountain Exit"
+        const signPostGeo = new THREE.BoxGeometry(0.5, 6, 0.5);
+        const signPostMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const signPost = new THREE.Mesh(signPostGeo, signPostMat);
+        signPost.position.set(12, 3, 0);
+        exitGroup.add(signPost);
+
+        const signGeo = new THREE.BoxGeometry(8, 3, 0.3);
+        const signMat = new THREE.MeshStandardMaterial({ color: 0xDEB887 });
+        const sign = new THREE.Mesh(signGeo, signMat);
+        sign.position.set(12, 7, 0);
+        exitGroup.add(sign);
+
+        // Glowing exit light
+        const lightGeo = new THREE.SphereGeometry(1.5, 16, 16);
+        const lightMat = new THREE.MeshBasicMaterial({
+            color: 0x00FF00,
+            transparent: true,
+            opacity: 0.8
+        });
+        const exitLight = new THREE.Mesh(lightGeo, lightMat);
+        exitLight.position.y = 12;
+        exitGroup.add(exitLight);
+
+        exitGroup.position.set(exitPos.x, 0, exitPos.z);
+        exitGroup.userData.isMountainExit = true;
+        game.scene.add(exitGroup);
     }
 
     setupLighting() {
@@ -4586,9 +4679,11 @@ function handleCharacterInput(e) {
         showMessage('WASD move, SPACE fly, J/K/L attack', 'info');
         showMessage('E talk to NPCs, Q quests, P skills', 'info');
 
-        // RPG: Start the first quest
+        // RPG: Start the first quest and spawn markers
         setTimeout(() => {
             startQuest('theBeginning');
+            // Markers are already spawned by startQuest, but spawn again to make sure
+            setTimeout(() => spawnQuestMarkers(), 500);
         }, 2000);
     }
 }
