@@ -229,6 +229,101 @@ const TRIBES = {
         breathType: 'fire',
         breathColor: 0x800080,
         description: 'Mysterious dark dragons with silver scales under their wings like stars.'
+    },
+    // ============================================
+    // PANTALA TRIBES - The Lost Continent
+    // ============================================
+    LeafWing: {
+        name: 'LeafWing',
+        colors: {
+            body: 0x228B22,
+            underbelly: 0x90EE90,
+            wings: 0x32CD32,
+            wingMembrane: 0x98FB98,
+            horns: 0x006400,
+            eyes: 0xADFF2F,
+            claws: 0x2F4F2F,
+            leafPatterns: 0x00FF00
+        },
+        features: {
+            bulky: false,
+            flatHead: false,
+            thickScales: false,
+            noseHorn: false,
+            tailBarb: false,
+            glowScales: false,
+            ruff: true,
+            sailFin: false,
+            leafWings: true,
+            leafspeak: true
+        },
+        baseStats: { hp: 110, attack: 17, defense: 14, speed: 1.0 },
+        special: 'Leafspeak',
+        breathType: 'plant',
+        breathColor: 0x00FF00,
+        description: 'Dragons with leaf-shaped wings who can communicate with plants. Once thought extinct.'
+    },
+    SilkWing: {
+        name: 'SilkWing',
+        colors: {
+            body: 0xFFB6C1,
+            underbelly: 0xFFF0F5,
+            wings: 0xDDA0DD,
+            wingMembrane: 0xE6E6FA,
+            horns: 0xDB7093,
+            eyes: 0x9370DB,
+            claws: 0xC71585,
+            antennae: 0xFF69B4
+        },
+        features: {
+            bulky: false,
+            flatHead: false,
+            thickScales: false,
+            noseHorn: false,
+            tailBarb: false,
+            glowScales: true,
+            ruff: false,
+            sailFin: false,
+            fourWings: true,
+            antennae: true,
+            silkSpinners: true
+        },
+        baseStats: { hp: 90, attack: 14, defense: 10, speed: 1.3 },
+        special: 'Flamesilk',
+        breathType: 'silk',
+        breathColor: 0xFFD700,
+        description: 'Beautiful dragons with four butterfly-like wings. Some can produce flamesilk.'
+    },
+    HiveWing: {
+        name: 'HiveWing',
+        colors: {
+            body: 0xFFD700,
+            underbelly: 0xFFA500,
+            wings: 0xDAA520,
+            wingMembrane: 0xF0E68C,
+            horns: 0x8B4513,
+            eyes: 0x000000,
+            claws: 0x8B0000,
+            stripes: 0x000000
+        },
+        features: {
+            bulky: false,
+            flatHead: false,
+            thickScales: false,
+            noseHorn: false,
+            tailBarb: true,
+            glowScales: false,
+            ruff: false,
+            sailFin: false,
+            waspStripes: true,
+            stinger: true,
+            wristStingers: true
+        },
+        baseStats: { hp: 105, attack: 21, defense: 12, speed: 1.1 },
+        special: 'Nerve Strike',
+        breathType: 'venom',
+        breathColor: 0x8B0000,
+        description: 'Wasp-like dragons with venomous stingers and paralyzing toxins. Ruled by Queen Wasp.'
     }
 };
 
@@ -246,6 +341,7 @@ const LOCATIONS = {
         features: 'swamp',
         enemies: ['Swamp Serpent', 'Mud Crawler', 'MudWing Scout', 'Cave Guard', 'Scavenger'],
         enemyLevel: [1, 3],
+        baseLevel: 1,
         bossName: 'Marshal Marsh',
         bossLevel: 4,
         palace: {
@@ -264,6 +360,7 @@ const LOCATIONS = {
         features: 'desert',
         enemies: ['Sand Viper', 'Scorpion', 'SandWing Soldier'],
         enemyLevel: [2, 4],
+        baseLevel: 2,
         bossName: 'Queen Thorn',
         bossLevel: 5,
         palace: {
@@ -282,6 +379,7 @@ const LOCATIONS = {
         features: 'mountains',
         enemies: ['Mountain Eagle', 'Rock Golem', 'SkyWing Guard'],
         enemyLevel: [3, 5],
+        baseLevel: 3,
         bossName: 'General Ruby',
         bossLevel: 6,
         palace: {
@@ -300,6 +398,7 @@ const LOCATIONS = {
         features: 'underwater',
         enemies: ['Giant Crab', 'Shark', 'SeaWing Warrior'],
         enemyLevel: [2, 4],
+        baseLevel: 2,
         bossName: 'Commander Tsunami',
         bossLevel: 5,
         palace: {
@@ -318,6 +417,7 @@ const LOCATIONS = {
         features: 'jungle',
         enemies: ['Jungle Cat', 'Poison Frog', 'RainWing Guard'],
         enemyLevel: [3, 5],
+        baseLevel: 3,
         bossName: 'Queen Glory',
         bossLevel: 6,
         palace: {
@@ -336,6 +436,7 @@ const LOCATIONS = {
         features: 'arctic',
         enemies: ['Frost Wolf', 'Ice Bear', 'IceWing Soldier'],
         enemyLevel: [4, 6],
+        baseLevel: 4,
         bossName: 'Prince Winter',
         bossLevel: 7,
         palace: {
@@ -354,6 +455,7 @@ const LOCATIONS = {
         features: 'volcanic',
         enemies: ['Shadow Bat', 'Lava Serpent', 'NightWing Assassin'],
         enemyLevel: [5, 7],
+        baseLevel: 5,
         bossName: 'Darkstalker',
         bossLevel: 8,
         palace: {
@@ -361,6 +463,85 @@ const LOCATIONS = {
             style: 'obsidian',
             color: 0x2F2F4F,
             size: 70
+        }
+    },
+    // ============================================
+    // PANTALA - The Lost Continent
+    // ============================================
+    poisonJungle: {
+        name: 'The Poison Jungle',
+        skyColor: 0x2D5A27,
+        groundColor: 0x1A4D1A,
+        fogColor: 0x3D7A37,
+        fogDensity: 0.007,
+        features: 'poisonJungle',
+        enemies: ['Sundew Trap', 'Poison Dart Frog', 'LeafWing Warrior', 'Jungle Serpent'],
+        enemyLevel: [4, 6],
+        bossName: 'Sundew',
+        bossLevel: 7,
+        baseLevel: 4,
+        palace: {
+            name: 'The LeafWing Village',
+            style: 'treehouse',
+            color: 0x228B22,
+            size: 45
+        }
+    },
+    jewelHive: {
+        name: 'Jewel Hive',
+        skyColor: 0x87CEEB,
+        groundColor: 0xFFD700,
+        fogColor: 0xFFF8DC,
+        fogDensity: 0.004,
+        features: 'hive',
+        enemies: ['HiveWing Soldier', 'HiveWing Guard', 'Wasp Drone', 'SilkWing Slave'],
+        enemyLevel: [3, 5],
+        bossName: 'Lady Jewel',
+        bossLevel: 6,
+        baseLevel: 3,
+        palace: {
+            name: 'Jewel Hive Palace',
+            style: 'honeycomb',
+            color: 0xFFD700,
+            size: 55
+        }
+    },
+    waspHive: {
+        name: 'Wasp Hive',
+        skyColor: 0x8B4513,
+        groundColor: 0xDAA520,
+        fogColor: 0xD2691E,
+        fogDensity: 0.005,
+        features: 'hive',
+        enemies: ['HiveWing Elite', 'Mind-Controlled Dragon', 'Queen Guard', 'Wasp Swarm'],
+        enemyLevel: [6, 8],
+        bossName: 'Queen Wasp',
+        bossLevel: 10,
+        baseLevel: 6,
+        palace: {
+            name: 'Queen Wasps Throne',
+            style: 'darkHive',
+            color: 0x8B0000,
+            size: 80
+        }
+    },
+    silkwingCaves: {
+        name: 'SilkWing Caves',
+        skyColor: 0x9370DB,
+        groundColor: 0x483D8B,
+        fogColor: 0x7B68EE,
+        fogDensity: 0.004,
+        features: 'silkCaves',
+        enemies: ['SilkWing Weaver', 'Cave Spider', 'Silk Guardian', 'Flamesilk Moth'],
+        enemyLevel: [2, 4],
+        bossName: 'Blue',
+        bossLevel: 5,
+        baseLevel: 2,
+        palace: {
+            name: 'The Silk Caverns',
+            style: 'crystal',
+            color: 0xE6E6FA,
+            size: 40
         }
     }
 };
@@ -1301,6 +1482,140 @@ function createPalace(palaceData, locationId) {
             darkSpire.position.y = size;
             palace.add(darkSpire);
             break;
+
+        // ============================================
+        // PANTALA PALACE STYLES
+        // ============================================
+
+        case 'honeycomb':
+            // HiveWing Hive Palace - hexagonal structures
+            const hexMat = new THREE.MeshStandardMaterial({
+                color: 0xFFD700,
+                roughness: 0.3,
+                metalness: 0.2
+            });
+            const darkHexMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+
+            // Main hexagonal tower
+            const mainHexGeo = new THREE.CylinderGeometry(size * 0.5, size * 0.6, size * 1.2, 6);
+            const mainHex = new THREE.Mesh(mainHexGeo, hexMat);
+            mainHex.position.y = size * 0.6;
+            palace.add(mainHex);
+
+            // Surrounding hexagonal cells
+            for (let ring = 0; ring < 3; ring++) {
+                const numCells = 6 + ring * 6;
+                for (let i = 0; i < numCells; i++) {
+                    const cellAngle = (i / numCells) * Math.PI * 2;
+                    const cellDist = size * 0.4 + ring * size * 0.25;
+                    const cellSize = size * 0.15 - ring * 0.02;
+
+                    const cellGeo = new THREE.CylinderGeometry(cellSize, cellSize * 1.1, size * 0.4 + Math.random() * size * 0.3, 6);
+                    const cell = new THREE.Mesh(cellGeo, hexMat);
+                    cell.position.set(
+                        Math.cos(cellAngle) * cellDist,
+                        size * 0.3 + ring * 0.15,
+                        Math.sin(cellAngle) * cellDist
+                    );
+                    palace.add(cell);
+                }
+            }
+
+            // Dark entrance
+            const entranceGeo = new THREE.CylinderGeometry(size * 0.2, size * 0.2, size * 0.5, 6);
+            const entrance = new THREE.Mesh(entranceGeo, darkHexMat);
+            entrance.position.set(0, size * 0.25, size * 0.4);
+            palace.add(entrance);
+            break;
+
+        case 'darkHive':
+            // Queen Wasp's Dark Hive - menacing structure
+            const darkWaxMat = new THREE.MeshStandardMaterial({
+                color: 0x4A0000,
+                roughness: 0.6,
+                emissive: 0x2A0000,
+                emissiveIntensity: 0.2
+            });
+            const eyeMat = new THREE.MeshBasicMaterial({
+                color: 0xFF0000,
+                emissive: 0xFF0000
+            });
+
+            // Massive dark hive
+            const darkHiveGeo = new THREE.CylinderGeometry(size * 0.4, size * 0.7, size * 1.5, 6);
+            const darkHive = new THREE.Mesh(darkHiveGeo, darkWaxMat);
+            darkHive.position.y = size * 0.75;
+            palace.add(darkHive);
+
+            // Twisted spires
+            for (let i = 0; i < 5; i++) {
+                const spireAngle = (i / 5) * Math.PI * 2;
+                const spireGeo = new THREE.ConeGeometry(size * 0.1, size * 0.6, 6);
+                const spire = new THREE.Mesh(spireGeo, darkWaxMat);
+                spire.position.set(
+                    Math.cos(spireAngle) * size * 0.35,
+                    size * 1.3,
+                    Math.sin(spireAngle) * size * 0.35
+                );
+                palace.add(spire);
+            }
+
+            // Glowing red "eyes"
+            for (let i = 0; i < 8; i++) {
+                const eyeAngle = (i / 8) * Math.PI * 2;
+                const eyeGeo = new THREE.SphereGeometry(size * 0.05, 8, 8);
+                const eye = new THREE.Mesh(eyeGeo, eyeMat);
+                eye.position.set(
+                    Math.cos(eyeAngle) * size * 0.45,
+                    size * 0.8 + Math.random() * size * 0.3,
+                    Math.sin(eyeAngle) * size * 0.45
+                );
+                palace.add(eye);
+            }
+            break;
+
+        case 'crystal':
+            // SilkWing Silk Caverns - crystal formations
+            const crystalPalaceMat = new THREE.MeshStandardMaterial({
+                color: 0xE6E6FA,
+                transparent: true,
+                opacity: 0.8,
+                emissive: 0x9370DB,
+                emissiveIntensity: 0.3
+            });
+            const silkPalaceMat = new THREE.MeshStandardMaterial({
+                color: 0xFFB6C1,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            // Main crystal formation
+            for (let i = 0; i < 7; i++) {
+                const crystalH = size * 0.4 + Math.random() * size * 0.6;
+                const crystalGeo = new THREE.ConeGeometry(size * 0.1 + Math.random() * size * 0.1, crystalH, 6);
+                const crystal = new THREE.Mesh(crystalGeo, crystalPalaceMat);
+                crystal.position.set(
+                    (Math.random() - 0.5) * size * 0.5,
+                    crystalH / 2,
+                    (Math.random() - 0.5) * size * 0.5
+                );
+                crystal.rotation.z = (Math.random() - 0.5) * 0.3;
+                palace.add(crystal);
+            }
+
+            // Silk cocoon structures
+            for (let i = 0; i < 5; i++) {
+                const cocoonGeo = new THREE.SphereGeometry(size * 0.15, 12, 12);
+                const cocoon = new THREE.Mesh(cocoonGeo, silkPalaceMat);
+                cocoon.position.set(
+                    (Math.random() - 0.5) * size * 0.7,
+                    size * 0.3 + Math.random() * size * 0.4,
+                    (Math.random() - 0.5) * size * 0.7
+                );
+                cocoon.scale.y = 1.5;
+                palace.add(cocoon);
+            }
+            break;
     }
 
     palace.position.set(0, 0, -60);
@@ -1372,6 +1687,16 @@ function addEnvironmentFeatures(terrain, loc) {
             break;
         case 'volcanic':
             addVolcanicFeatures(terrain);
+            break;
+        // Pantala environments
+        case 'poisonJungle':
+            addPoisonJungleFeatures(terrain);
+            break;
+        case 'hive':
+            addHiveFeatures(terrain);
+            break;
+        case 'silkCaves':
+            addSilkCaveFeatures(terrain);
             break;
     }
 }
@@ -1606,6 +1931,227 @@ function addVolcanicFeatures(terrain) {
         const rock = new THREE.Mesh(rockGeo, rockMat);
         rock.position.set((Math.random() - 0.5) * 120, 2, (Math.random() - 0.5) * 120);
         rock.rotation.set(Math.random(), Math.random(), Math.random());
+        rock.castShadow = true;
+        terrain.add(rock);
+    }
+}
+
+// ============================================
+// PANTALA ENVIRONMENT FEATURES
+// ============================================
+
+function addPoisonJungleFeatures(terrain) {
+    const toxicMat = new THREE.MeshStandardMaterial({ color: 0x4B0082, emissive: 0x2A0050, emissiveIntensity: 0.2 });
+    const venomMat = new THREE.MeshStandardMaterial({ color: 0x00FF00, emissive: 0x00FF00, emissiveIntensity: 0.4, transparent: true, opacity: 0.7 });
+    const treeMat = new THREE.MeshStandardMaterial({ color: 0x1A4D1A });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    const vineMat = new THREE.MeshStandardMaterial({ color: 0x2E8B57 });
+    const sundewMat = new THREE.MeshStandardMaterial({ color: 0xFF1493, emissive: 0xFF1493, emissiveIntensity: 0.3 });
+
+    // Toxic pools
+    for (let i = 0; i < 15; i++) {
+        const poolGeo = new THREE.CircleGeometry(4 + Math.random() * 8, 24);
+        const pool = new THREE.Mesh(poolGeo, venomMat);
+        pool.rotation.x = -Math.PI / 2;
+        pool.position.set((Math.random() - 0.5) * 120, 0.15, (Math.random() - 0.5) * 120);
+        terrain.add(pool);
+    }
+
+    // Giant twisted trees
+    for (let i = 0; i < 40; i++) {
+        const tx = (Math.random() - 0.5) * 130;
+        const tz = (Math.random() - 0.5) * 130;
+        const height = 12 + Math.random() * 10;
+
+        const trunkGeo = new THREE.CylinderGeometry(0.8, 1.5, height, 8);
+        const trunk = new THREE.Mesh(trunkGeo, treeMat);
+        trunk.position.set(tx, height / 2, tz);
+        trunk.rotation.z = (Math.random() - 0.5) * 0.3;
+        trunk.castShadow = true;
+        terrain.add(trunk);
+
+        // Canopy
+        const canopyGeo = new THREE.SphereGeometry(6 + Math.random() * 4, 12, 8);
+        const canopy = new THREE.Mesh(canopyGeo, leafMat);
+        canopy.position.set(tx, height + 3, tz);
+        canopy.scale.y = 0.5;
+        canopy.castShadow = true;
+        terrain.add(canopy);
+
+        // Hanging vines
+        for (let v = 0; v < 5; v++) {
+            const vineGeo = new THREE.CylinderGeometry(0.1, 0.1, 8 + Math.random() * 6, 6);
+            const vine = new THREE.Mesh(vineGeo, vineMat);
+            vine.position.set(tx + (Math.random() - 0.5) * 6, height - 2, tz + (Math.random() - 0.5) * 6);
+            terrain.add(vine);
+        }
+    }
+
+    // Carnivorous sundew plants (glowing)
+    for (let i = 0; i < 25; i++) {
+        const sundewGeo = new THREE.SphereGeometry(1 + Math.random() * 1.5, 12, 12);
+        const sundew = new THREE.Mesh(sundewGeo, sundewMat);
+        sundew.position.set((Math.random() - 0.5) * 100, 1.5, (Math.random() - 0.5) * 100);
+        terrain.add(sundew);
+
+        // Tendrils
+        for (let t = 0; t < 8; t++) {
+            const tendrilGeo = new THREE.CylinderGeometry(0.05, 0.1, 2, 6);
+            const tendril = new THREE.Mesh(tendrilGeo, sundewMat);
+            const angle = (t / 8) * Math.PI * 2;
+            tendril.position.set(
+                sundew.position.x + Math.cos(angle) * 1,
+                2,
+                sundew.position.z + Math.sin(angle) * 1
+            );
+            tendril.rotation.z = Math.PI / 4;
+            tendril.rotation.y = angle;
+            terrain.add(tendril);
+        }
+    }
+}
+
+function addHiveFeatures(terrain) {
+    const hiveMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, roughness: 0.4 });
+    const honeycombMat = new THREE.MeshStandardMaterial({ color: 0xFFA500, emissive: 0xFFA500, emissiveIntensity: 0.2 });
+    const waxMat = new THREE.MeshStandardMaterial({ color: 0xF5DEB3 });
+    const darkHiveMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+
+    // Hexagonal honeycomb platforms
+    for (let i = 0; i < 30; i++) {
+        const hexGeo = new THREE.CylinderGeometry(4 + Math.random() * 4, 4 + Math.random() * 4, 2, 6);
+        const hex = new THREE.Mesh(hexGeo, honeycombMat);
+        hex.position.set(
+            (Math.random() - 0.5) * 120,
+            Math.random() * 15,
+            (Math.random() - 0.5) * 120
+        );
+        hex.castShadow = true;
+        terrain.add(hex);
+    }
+
+    // Hive towers/structures
+    for (let i = 0; i < 15; i++) {
+        const towerGeo = new THREE.CylinderGeometry(5, 8, 20 + Math.random() * 15, 6);
+        const tower = new THREE.Mesh(towerGeo, hiveMat);
+        tower.position.set(
+            (Math.random() - 0.5) * 100,
+            10 + Math.random() * 5,
+            (Math.random() - 0.5) * 100
+        );
+        tower.castShadow = true;
+        terrain.add(tower);
+
+        // Windows/openings
+        for (let w = 0; w < 5; w++) {
+            const windowGeo = new THREE.CircleGeometry(1.5, 6);
+            const windowMesh = new THREE.Mesh(windowGeo, darkHiveMat);
+            const angle = (w / 5) * Math.PI * 2;
+            windowMesh.position.set(
+                tower.position.x + Math.cos(angle) * 5.5,
+                tower.position.y + (Math.random() - 0.5) * 10,
+                tower.position.z + Math.sin(angle) * 5.5
+            );
+            windowMesh.rotation.y = -angle;
+            terrain.add(windowMesh);
+        }
+    }
+
+    // Wax pillars
+    for (let i = 0; i < 20; i++) {
+        const pillarGeo = new THREE.CylinderGeometry(1, 2, 8 + Math.random() * 8, 8);
+        const pillar = new THREE.Mesh(pillarGeo, waxMat);
+        pillar.position.set(
+            (Math.random() - 0.5) * 110,
+            4,
+            (Math.random() - 0.5) * 110
+        );
+        pillar.castShadow = true;
+        terrain.add(pillar);
+    }
+}
+
+function addSilkCaveFeatures(terrain) {
+    const silkMat = new THREE.MeshStandardMaterial({
+        color: 0xE6E6FA,
+        emissive: 0xDDA0DD,
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.8
+    });
+    const crystalMat = new THREE.MeshStandardMaterial({
+        color: 0x9370DB,
+        emissive: 0x9370DB,
+        emissiveIntensity: 0.5
+    });
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x483D8B });
+    const flamesilkMat = new THREE.MeshBasicMaterial({
+        color: 0xFFD700,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    // Cave ceiling stalactites
+    for (let i = 0; i < 40; i++) {
+        const stalGeo = new THREE.ConeGeometry(1 + Math.random(), 5 + Math.random() * 8, 6);
+        const stal = new THREE.Mesh(stalGeo, rockMat);
+        stal.position.set(
+            (Math.random() - 0.5) * 130,
+            30 + Math.random() * 10,
+            (Math.random() - 0.5) * 130
+        );
+        stal.rotation.x = Math.PI;
+        terrain.add(stal);
+    }
+
+    // Silk webs stretched across
+    for (let i = 0; i < 20; i++) {
+        const webGeo = new THREE.PlaneGeometry(15 + Math.random() * 15, 15 + Math.random() * 15);
+        const web = new THREE.Mesh(webGeo, silkMat);
+        web.position.set(
+            (Math.random() - 0.5) * 100,
+            5 + Math.random() * 15,
+            (Math.random() - 0.5) * 100
+        );
+        web.rotation.x = -Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+        web.rotation.z = Math.random() * Math.PI;
+        terrain.add(web);
+    }
+
+    // Glowing crystals
+    for (let i = 0; i < 25; i++) {
+        const crystalGeo = new THREE.OctahedronGeometry(2 + Math.random() * 2);
+        const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+        crystal.position.set(
+            (Math.random() - 0.5) * 110,
+            1 + Math.random() * 3,
+            (Math.random() - 0.5) * 110
+        );
+        crystal.rotation.set(Math.random(), Math.random(), Math.random());
+        terrain.add(crystal);
+    }
+
+    // Flamesilk lanterns
+    for (let i = 0; i < 15; i++) {
+        const lanternGeo = new THREE.SphereGeometry(1.5, 12, 12);
+        const lantern = new THREE.Mesh(lanternGeo, flamesilkMat);
+        lantern.position.set(
+            (Math.random() - 0.5) * 80,
+            8 + Math.random() * 10,
+            (Math.random() - 0.5) * 80
+        );
+        terrain.add(lantern);
+    }
+
+    // Rock formations
+    for (let i = 0; i < 25; i++) {
+        const rockGeo = new THREE.DodecahedronGeometry(3 + Math.random() * 4);
+        const rock = new THREE.Mesh(rockGeo, rockMat);
+        rock.position.set(
+            (Math.random() - 0.5) * 120,
+            2,
+            (Math.random() - 0.5) * 120
+        );
         rock.castShadow = true;
         terrain.add(rock);
     }
@@ -1867,9 +2413,12 @@ class Enemy {
 
         // Real-time combat properties
         this.attackCooldown = 0;
-        this.aggroRange = isBoss ? 40 : 25;
-        this.moveSpeed = isBoss ? 4 : 6;
+        this.aggroRange = isBoss ? 50 : 35;
+        this.moveSpeed = isBoss ? 12 : 18;
         this.velocity = new THREE.Vector3(0, 0, 0);
+
+        // Enemy tribe detection for appearance
+        this.tribe = this.detectTribe(name);
 
         this.mesh = null;
         this.position = new THREE.Vector3(
@@ -1879,9 +2428,42 @@ class Enemy {
         );
     }
 
+    // Detect tribe from enemy name for proper appearance
+    detectTribe(name) {
+        const lowerName = name.toLowerCase();
+
+        // Direct tribe matches
+        if (lowerName.includes('mudwing') || lowerName.includes('mud')) return 'MudWing';
+        if (lowerName.includes('sandwing') || lowerName.includes('sand') || lowerName.includes('scorpion') || lowerName.includes('viper')) return 'SandWing';
+        if (lowerName.includes('skywing') || lowerName.includes('sky') || lowerName.includes('eagle') || lowerName.includes('ruby')) return 'SkyWing';
+        if (lowerName.includes('seawing') || lowerName.includes('sea') || lowerName.includes('shark') || lowerName.includes('crab') || lowerName.includes('tsunami')) return 'SeaWing';
+        if (lowerName.includes('rainwing') || lowerName.includes('rain') || lowerName.includes('frog') || lowerName.includes('glory') || lowerName.includes('jungle cat')) return 'RainWing';
+        if (lowerName.includes('icewing') || lowerName.includes('ice') || lowerName.includes('frost') || lowerName.includes('winter') || lowerName.includes('bear') || lowerName.includes('wolf')) return 'IceWing';
+        if (lowerName.includes('nightwing') || lowerName.includes('night') || lowerName.includes('shadow') || lowerName.includes('darkstalker') || lowerName.includes('lava')) return 'NightWing';
+
+        // Pantala tribes
+        if (lowerName.includes('leafwing') || lowerName.includes('leaf') || lowerName.includes('sundew') || lowerName.includes('plant')) return 'LeafWing';
+        if (lowerName.includes('silkwing') || lowerName.includes('silk') || lowerName.includes('blue') || lowerName.includes('weaver') || lowerName.includes('flamesilk') || lowerName.includes('moth')) return 'SilkWing';
+        if (lowerName.includes('hivewing') || lowerName.includes('hive') || lowerName.includes('wasp') || lowerName.includes('drone') || lowerName.includes('queen wasp') || lowerName.includes('jewel')) return 'HiveWing';
+
+        // Generic creatures based on location context
+        if (lowerName.includes('swamp') || lowerName.includes('crawler') || lowerName.includes('cave') || lowerName.includes('marsh')) return 'MudWing';
+        if (lowerName.includes('desert') || lowerName.includes('scorpion')) return 'SandWing';
+        if (lowerName.includes('mountain') || lowerName.includes('rock') || lowerName.includes('golem')) return 'SkyWing';
+        if (lowerName.includes('serpent')) return 'SeaWing';
+        if (lowerName.includes('poison') || lowerName.includes('dart')) return 'LeafWing';
+        if (lowerName.includes('mind') || lowerName.includes('control')) return 'HiveWing';
+        if (lowerName.includes('spider') || lowerName.includes('guardian')) return 'SilkWing';
+        if (lowerName.includes('scavenger')) return 'SandWing'; // Humans are often in sand kingdom
+
+        // Default based on random for variety
+        const tribes = Object.keys(TRIBES);
+        return tribes[Math.floor(Math.random() * tribes.length)];
+    }
+
     createMesh() {
         const scale = this.isBoss ? 1.8 : 0.7;
-        this.mesh = createDragon3D('MudWing', scale, true);
+        this.mesh = createDragon3D(this.tribe, scale, true);
         this.mesh.position.copy(this.position);
         return this.mesh;
     }
@@ -1902,32 +2484,65 @@ class Enemy {
         }
 
         const dist = this.mesh.position.distanceTo(playerPos);
+        const groundLevel = 3;
+
+        // Gravity - bring enemies down to reasonable height
+        if (!this.isFlying && this.mesh.position.y > groundLevel) {
+            this.mesh.position.y -= 0.15;
+        }
+        if (this.isFlying && this.mesh.position.y > 20) {
+            this.mesh.position.y -= 0.1;
+        }
+        // Keep above ground
+        if (this.mesh.position.y < groundLevel) {
+            this.mesh.position.y = groundLevel;
+        }
 
         // Chase player if in aggro range
-        if (dist < this.aggroRange && dist > 2) {
+        if (dist < this.aggroRange && dist > 3) {
             const direction = new THREE.Vector3()
                 .subVectors(playerPos, this.mesh.position)
                 .normalize();
 
-            // Move toward player
-            this.velocity.x = direction.x * this.moveSpeed * delta;
-            this.velocity.z = direction.z * this.moveSpeed * delta;
+            // Move toward player - FAST chase speed
+            const chaseSpeed = 0.25;
+            this.velocity.x = direction.x * chaseSpeed;
+            this.velocity.z = direction.z * chaseSpeed;
+
+            // Flying enemies also adjust Y toward player
+            if (this.isFlying) {
+                const yDiff = playerPos.y - this.mesh.position.y;
+                this.velocity.y = Math.sign(yDiff) * 0.1;
+            }
 
             // Rotate to face player
             this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+        } else if (dist <= 3) {
+            // Close to player - stop and attack
+            this.velocity.x *= 0.5;
+            this.velocity.z *= 0.5;
         } else {
+            // Idle wandering when not chasing
+            if (Math.random() < 0.02) {
+                this.velocity.x = (Math.random() - 0.5) * 0.15;
+                this.velocity.z = (Math.random() - 0.5) * 0.15;
+            }
             // Slow down
-            this.velocity.x *= 0.9;
-            this.velocity.z *= 0.9;
+            this.velocity.x *= 0.95;
+            this.velocity.z *= 0.95;
         }
 
         // Apply velocity
         this.mesh.position.x += this.velocity.x;
         this.mesh.position.z += this.velocity.z;
+        if (this.isFlying && this.velocity.y) {
+            this.mesh.position.y += this.velocity.y;
+            this.mesh.position.y = Math.max(groundLevel, Math.min(25, this.mesh.position.y));
+        }
 
         // Keep in bounds
-        this.mesh.position.x = Math.max(-100, Math.min(100, this.mesh.position.x));
-        this.mesh.position.z = Math.max(-100, Math.min(100, this.mesh.position.z));
+        this.mesh.position.x = Math.max(-95, Math.min(95, this.mesh.position.x));
+        this.mesh.position.z = Math.max(-95, Math.min(95, this.mesh.position.z));
 
         // Update position reference
         this.position.copy(this.mesh.position);
@@ -2344,12 +2959,16 @@ class World {
     spawnEnemy() {
         const loc = this.location;
         const enemyType = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
-        const lvl = Math.floor(Math.random() * 3) + loc.baseLevel;
+        const baseLevel = loc.baseLevel || loc.enemyLevel?.[0] || 1;
+        const lvl = Math.floor(Math.random() * 3) + baseLevel;
         const enemy = new Enemy(enemyType, lvl, false);
+
+        // Spawn enemies at reasonable heights - ground level or slightly above
+        const spawnY = enemy.isFlying ? (5 + Math.random() * 8) : 3;
         enemy.position.set(
-            (Math.random() - 0.5) * 120,
-            5 + Math.random() * 10,
-            (Math.random() - 0.5) * 120
+            (Math.random() - 0.5) * 100,
+            spawnY,
+            (Math.random() - 0.5) * 100
         );
         this.enemies.push(enemy);
         game.scene.add(enemy.createMesh());
