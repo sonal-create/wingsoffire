@@ -1634,8 +1634,8 @@ function createTerrain(locationId) {
     const terrain = new THREE.Group();
 
     // Ground
-    // VAST WORLD - 1000x1000 terrain
-    const groundGeo = new THREE.PlaneGeometry(1000, 1000, 100, 100);
+    // SPHERICAL WORLD - 800x800 terrain that wraps around
+    const groundGeo = new THREE.PlaneGeometry(800, 800, 80, 80);
     const vertices = groundGeo.attributes.position.array;
     for (let i = 0; i < vertices.length; i += 3) {
         const x = vertices[i];
@@ -2542,8 +2542,12 @@ class Enemy {
         }
 
         // Keep in vast world bounds
-        this.mesh.position.x = Math.max(-480, Math.min(480, this.mesh.position.x));
-        this.mesh.position.z = Math.max(-480, Math.min(480, this.mesh.position.z));
+        // Wrap enemies around world edges
+        const WORLD_RADIUS = 400;
+        if (this.mesh.position.x > WORLD_RADIUS) this.mesh.position.x = -WORLD_RADIUS;
+        if (this.mesh.position.x < -WORLD_RADIUS) this.mesh.position.x = WORLD_RADIUS;
+        if (this.mesh.position.z > WORLD_RADIUS) this.mesh.position.z = -WORLD_RADIUS;
+        if (this.mesh.position.z < -WORLD_RADIUS) this.mesh.position.z = WORLD_RADIUS;
 
         // Update position reference
         this.position.copy(this.mesh.position);
@@ -2910,11 +2914,11 @@ class World {
             emissiveIntensity: 0.4
         });
         const mesh = new THREE.Mesh(geo, mat);
-        // Spread across the vast world
+        // Spread across the spherical world
         mesh.position.set(
-            (Math.random() - 0.5) * 400,
+            (Math.random() - 0.5) * 600,
             2 + Math.random() * 3,
-            (Math.random() - 0.5) * 400
+            (Math.random() - 0.5) * 600
         );
         mesh.userData = { type, value: type === 'gold' ? 15 + Math.floor(Math.random() * 20) : 35 };
         return mesh;
@@ -2925,16 +2929,17 @@ class World {
         const allLocations = Object.entries(LOCATIONS);
         const regionPositions = [
             { x: 0, z: 0 },        // Current kingdom at center
-            { x: -300, z: 0 },     // West
-            { x: 300, z: 0 },      // East
-            { x: 0, z: -300 },     // North
-            { x: 0, z: 300 },      // South
-            { x: -200, z: -200 },  // NW
-            { x: 200, z: -200 },   // NE
-            { x: -200, z: 200 },   // SW
-            { x: 200, z: 200 },    // SE
-            { x: -350, z: -200 },  // Far NW
-            { x: 350, z: -200 },   // Far NE
+            { x: -120, z: 0 },     // West
+            { x: 120, z: 0 },      // East
+            { x: 0, z: -120 },     // North
+            { x: 0, z: 120 },      // South
+            { x: -90, z: -90 },    // NW
+            { x: 90, z: -90 },     // NE
+            { x: -90, z: 90 },     // SW
+            { x: 90, z: 90 },      // SE
+            { x: -150, z: -90 },   // Far NW
+            { x: 150, z: -90 },    // Far NE
+            { x: -150, z: 90 },    // Far SW
         ];
 
         // Add signposts pointing to other kingdoms
@@ -3017,8 +3022,12 @@ class World {
         );
 
         // Keep in world bounds
-        enemy.position.x = Math.max(-480, Math.min(480, enemy.position.x));
-        enemy.position.z = Math.max(-480, Math.min(480, enemy.position.z));
+        // Wrap enemy spawn around world edges
+        const WORLD_RADIUS = 400;
+        if (enemy.position.x > WORLD_RADIUS) enemy.position.x = -WORLD_RADIUS;
+        if (enemy.position.x < -WORLD_RADIUS) enemy.position.x = WORLD_RADIUS;
+        if (enemy.position.z > WORLD_RADIUS) enemy.position.z = -WORLD_RADIUS;
+        if (enemy.position.z < -WORLD_RADIUS) enemy.position.z = WORLD_RADIUS;
 
         this.enemies.push(enemy);
         game.scene.add(enemy.createMesh());
@@ -4006,20 +4015,35 @@ function renderMap() {
     ctx.fillRect(0, 0, 700, 400);
 
     const locs = Object.entries(LOCATIONS);
+    // Pyrrhia (left side) and Pantala (right side) map positions
     const positions = [
+        // Pyrrhia continent (7 kingdoms)
         { x: 120, y: 200 }, { x: 80, y: 320 }, { x: 250, y: 100 },
-        { x: 100, y: 100 }, { x: 200, y: 320 }, { x: 400, y: 80 }, { x: 500, y: 280 }
+        { x: 100, y: 100 }, { x: 200, y: 320 }, { x: 300, y: 80 }, { x: 350, y: 200 },
+        // Pantala continent (5 locations)
+        { x: 500, y: 280 }, { x: 550, y: 150 }, { x: 620, y: 220 }, { x: 580, y: 320 }, { x: 480, y: 120 }
     ];
 
     ctx.strokeStyle = '#555';
     ctx.lineWidth = 2;
-    for (let i = 0; i < positions.length; i++) {
-        const next = (i + 1) % positions.length;
+    // Draw Pyrrhia connections (indices 0-6)
+    const pyrrhiaLinks = [[0,1], [0,3], [1,4], [2,3], [2,5], [4,6], [5,6]];
+    pyrrhiaLinks.forEach(([a, b]) => {
         ctx.beginPath();
-        ctx.moveTo(positions[i].x, positions[i].y);
-        ctx.lineTo(positions[next].x, positions[next].y);
+        ctx.moveTo(positions[a].x, positions[a].y);
+        ctx.lineTo(positions[b].x, positions[b].y);
         ctx.stroke();
-    }
+    });
+    // Draw Pantala connections (indices 7-11)
+    const pantalaLinks = [[7,8], [8,9], [9,10], [7,10], [8,11], [11,7]];
+    pantalaLinks.forEach(([a, b]) => {
+        if (positions[a] && positions[b]) {
+            ctx.beginPath();
+            ctx.moveTo(positions[a].x, positions[a].y);
+            ctx.lineTo(positions[b].x, positions[b].y);
+            ctx.stroke();
+        }
+    });
 
     locs.forEach(([id, loc], i) => {
         const pos = positions[i];
@@ -4131,9 +4155,12 @@ function updatePlayer(delta) {
         p.isGrounded = false;
     }
 
-    // VAST WORLD - much larger boundaries (1000x1000 map)
-    p.position.x = Math.max(-500, Math.min(500, p.position.x));
-    p.position.z = Math.max(-500, Math.min(500, p.position.z));
+    // SPHERICAL WORLD - wrap around like Earth (toroidal topology)
+    const WORLD_RADIUS = 400;
+    if (p.position.x > WORLD_RADIUS) p.position.x = -WORLD_RADIUS;
+    if (p.position.x < -WORLD_RADIUS) p.position.x = WORLD_RADIUS;
+    if (p.position.z > WORLD_RADIUS) p.position.z = -WORLD_RADIUS;
+    if (p.position.z < -WORLD_RADIUS) p.position.z = WORLD_RADIUS;
     p.position.y = Math.max(groundLevel, Math.min(100, p.position.y));
 
     // Check if player is somehow stuck (NaN or invalid position)
