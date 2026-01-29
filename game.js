@@ -4016,12 +4016,13 @@ function renderMap() {
 
     const locs = Object.entries(LOCATIONS);
     // Pyrrhia (left side) and Pantala (right side) map positions
+    // 7 Pyrrhia + 4 Pantala = 11 locations total
     const positions = [
-        // Pyrrhia continent (7 kingdoms)
+        // Pyrrhia continent (7 kingdoms): mud, sand, sky, sea, rain, ice, night
         { x: 120, y: 200 }, { x: 80, y: 320 }, { x: 250, y: 100 },
-        { x: 100, y: 100 }, { x: 200, y: 320 }, { x: 300, y: 80 }, { x: 350, y: 200 },
-        // Pantala continent (5 locations)
-        { x: 500, y: 280 }, { x: 550, y: 150 }, { x: 620, y: 220 }, { x: 580, y: 320 }, { x: 480, y: 120 }
+        { x: 100, y: 100 }, { x: 200, y: 280 }, { x: 300, y: 80 }, { x: 350, y: 200 },
+        // Pantala continent (4 locations): poisonJungle, jewelHive, waspHive, silkwingCaves
+        { x: 500, y: 200 }, { x: 580, y: 120 }, { x: 620, y: 220 }, { x: 550, y: 320 }
     ];
 
     ctx.strokeStyle = '#555';
@@ -4034,8 +4035,8 @@ function renderMap() {
         ctx.lineTo(positions[b].x, positions[b].y);
         ctx.stroke();
     });
-    // Draw Pantala connections (indices 7-11)
-    const pantalaLinks = [[7,8], [8,9], [9,10], [7,10], [8,11], [11,7]];
+    // Draw Pantala connections (indices 7-10)
+    const pantalaLinks = [[7,8], [8,9], [9,10], [7,10]];
     pantalaLinks.forEach(([a, b]) => {
         if (positions[a] && positions[b]) {
             ctx.beginPath();
@@ -4047,6 +4048,7 @@ function renderMap() {
 
     locs.forEach(([id, loc], i) => {
         const pos = positions[i];
+        if (!pos) return; // Skip if no position defined
         const isCurrent = game.world && game.world.locationId === id;
 
         ctx.beginPath();
