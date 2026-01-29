@@ -2607,35 +2607,43 @@ function startQuest(questId) {
 }
 
 function updateQuestProgress(type, target = null) {
-    game.activeQuests.forEach(quest => {
+    // Make a copy of active quests to iterate (in case completion modifies the array)
+    const questsToCheck = [...game.activeQuests];
+
+    questsToCheck.forEach(quest => {
+        if (quest.completed) return; // Skip already completed
+
         quest.objectives.forEach(obj => {
             if (obj.done) return;
 
             if (obj.type === type) {
                 if (type === 'kill' && obj.target === target) {
                     obj.current = (obj.current || 0) + 1;
+                    showMessage(`${obj.target}: ${obj.current}/${obj.count}`, 'info');
                     if (obj.current >= obj.count) {
                         obj.done = true;
-                        showMessage(`Objective complete: Kill ${obj.target}`, 'reward');
+                        showMessage(`Objective complete: Kill ${obj.target}!`, 'reward');
                     }
                 } else if (type === 'killBoss') {
-                    obj.current = game.player.bossKills;
+                    obj.current = (obj.current || 0) + 1;
+                    showMessage(`Bosses defeated: ${obj.current}/${obj.count}`, 'info');
                     if (obj.current >= obj.count) {
                         obj.done = true;
-                        showMessage(`Objective complete: Boss slaying`, 'reward');
+                        showMessage(`Objective complete: Boss slaying!`, 'reward');
                     }
                 } else if (type === 'collect' && obj.target === target) {
                     obj.current = (obj.current || 0) + 1;
+                    showMessage(`${obj.target}: ${obj.current}/${obj.count}`, 'info');
                     if (obj.current >= obj.count) {
                         obj.done = true;
-                        showMessage(`Objective complete: Collect ${obj.target}`, 'reward');
+                        showMessage(`Objective complete: Collect ${obj.target}!`, 'reward');
                     }
                 } else if (type === 'travel' && obj.target === target) {
                     obj.done = true;
-                    showMessage(`Reached ${LOCATIONS[target].name}!`, 'reward');
+                    showMessage(`Reached ${LOCATIONS[target]?.name || target}!`, 'reward');
                 } else if (type === 'talk' && obj.target === target) {
                     obj.done = true;
-                    showMessage(`Spoke with ${target}`, 'reward');
+                    showMessage(`Spoke with ${target}!`, 'reward');
                 }
             }
         });
@@ -2647,7 +2655,8 @@ function updateQuestProgress(type, target = null) {
 
 function checkQuestCompletion(quest) {
     const allDone = quest.objectives.every(obj => obj.done);
-    if (allDone) {
+    if (allDone && !quest.completed) {
+        quest.completed = true; // Prevent double completion
         completeQuest(quest.id);
     }
 }
@@ -2657,6 +2666,10 @@ function completeQuest(questId) {
     if (questIndex === -1) return;
 
     const quest = game.activeQuests[questIndex];
+
+    // Remove from active FIRST to prevent issues
+    game.activeQuests.splice(questIndex, 1);
+    game.completedQuests.push(questId);
 
     // Give rewards
     if (quest.rewards.xp) {
@@ -2673,15 +2686,15 @@ function completeQuest(questId) {
         if (item) showMessage(`Received ${item.name}!`, 'reward');
     }
 
-    // Remove from active, add to completed
-    game.activeQuests.splice(questIndex, 1);
-    game.completedQuests.push(questId);
-
-    showMessage(`Quest Complete: ${quest.name}!`, 'critical');
+    showMessage(`QUEST COMPLETE: ${quest.name}!`, 'critical');
+    console.log('Quest completed:', quest.name, '-> Next:', quest.nextQuest);
 
     // Start next quest if there is one
-    if (quest.nextQuest) {
-        setTimeout(() => startQuest(quest.nextQuest), 1000);
+    if (quest.nextQuest && QUESTS[quest.nextQuest]) {
+        setTimeout(() => {
+            startQuest(quest.nextQuest);
+            showMessage(`New quest available!`, 'info');
+        }, 1500);
     }
 
     updateHUD();
