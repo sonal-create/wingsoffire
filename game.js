@@ -620,31 +620,65 @@ const QUESTS = {
         type: 'main',
         objectives: [{ type: 'talk', target: 'Elder Webs', done: false }],
         rewards: { xp: 100, gold: 50 },
-        nextQuest: 'escapeTheMountain'
+        nextQuest: 'proveYourWorth'
     },
-    escapeTheMountain: {
-        id: 'escapeTheMountain',
-        name: 'Escape the Mountain',
-        desc: 'Find a way out of the mountain caves. Defeat the guards blocking your path.',
+    proveYourWorth: {
+        id: 'proveYourWorth',
+        name: 'Prove Your Worth',
+        desc: 'Defeat enemies to prove you are worthy of the prophecy.',
         type: 'main',
         objectives: [
-            { type: 'kill', target: 'Cave Guard', count: 3, current: 0, done: false },
-            { type: 'reach', target: 'Mountain Exit', done: false }
+            { type: 'kill', target: 'Swamp Serpent', count: 3, current: 0, done: false }
         ],
-        rewards: { xp: 200, gold: 100, item: 'bronzeScales' },
+        rewards: { xp: 150, gold: 75 },
         nextQuest: 'seekingAllies'
     },
     seekingAllies: {
         id: 'seekingAllies',
         name: 'Seeking Allies',
-        desc: 'Travel to the Mud Kingdom and find dragons who will help your cause.',
+        desc: 'Travel to the Sand Kingdom and speak with Commander Clay.',
         type: 'main',
         objectives: [
-            { type: 'travel', target: 'mudKingdom', done: false },
+            { type: 'travel', target: 'sandKingdom', done: false },
             { type: 'talk', target: 'Commander Clay', done: false }
         ],
         rewards: { xp: 300, gold: 150 },
         nextQuest: 'theWarBegins'
+    },
+    theWarBegins: {
+        id: 'theWarBegins',
+        name: 'The War Begins',
+        desc: 'Travel to the Sky Kingdom and defeat enemies threatening Pyrrhia.',
+        type: 'main',
+        objectives: [
+            { type: 'travel', target: 'skyKingdom', done: false },
+            { type: 'kill', target: 'SkyWing Guard', count: 5, current: 0, done: false }
+        ],
+        rewards: { xp: 400, gold: 200, item: 'bronzeScales' },
+        nextQuest: 'unitingTribes'
+    },
+    unitingTribes: {
+        id: 'unitingTribes',
+        name: 'Uniting the Tribes',
+        desc: 'Visit all the kingdoms of Pyrrhia to unite them against the common threat.',
+        type: 'main',
+        objectives: [
+            { type: 'travel', target: 'seaKingdom', done: false },
+            { type: 'travel', target: 'rainforest', done: false },
+            { type: 'travel', target: 'iceKingdom', done: false }
+        ],
+        rewards: { xp: 500, gold: 300, item: 'ironScales' },
+        nextQuest: 'finalBattle'
+    },
+    finalBattle: {
+        id: 'finalBattle',
+        name: 'The Final Battle',
+        desc: 'Defeat the bosses threatening the peace of Pyrrhia.',
+        type: 'main',
+        objectives: [
+            { type: 'killBoss', count: 3, current: 0, done: false }
+        ],
+        rewards: { xp: 1000, gold: 500, item: 'dragonsteelArmor' }
     },
 
     // Side Quests
@@ -4406,10 +4440,10 @@ function handleKeyUp(e) {
 }
 
 function handleCharacterInput(e) {
-    if (e.code === 'ArrowLeft') {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
         game.selectedTribe = (game.selectedTribe - 1 + game.tribeList.length) % game.tribeList.length;
         updateTribeSelection();
-    } else if (e.code === 'ArrowRight') {
+    } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
         game.selectedTribe = (game.selectedTribe + 1) % game.tribeList.length;
         updateTribeSelection();
     } else if (e.code === 'Enter') {
@@ -4513,20 +4547,33 @@ function handleGameInput(e) {
             updateHUD();
             break;
 
-        // Unstuck - teleport to center
+        // Travel to next kingdom
         case 'KeyT':
+            const locationIds = Object.keys(LOCATIONS);
+            const currentIdx = locationIds.indexOf(game.world.locationId);
+            const nextIdx = (currentIdx + 1) % locationIds.length;
+            const nextLocation = locationIds[nextIdx];
+
+            // Cleanup old world
+            game.world.cleanup();
+
+            // Create new world at next location
+            game.world = new World(nextLocation);
+            game.world.generate();
+
+            // Reset player position
             game.player.position.set(0, 8, 0);
             game.player.rotation = 0;
             game.player.isFlying = false;
             game.player.isGrounded = true;
-            // Also update mesh immediately
             if (game.player.mesh) {
                 game.player.mesh.position.set(0, 8, 0);
                 game.player.mesh.rotation.y = 0;
             }
-            // Reset camera angle
             game.cameraAngleY = 0;
-            showMessage('Teleported to safety! (T)', 'info');
+
+            showMessage(`Traveled to ${LOCATIONS[nextLocation].name}!`, 'reward');
+            updateHUD();
             break;
     }
 }
